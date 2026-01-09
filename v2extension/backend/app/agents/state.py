@@ -1,6 +1,6 @@
 """LangGraph state definition."""
 
-from typing import TypedDict, Annotated, Sequence
+from typing import TypedDict, Annotated, Sequence, Optional, List, Dict
 from langchain_core.messages import BaseMessage
 
 
@@ -9,25 +9,25 @@ class AgentState(TypedDict):
 
     # User context
     user_id: str
-    goal_id: str | None
-    task_id: str | None
+    goal_id: Optional[str]
+    task_id: Optional[str]
 
     # Messages
     messages: Annotated[Sequence[BaseMessage], "Chat messages"]
 
     # Execution context
     current_node: str
-    next_node: str | None
+    next_node: Optional[str]
 
     # User data
-    code_snapshot: str | None
-    validation_results: dict | None
+    code_snapshot: Optional[str]
+    validation_results: Optional[Dict]
 
     # Agent-specific data
     mood_score: float  # Nodo 8
-    performance_metrics: dict | None  # Nodo 5
-    contract_status: str | None  # Nodo 9
-    context_priority: list[str] | None  # Nodo 7
+    performance_metrics: Optional[Dict]  # Nodo 5
+    contract_status: Optional[str]  # Nodo 9
+    context_priority: Optional[List[str]]  # Nodo 7
 
     # Flags
     is_authenticated: bool

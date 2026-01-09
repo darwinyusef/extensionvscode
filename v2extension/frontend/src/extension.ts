@@ -10,11 +10,13 @@
 
 import * as vscode from 'vscode';
 import { WebSocketClient } from './services/websocket';
+import { ApiService } from './services/api';
 import { GoalsTreeProvider } from './providers/goalsTreeProvider';
 import { ConnectionStatusProvider } from './providers/connectionStatusProvider';
 import { registerCommands } from './commands';
 
 let wsClient: WebSocketClient;
+let apiService: ApiService;
 let goalsTreeProvider: GoalsTreeProvider;
 let connectionStatusProvider: ConnectionStatusProvider;
 
@@ -26,11 +28,12 @@ export async function activate(context: vscode.ExtensionContext) {
     const serverUrl = config.get<string>('serverUrl', 'ws://localhost:8000/api/v1/ws');
     const autoConnect = config.get<boolean>('autoConnect', true);
 
-    // Initialize WebSocket client
+    // Initialize services
     wsClient = new WebSocketClient(serverUrl, context);
+    apiService = new ApiService();
 
     // Initialize Tree Provider
-    goalsTreeProvider = new GoalsTreeProvider(wsClient);
+    goalsTreeProvider = new GoalsTreeProvider(wsClient, apiService);
     vscode.window.registerTreeDataProvider('goalsTreeView', goalsTreeProvider);
 
     // Initialize Connection Status Provider
@@ -38,17 +41,18 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.window.registerWebviewViewProvider('connectionStatus', connectionStatusProvider);
 
     // Register commands
-    registerCommands(context, wsClient, goalsTreeProvider);
+    registerCommands(context, wsClient, goalsTreeProvider, apiService);
 
     // Setup WebSocket event listeners
     setupWebSocketListeners();
 
     // Auto-connect if enabled
     if (autoConnect) {
-        // Get authentication token (placeholder - implement actual auth)
         const token = await getAuthToken();
         if (token) {
+            apiService.setToken(token);
             wsClient.connect(token);
+            await goalsTreeProvider.loadGoals();
         } else {
             vscode.window.showWarningMessage('Please login to connect to AI Goals Tracker');
         }

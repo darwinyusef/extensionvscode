@@ -60,9 +60,24 @@
         "icon": "$(add)"
       },
       {
+        "command": "aiGoalsV2.updateGoal",
+        "title": "Update Goal",
+        "icon": "$(edit)"
+      },
+      {
         "command": "aiGoalsV2.startGoal",
         "title": "Start Goal",
         "icon": "$(play)"
+      },
+      {
+        "command": "aiGoalsV2.createTask",
+        "title": "Create New Task",
+        "icon": "$(add)"
+      },
+      {
+        "command": "aiGoalsV2.updateTask",
+        "title": "Update Task",
+        "icon": "$(edit)"
       },
       {
         "command": "aiGoalsV2.validateTask",
@@ -97,12 +112,27 @@
         {
           "command": "aiGoalsV2.startGoal",
           "when": "view == goalsTreeView && viewItem == goal",
-          "group": "inline"
+          "group": "inline@1"
+        },
+        {
+          "command": "aiGoalsV2.updateGoal",
+          "when": "view == goalsTreeView && viewItem == goal",
+          "group": "inline@2"
+        },
+        {
+          "command": "aiGoalsV2.createTask",
+          "when": "view == goalsTreeView && viewItem == goal",
+          "group": "inline@3"
+        },
+        {
+          "command": "aiGoalsV2.updateTask",
+          "when": "view == goalsTreeView && viewItem == task",
+          "group": "inline@1"
         },
         {
           "command": "aiGoalsV2.validateTask",
           "when": "view == goalsTreeView && viewItem == task",
-          "group": "inline"
+          "group": "inline@2"
         }
       ]
     },

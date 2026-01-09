@@ -21,7 +21,7 @@ backend/data/storage/events/
 
 import pyarrow as pa
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -210,23 +210,23 @@ class BaseEvent:
 @dataclass
 class UserEvent(BaseEvent):
     """Evento de usuario."""
-    email: str | None = None
-    username: str | None = None
+    email: Optional[str] = None
+    username: Optional[str] = None
     action: str = "unknown"
-    ip_address: str | None = None
-    user_agent: str | None = None
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
 
 
 @dataclass
 class GoalEvent(BaseEvent):
     """Evento de goal."""
     goal_id: str = ""
-    title: str | None = None
-    status: str | None = None
-    priority: str | None = None
-    progress_percentage: float | None = None
-    ai_generated: bool | None = None
-    course_id: str | None = None
+    title: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    progress_percentage: Optional[float] = None
+    ai_generated: Optional[bool] = None
+    course_id: Optional[str] = None
 
 
 @dataclass
@@ -234,39 +234,39 @@ class TaskEvent(BaseEvent):
     """Evento de task."""
     task_id: str = ""
     goal_id: str = ""
-    title: str | None = None
-    task_type: str | None = None
-    status: str | None = None
-    validation_score: float | None = None
-    estimated_hours: float | None = None
-    actual_hours: float | None = None
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
+    title: Optional[str] = None
+    task_type: Optional[str] = None
+    status: Optional[str] = None
+    validation_score: Optional[float] = None
+    estimated_hours: Optional[float] = None
+    actual_hours: Optional[float] = None
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
 
 
 @dataclass
 class CodeEvent(BaseEvent):
     """Evento de código."""
     code_snapshot_id: str = ""
-    task_id: str | None = None
-    file_path: str | None = None
-    language: str | None = None
-    lines_of_code: int | None = None
-    validation_passed: bool | None = None
-    validation_score: float | None = None
-    issues_count: int | None = None
+    task_id: Optional[str] = None
+    file_path: Optional[str] = None
+    language: Optional[str] = None
+    lines_of_code: Optional[int] = None
+    validation_passed: Optional[bool] = None
+    validation_score: Optional[float] = None
+    issues_count: Optional[int] = None
 
 
 @dataclass
 class AIEvent(BaseEvent):
     """Evento de IA."""
     agent_node: str = ""
-    entity_type: str | None = None
-    entity_id: str | None = None
-    model_used: str | None = None
-    tokens_used: int | None = None
-    latency_ms: int | None = None
-    feedback_type: str | None = None
+    entity_type: Optional[str] = None
+    entity_id: Optional[str] = None
+    model_used: Optional[str] = None
+    tokens_used: Optional[int] = None
+    latency_ms: Optional[int] = None
+    feedback_type: Optional[str] = None
 
 
 # ==================== HELPERS ====================
