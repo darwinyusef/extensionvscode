@@ -14,6 +14,7 @@ import { ApiService } from './services/api';
 import { GoalsTreeProvider } from './providers/goalsTreeProvider';
 import { ConnectionStatusProvider } from './providers/connectionStatusProvider';
 import { registerCommands } from './commands';
+import { Logger } from './services/logger';
 
 let wsClient: WebSocketClient;
 let apiService: ApiService;
@@ -21,7 +22,9 @@ let goalsTreeProvider: GoalsTreeProvider;
 let connectionStatusProvider: ConnectionStatusProvider;
 
 export async function activate(context: vscode.ExtensionContext) {
-    console.log('AI Goals Tracker V2 is now active!');
+    Logger.init();
+    Logger.info('AI Goals Tracker V2 Activation started');
+    vscode.window.showInformationMessage('AI Goals Tracker V2 Initializing...');
 
     // Get configuration
     const config = vscode.workspace.getConfiguration('aiGoalsV2');
@@ -47,15 +50,30 @@ export async function activate(context: vscode.ExtensionContext) {
     setupWebSocketListeners();
 
     // Auto-connect if enabled
-    if (autoConnect) {
-        const token = await getAuthToken();
-        if (token) {
-            apiService.setToken(token);
-            wsClient.connect(token);
-            await goalsTreeProvider.loadGoals();
-        } else {
-            vscode.window.showWarningMessage('Please login to connect to AI Goals Tracker');
+    try {
+        Logger.info('Starting auto-connect process...');
+        if (autoConnect) {
+            const token = await getAuthToken();
+            if (token) {
+                Logger.info('Token obtained, initializing API and WebSocket...');
+                apiService.setToken(token);
+                Logger.info(`Attempting WebSocket connection to: ${serverUrl}`);
+                wsClient.connect(token);
+
+                // Do not await loadGoals here to avoid blocking activation
+                goalsTreeProvider.loadGoals().then(() => {
+                    Logger.info('Initial goals loaded successfully');
+                }).catch(err => {
+                    Logger.error('Initial goal load failed', err);
+                });
+            } else {
+                Logger.warn('No authentication token available');
+                vscode.window.showWarningMessage('Please login to connect to AI Goals Tracker');
+            }
         }
+    } catch (error) {
+        Logger.error('Activation error during auto-connect', error);
+        vscode.window.showErrorMessage(`Initialization failed: ${error}`);
     }
 
     // Show status bar item
@@ -135,7 +153,8 @@ async function getAuthToken(): Promise<string | null> {
     // 3. Call /api/v1/auth/login
     // 4. Store token securely
 
-    return 'placeholder-token-implement-real-auth';
+    // For development: return a valid token for the seeded admin user
+    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2N2QzYmZhMi1iZGZjLTQ1NjktYmVmMy1hNTdjMjgxM2FjMTAiLCJ0eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk5NjkyOTc2fQ.sZ6kJsCPiUlHBHiaOkuh34aWJKknPSAualCvelBZgOY';
 }
 
 export function deactivate() {

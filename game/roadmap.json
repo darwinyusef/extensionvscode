@@ -1,0 +1,416 @@
+{
+  "title": "Tech Learning Roadmap",
+  "nodes": [
+    {
+      "id": "html",
+      "title": "HTML",
+      "icon": "https://svgl.app/library/html5.svg",
+      "x": 200,
+      "y": 450,
+      "level": 1,
+      "color": "0xe44d26",
+      "description": "Lenguaje de marcado para estructurar contenido web",
+      "detail_info": "Este contenido se puede aprender en el curso de HTML de freeCodeCamp. y manejar archivos HTML con un editor de texto como Visual Studio Code. tambien ",
+      "url": "https://developer.mozilla.org/es/docs/Learn/HTML",
+      "active": true,
+      "locked": false,
+      "requires": [],
+      "connections": [
+        "css",
+        "git"
+      ]
+    },
+    {
+      "id": "css",
+      "title": "CSS",
+      "icon": "https://svgl.app/library/css.svg",
+      "x": 400,
+      "y": 300,
+      "level": 1,
+      "color": "0x264de4",
+      "description": "Hojas de estilo para diseñar páginas web",
+      "url": "https://developer.mozilla.org/es/docs/Learn/CSS",
+      "active": false,
+      "locked": false,
+      "requires": [],
+      "connections": [
+        "html",
+        "javascript",
+        "git",
+        "tailwind"
+      ]
+    },
+    {
+      "id": "git",
+      "title": "Git",
+      "icon": "https://svgl.app/library/git.svg",
+      "x": 400,
+      "y": 600,
+      "level": 1,
+      "color": "0xf05032",
+      "description": "Sistema de control de versiones",
+      "url": "https://git-scm.com/book/es/v2",
+      "active": false,
+      "locked": false,
+      "requires": [],
+      "connections": [
+        "html",
+        "css",
+        "javascript",
+        "github"
+      ]
+    },
+    {
+      "id": "javascript",
+      "title": "JavaScript",
+      "icon": "https://svgl.app/library/javascript.svg",
+      "x": 650,
+      "y": 450,
+      "level": 2,
+      "color": "0xf7df1e",
+      "description": "Lenguaje de programación para la web",
+      "url": "https://developer.mozilla.org/es/docs/Learn/JavaScript",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "html",
+        "css"
+      ],
+      "connections": [
+        "css",
+        "git",
+        "react",
+        "nodejs",
+        "typescript",
+        "vue"
+      ]
+    },
+    {
+      "id": "tailwind",
+      "title": "Tailwind",
+      "icon": "https://svgl.app/library/tailwindcss.svg",
+      "x": 650,
+      "y": 200,
+      "level": 2,
+      "color": "0x06b6d4",
+      "description": "Framework CSS utility-first",
+      "url": "https://tailwindcss.com/docs",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "css"
+      ],
+      "connections": [
+        "css",
+        "react",
+        "nextjs"
+      ]
+    },
+    {
+      "id": "github",
+      "title": "GitHub",
+      "icon": "https://svgl.app/library/github.svg",
+      "x": 650,
+      "y": 750,
+      "level": 2,
+      "color": "0x181717",
+      "description": "Plataforma de desarrollo colaborativo",
+      "url": "https://docs.github.com/es/get-started",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "git"
+      ],
+      "connections": [
+        "git",
+        "docker"
+      ]
+    },
+    {
+      "id": "react",
+      "title": "React",
+      "icon": "https://svgl.app/library/react.svg",
+      "x": 900,
+      "y": 280,
+      "level": 3,
+      "color": "0x61dafb",
+      "description": "Librería para construir interfaces de usuario",
+      "url": "https://es.react.dev/learn",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "javascript"
+      ],
+      "connections": [
+        "javascript",
+        "tailwind",
+        "nextjs",
+        "redux"
+      ]
+    },
+    {
+      "id": "vue",
+      "title": "Vue",
+      "icon": "https://svgl.app/library/vue.svg",
+      "x": 900,
+      "y": 480,
+      "level": 3,
+      "color": "0x4fc08d",
+      "description": "Framework progresivo de JavaScript",
+      "url": "https://vuejs.org/guide/introduction.html",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "javascript"
+      ],
+      "connections": [
+        "javascript",
+        "nuxt"
+      ]
+    },
+    {
+      "id": "typescript",
+      "title": "TypeScript",
+      "icon": "https://svgl.app/library/typescript.svg",
+      "x": 900,
+      "y": 620,
+      "level": 3,
+      "color": "0x3178c6",
+      "description": "JavaScript con tipos estáticos",
+      "url": "https://www.typescriptlang.org/docs/",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "javascript"
+      ],
+      "connections": [
+        "javascript",
+        "react",
+        "nodejs",
+        "vue"
+      ]
+    },
+    {
+      "id": "nodejs",
+      "title": "Node.js",
+      "icon": "https://svgl.app/library/nodejs.svg",
+      "x": 900,
+      "y": 780,
+      "level": 3,
+      "color": "0x339933",
+      "description": "Entorno de ejecución para JavaScript",
+      "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "javascript"
+      ],
+      "connections": [
+        "javascript",
+        "typescript",
+        "express",
+        "mongodb",
+        "nestjs"
+      ]
+    },
+    {
+      "id": "nextjs",
+      "title": "Next.js",
+      "icon": "https://svgl.app/library/nextjs.svg",
+      "x": 1150,
+      "y": 200,
+      "level": 4,
+      "color": "0x000000",
+      "description": "Framework de React para producción",
+      "url": "https://nextjs.org/docs",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "react"
+      ],
+      "connections": [
+        "react",
+        "tailwind",
+        "vercel"
+      ]
+    },
+    {
+      "id": "redux",
+      "title": "Redux",
+      "icon": "https://svgl.app/library/redux.svg",
+      "x": 1150,
+      "y": 350,
+      "level": 4,
+      "color": "0x764abc",
+      "description": "Manejador de estado para aplicaciones",
+      "url": "https://redux.js.org/introduction/getting-started",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "react"
+      ],
+      "connections": [
+        "react"
+      ]
+    },
+    {
+      "id": "nuxt",
+      "title": "Nuxt",
+      "icon": "https://svgl.app/library/nuxt.svg",
+      "x": 1150,
+      "y": 500,
+      "level": 4,
+      "color": "0x00dc82",
+      "description": "Framework de Vue para producción",
+      "url": "https://nuxt.com/docs/getting-started/introduction",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "vue"
+      ],
+      "connections": [
+        "vue"
+      ]
+    },
+    {
+      "id": "nestjs",
+      "title": "NestJS",
+      "icon": "https://svgl.app/library/nestjs.svg",
+      "x": 1150,
+      "y": 680,
+      "level": 4,
+      "color": "0xe0234e",
+      "description": "Framework de Node.js para backend",
+      "url": "https://docs.nestjs.com/",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "nodejs",
+        "typescript"
+      ],
+      "connections": [
+        "nodejs",
+        "typescript"
+      ]
+    },
+    {
+      "id": "express",
+      "title": "Express",
+      "icon": "https://svgl.app/library/express.svg",
+      "x": 1150,
+      "y": 830,
+      "level": 4,
+      "color": "0x000000",
+      "description": "Framework web minimalista para Node.js",
+      "url": "https://expressjs.com/es/starter/installing.html",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "nodejs"
+      ],
+      "connections": [
+        "nodejs",
+        "mongodb"
+      ]
+    },
+    {
+      "id": "mongodb",
+      "title": "MongoDB",
+      "icon": "https://svgl.app/library/mongodb.svg",
+      "x": 1400,
+      "y": 850,
+      "level": 5,
+      "color": "0x47a248",
+      "description": "Base de datos NoSQL",
+      "url": "https://www.mongodb.com/docs/manual/tutorial/getting-started/",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "nodejs"
+      ],
+      "connections": [
+        "express",
+        "nodejs"
+      ]
+    },
+    {
+      "id": "docker",
+      "title": "Docker",
+      "icon": "https://svgl.app/library/docker.svg",
+      "x": 900,
+      "y": 950,
+      "level": 3,
+      "color": "0x2496ed",
+      "description": "Plataforma de contenedores",
+      "url": "https://docs.docker.com/get-started/",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "github"
+      ],
+      "connections": [
+        "github",
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "vercel",
+      "title": "Vercel",
+      "icon": "https://svgl.app/library/vercel.svg",
+      "x": 1400,
+      "y": 200,
+      "level": 5,
+      "color": "0x000000",
+      "description": "Plataforma de despliegue",
+      "url": "https://vercel.com/docs",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "nextjs"
+      ],
+      "connections": [
+        "nextjs"
+      ]
+    },
+    {
+      "id": "kubernetes",
+      "title": "Kubernetes",
+      "icon": "https://svgl.app/library/kubernetes.svg",
+      "x": 1150,
+      "y": 1000,
+      "level": 4,
+      "color": "0x326ce5",
+      "description": "Orquestación de contenedores",
+      "url": "https://kubernetes.io/docs/tutorials/",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "docker"
+      ],
+      "connections": [
+        "docker",
+        "devops"
+      ]
+    },
+    {
+      "id": "devops",
+      "title": "DevOps",
+      "icon": "https://svgl.app/library/devops.svg",
+      "x": 1400,
+      "y": 600,
+      "level": 5,
+      "color": "0xff6b6b",
+      "description": "Prácticas de desarrollo y operaciones",
+      "url": "https://roadmap.sh/devops",
+      "active": false,
+      "locked": true,
+      "requires": [
+        "kubernetes"
+      ],
+      "connections": [
+        "kubernetes",
+        "github"
+      ]
+    }
+  ]
+}

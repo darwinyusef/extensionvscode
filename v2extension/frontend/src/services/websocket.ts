@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import WebSocket from 'ws';
 import { EventEmitter } from 'events';
+import { Logger } from './logger';
 
 interface WebSocketMessage {
     type: string;
@@ -37,7 +38,7 @@ export class WebSocketClient extends EventEmitter {
      */
     public connect(token: string): void {
         if (this.isConnecting || (this.ws && this.ws.readyState === WebSocket.OPEN)) {
-            console.log('Already connected or connecting');
+            Logger.info('WebSocket: Already connected or connecting');
             return;
         }
 
@@ -48,6 +49,7 @@ export class WebSocketClient extends EventEmitter {
         const urlWithToken = `${this.serverUrl}?token=${token}`;
 
         try {
+            Logger.info(`WebSocket: Connecting to ${this.serverUrl}`);
             this.ws = new WebSocket(urlWithToken);
 
             this.ws.on('open', () => this.onOpen());
@@ -56,7 +58,7 @@ export class WebSocketClient extends EventEmitter {
             this.ws.on('error', (error) => this.onError(error));
 
         } catch (error) {
-            console.error('WebSocket connection error:', error);
+            Logger.error('WebSocket connection error', error);
             this.isConnecting = false;
             this.scheduleReconnect();
         }
@@ -84,7 +86,7 @@ export class WebSocketClient extends EventEmitter {
      */
     public send(type: string, payload: any): void {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            console.error('WebSocket is not connected');
+            Logger.warn(`WebSocket: Cannot send ${type}, not connected`);
             return;
         }
 
@@ -108,7 +110,7 @@ export class WebSocketClient extends EventEmitter {
     // ==================== Private Methods ====================
 
     private onOpen(): void {
-        console.log('WebSocket connected');
+        Logger.info('WebSocket: Connected successfully');
         this.isConnecting = false;
         this.emit('connected');
 
@@ -119,7 +121,7 @@ export class WebSocketClient extends EventEmitter {
     private onMessage(data: WebSocket.Data): void {
         try {
             const message: WebSocketMessage = JSON.parse(data.toString());
-            console.log('Received message:', message.type);
+            Logger.info(`WebSocket: Received message type: ${message.type}`);
 
             // Emit event based on message type
             this.emit(message.type, message.payload);
@@ -128,12 +130,12 @@ export class WebSocketClient extends EventEmitter {
             this.emit('message', message);
 
         } catch (error) {
-            console.error('Error parsing message:', error);
+            Logger.error('WebSocket: Error parsing message', error);
         }
     }
 
     private onClose(code: number, reason: Buffer): void {
-        console.log(`WebSocket closed: ${code} - ${reason.toString()}`);
+        Logger.warn(`WebSocket: Closed [code: ${code}, reason: ${reason.toString()}]`);
         this.isConnecting = false;
         this.ws = null;
         this.emit('disconnected', { code, reason: reason.toString() });
@@ -144,7 +146,7 @@ export class WebSocketClient extends EventEmitter {
     }
 
     private onError(error: Error): void {
-        console.error('WebSocket error:', error);
+        Logger.error('WebSocket: Error', error);
         this.emit('error', error.message);
     }
 
@@ -153,13 +155,13 @@ export class WebSocketClient extends EventEmitter {
             return;
         }
 
-        console.log(`Reconnecting in ${this.reconnectInterval}ms...`);
+        Logger.info(`WebSocket: Reconnecting in ${this.reconnectInterval}ms...`);
 
         this.reconnectTimer = setTimeout(() => {
             this.reconnectTimer = null;
 
             if (this.token && this.shouldReconnect) {
-                console.log('Attempting to reconnect...');
+                Logger.info('WebSocket: Attempting to reconnect...');
                 this.connect(this.token);
             }
         }, this.reconnectInterval);

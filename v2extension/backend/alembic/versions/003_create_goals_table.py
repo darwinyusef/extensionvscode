@@ -60,7 +60,7 @@ def upgrade() -> None:
         sa.Column('progress_percentage', sa.Float(), nullable=False, server_default='0.0'),
         sa.Column('ai_generated', sa.Boolean(), nullable=False, server_default='false'),
         sa.Column('validation_criteria', JSON, nullable=True),
-        sa.Column('metadata', JSON, nullable=True),
+        sa.Column('goal_metadata', JSON, nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('started_at', sa.DateTime(), nullable=True),

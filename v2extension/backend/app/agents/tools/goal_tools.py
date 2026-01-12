@@ -80,8 +80,8 @@ async def create_goal_tool(
             course_id=course_id,
             title=title,
             description=description,
-            status=GoalStatus.PENDING,
-            priority=GoalPriority[priority.upper()],
+            status=GoalStatus.pending,
+            priority=GoalPriority[priority.lower()],
             progress_percentage=0.0,
             ai_generated=ai_generated,
             validation_criteria={

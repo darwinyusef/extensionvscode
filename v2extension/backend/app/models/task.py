@@ -12,23 +12,23 @@ import enum
 
 class TaskStatus(str, enum.Enum):
     """Estados posibles de una task."""
-    TODO = "todo"
-    IN_PROGRESS = "in_progress"
-    IN_REVIEW = "in_review"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    SKIPPED = "skipped"
+    todo = "todo"
+    in_progress = "in_progress"
+    in_review = "in_review"
+    completed = "completed"
+    failed = "failed"
+    skipped = "skipped"
 
 
 class TaskType(str, enum.Enum):
     """Tipos de task."""
-    CODE = "code"
-    DOCUMENTATION = "documentation"
-    TESTING = "testing"
-    RESEARCH = "research"
-    REVIEW = "review"
-    DEPLOYMENT = "deployment"
-    OTHER = "other"
+    code = "code"
+    documentation = "documentation"
+    testing = "testing"
+    research = "research"
+    review = "review"
+    deployment = "deployment"
+    other = "other"
 
 
 class Task(Base):
@@ -88,14 +88,14 @@ class Task(Base):
     # Type & Status
     task_type: Mapped[TaskType] = mapped_column(
         Enum(TaskType),
-        default=TaskType.CODE,
+        default=TaskType.code,
         nullable=False,
         index=True
     )
 
     status: Mapped[TaskStatus] = mapped_column(
         Enum(TaskStatus),
-        default=TaskStatus.TODO,
+        default=TaskStatus.todo,
         nullable=False,
         index=True
     )
@@ -126,7 +126,7 @@ class Task(Base):
     #   "dependencies": ["task-id-1"],
     #   "tags": ["backend", "critical"]
     # }
-    task_metadata: Mapped[dict] = mapped_column("metadata", JSON, nullable=True)
+    task_metadata: Mapped[dict] = mapped_column(JSON, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(

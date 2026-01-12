@@ -12,10 +12,10 @@ import enum
 
 class CourseStatus(str, enum.Enum):
     """Estados posibles de un curso."""
-    DRAFT = "draft"
-    ACTIVE = "active"
-    COMPLETED = "completed"
-    ARCHIVED = "archived"
+    draft = "draft"
+    active = "active"
+    completed = "completed"
+    archived = "archived"
 
 
 class Course(Base):
@@ -60,7 +60,7 @@ class Course(Base):
     # Status
     status: Mapped[CourseStatus] = mapped_column(
         Enum(CourseStatus),
-        default=CourseStatus.DRAFT,
+        default=CourseStatus.draft,
         nullable=False,
         index=True
     )
@@ -75,7 +75,7 @@ class Course(Base):
     #   "difficulty": "intermediate",
     #   "estimated_hours": 40
     # }
-    course_metadata: Mapped[dict] = mapped_column("metadata", JSON, nullable=True)
+    course_metadata: Mapped[dict] = mapped_column(JSON, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(

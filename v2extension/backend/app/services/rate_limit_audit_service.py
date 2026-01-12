@@ -54,9 +54,9 @@ class RateLimitAuditService:
         """
         # Determinar status
         if rate_limit_result.allowed:
-            status = RateLimitStatus.ALLOWED
+            status = RateLimitStatus.allowed
         else:
-            status = RateLimitStatus.RATE_LIMITED
+            status = RateLimitStatus.rate_limited
 
         # Calcular costo estimado si hay uso de OpenAI
         estimated_cost_cents = None

@@ -27,10 +27,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     # Mapeo de endpoints a acciones
     ACTION_MAPPING = {
-        "/api/v1/goals": RateLimitAction.API_CALL,
-        "/api/v1/tasks": RateLimitAction.API_CALL,
-        "/api/v1/code-snapshots": RateLimitAction.CODE_VALIDATION,
-        "/api/v1/events": RateLimitAction.API_CALL,
+        "/api/v1/goals": RateLimitAction.api_call,
+        "/api/v1/tasks": RateLimitAction.api_call,
+        "/api/v1/code-snapshots": RateLimitAction.code_validation,
+        "/api/v1/events": RateLimitAction.api_call,
     }
 
     # Endpoints excluidos de rate limiting
@@ -129,7 +129,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         for pattern, action in self.ACTION_MAPPING.items():
             if path.startswith(pattern):
                 return action
-        return RateLimitAction.API_CALL
+        return RateLimitAction.api_call
 
     async def _log_audit(
         self,

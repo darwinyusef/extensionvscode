@@ -46,8 +46,8 @@ class GoalService:
             course_id=goal_data.course_id,
             title=goal_data.title,
             description=goal_data.description,
-            status=GoalStatus.PENDING,
-            priority=goal_data.priority or GoalPriority.MEDIUM,
+            status=GoalStatus.pending,
+            priority=goal_data.priority or GoalPriority.medium,
             progress_percentage=0.0,
             ai_generated=goal_data.ai_generated or False,
             validation_criteria=goal_data.validation_criteria,
@@ -115,9 +115,9 @@ class GoalService:
 
         # Handle status transitions
         if goal_update.status:
-            if goal_update.status == GoalStatus.IN_PROGRESS and not goal.started_at:
+            if goal_update.status == GoalStatus.in_progress and not goal.started_at:
                 goal.started_at = datetime.utcnow()
-            elif goal_update.status == GoalStatus.COMPLETED:
+            elif goal_update.status == GoalStatus.completed:
                 goal.completed_at = datetime.utcnow()
                 goal.progress_percentage = 100.0
 
@@ -157,8 +157,8 @@ class GoalService:
         goal.progress_percentage = min(100.0, max(0.0, progress_percentage))
         goal.updated_at = datetime.utcnow()
 
-        if goal.progress_percentage == 100.0 and goal.status != GoalStatus.COMPLETED:
-            goal.status = GoalStatus.COMPLETED
+        if goal.progress_percentage == 100.0 and goal.status != GoalStatus.completed:
+            goal.status = GoalStatus.completed
             goal.completed_at = datetime.utcnow()
 
         await self.db.commit()

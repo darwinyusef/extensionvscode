@@ -49,8 +49,8 @@ async def create_task_tool(
             user_id=user_id,
             title=title,
             description=description,
-            task_type=TaskType[task_type.upper()],
-            status=TaskStatus.TODO,
+            task_type=TaskType[task_type.lower()],
+            status=TaskStatus.todo,
             priority=priority,
             estimated_hours=estimated_hours
         )

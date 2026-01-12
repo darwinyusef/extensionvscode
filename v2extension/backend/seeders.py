@@ -37,12 +37,12 @@ def seed_users(cursor):
         {
             'id': generate_uuid(),
             'email': 'admin@test.com',
-            'username': 'admin',
+            'username': 'Admin',
             'hashed_password': hash_password('admin123'),
             'full_name': 'Admin User',
             'is_active': True,
             'is_superuser': True,
-            'metadata': '{"preferences": {"theme": "dark", "language": "es"}}',
+            'user_metadata': '{"preferences": {"theme": "dark", "language": "es"}}',
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow(),
             'last_login_at': None
@@ -55,7 +55,7 @@ def seed_users(cursor):
             'full_name': 'Test User 1',
             'is_active': True,
             'is_superuser': False,
-            'metadata': '{"preferences": {"theme": "light", "language": "en"}}',
+            'user_metadata': '{"preferences": {"theme": "light", "language": "en"}}',
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow(),
             'last_login_at': None
@@ -68,7 +68,7 @@ def seed_users(cursor):
             'full_name': 'Test User 2',
             'is_active': True,
             'is_superuser': False,
-            'metadata': '{"preferences": {"theme": "dark", "language": "en"}}',
+            'user_metadata': '{"preferences": {"theme": "dark", "language": "en"}}',
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow(),
             'last_login_at': None
@@ -77,9 +77,9 @@ def seed_users(cursor):
 
     query = """
         INSERT INTO users (id, email, username, hashed_password, full_name,
-                          is_active, is_superuser, metadata, created_at, updated_at, last_login_at)
+                          is_active, is_superuser, user_metadata, created_at, updated_at, last_login_at)
         VALUES (%(id)s, %(email)s, %(username)s, %(hashed_password)s, %(full_name)s,
-                %(is_active)s, %(is_superuser)s, %(metadata)s, %(created_at)s, %(updated_at)s, %(last_login_at)s)
+                %(is_active)s, %(is_superuser)s, %(user_metadata)s, %(created_at)s, %(updated_at)s, %(last_login_at)s)
         RETURNING id, email, username
     """
 
@@ -105,7 +105,7 @@ def seed_courses(cursor, user_ids):
             'description': 'Aprende conceptos avanzados de Python incluyendo async/await, decoradores y metaclases',
             'status': 'active',
             'progress_percentage': 45.5,
-            'metadata': '{"technologies": ["Python", "AsyncIO"], "difficulty": "advanced", "estimated_hours": 40}',
+            'course_metadata': '{"technologies": ["Python", "AsyncIO"], "difficulty": "advanced", "estimated_hours": 40}',
             'created_at': datetime.utcnow() - timedelta(days=30),
             'updated_at': datetime.utcnow(),
             'completed_at': None
@@ -117,7 +117,7 @@ def seed_courses(cursor, user_ids):
             'description': 'Construcción de APIs RESTful con FastAPI y PostgreSQL',
             'status': 'active',
             'progress_percentage': 70.0,
-            'metadata': '{"technologies": ["FastAPI", "PostgreSQL", "SQLAlchemy"], "difficulty": "intermediate", "estimated_hours": 30}',
+            'course_metadata': '{"technologies": ["FastAPI", "PostgreSQL", "SQLAlchemy"], "difficulty": "intermediate", "estimated_hours": 30}',
             'created_at': datetime.utcnow() - timedelta(days=15),
             'updated_at': datetime.utcnow(),
             'completed_at': None
@@ -129,7 +129,7 @@ def seed_courses(cursor, user_ids):
             'description': 'Desarrollo de aplicaciones web modernas con React y TypeScript',
             'status': 'completed',
             'progress_percentage': 100.0,
-            'metadata': '{"technologies": ["React", "TypeScript", "Vite"], "difficulty": "intermediate", "estimated_hours": 35}',
+            'course_metadata': '{"technologies": ["React", "TypeScript", "Vite"], "difficulty": "intermediate", "estimated_hours": 35}',
             'created_at': datetime.utcnow() - timedelta(days=60),
             'updated_at': datetime.utcnow() - timedelta(days=5),
             'completed_at': datetime.utcnow() - timedelta(days=5)
@@ -138,9 +138,9 @@ def seed_courses(cursor, user_ids):
 
     query = """
         INSERT INTO courses (id, user_id, title, description, status, progress_percentage,
-                           metadata, created_at, updated_at, completed_at)
+                           course_metadata, created_at, updated_at, completed_at)
         VALUES (%(id)s, %(user_id)s, %(title)s, %(description)s, %(status)s, %(progress_percentage)s,
-                %(metadata)s::jsonb, %(created_at)s, %(updated_at)s, %(completed_at)s)
+                %(course_metadata)s::jsonb, %(created_at)s, %(updated_at)s, %(completed_at)s)
         RETURNING id, title
     """
 
@@ -170,7 +170,7 @@ def seed_goals(cursor, user_ids, course_ids):
             'progress_percentage': 60.0,
             'ai_generated': True,
             'validation_criteria': '{"criteria": ["Implementar login", "Implementar registro", "Implementar refresh token"]}',
-            'metadata': '{"tags": ["backend", "security"], "estimated_hours": 8}',
+            'goal_metadata': '{"tags": ["backend", "security"], "estimated_hours": 8}',
             'created_at': datetime.utcnow() - timedelta(days=10),
             'updated_at': datetime.utcnow(),
             'started_at': datetime.utcnow() - timedelta(days=9),
@@ -188,7 +188,7 @@ def seed_goals(cursor, user_ids, course_ids):
             'progress_percentage': 100.0,
             'ai_generated': False,
             'validation_criteria': '{"criteria": ["GET /users", "POST /users", "PUT /users/:id", "DELETE /users/:id"]}',
-            'metadata': '{"tags": ["backend", "api"], "estimated_hours": 6, "actual_hours": 5.5}',
+            'goal_metadata': '{"tags": ["backend", "api"], "estimated_hours": 6, "actual_hours": 5.5}',
             'created_at': datetime.utcnow() - timedelta(days=20),
             'updated_at': datetime.utcnow() - timedelta(days=3),
             'started_at': datetime.utcnow() - timedelta(days=19),
@@ -206,7 +206,7 @@ def seed_goals(cursor, user_ids, course_ids):
             'progress_percentage': 0.0,
             'ai_generated': True,
             'validation_criteria': '{"criteria": ["Generar embeddings", "Crear índice HNSW", "Implementar búsqueda"]}',
-            'metadata': '{"tags": ["backend", "ai", "rag"], "estimated_hours": 12}',
+            'goal_metadata': '{"tags": ["backend", "ai", "rag"], "estimated_hours": 12}',
             'created_at': datetime.utcnow() - timedelta(days=2),
             'updated_at': datetime.utcnow() - timedelta(days=2),
             'started_at': None,
@@ -217,10 +217,10 @@ def seed_goals(cursor, user_ids, course_ids):
 
     query = """
         INSERT INTO goals (id, user_id, course_id, title, description, status, priority,
-                          progress_percentage, ai_generated, validation_criteria, metadata,
+                          progress_percentage, ai_generated, validation_criteria, goal_metadata,
                           created_at, updated_at, started_at, completed_at, due_date)
         VALUES (%(id)s, %(user_id)s, %(course_id)s, %(title)s, %(description)s, %(status)s, %(priority)s,
-                %(progress_percentage)s, %(ai_generated)s, %(validation_criteria)s::jsonb, %(metadata)s::jsonb,
+                %(progress_percentage)s, %(ai_generated)s, %(validation_criteria)s::jsonb, %(goal_metadata)s::jsonb,
                 %(created_at)s, %(updated_at)s, %(started_at)s, %(completed_at)s, %(due_date)s)
         RETURNING id, title
     """
@@ -253,7 +253,7 @@ def seed_tasks(cursor, user_ids, goal_ids):
             'actual_hours': 1.5,
             'validation_result': '{"passed": true, "score": 0.95}',
             'ai_feedback': 'Excelente implementación. El modelo está bien estructurado.',
-            'metadata': '{"files": ["/app/models/user.py"]}',
+            'task_metadata': '{"files": ["/app/models/user.py"]}',
             'created_at': datetime.utcnow() - timedelta(days=9),
             'updated_at': datetime.utcnow() - timedelta(days=7),
             'started_at': datetime.utcnow() - timedelta(days=9),
@@ -272,7 +272,7 @@ def seed_tasks(cursor, user_ids, goal_ids):
             'actual_hours': 2.5,
             'validation_result': None,
             'ai_feedback': None,
-            'metadata': '{"files": ["/app/routes/auth.py"]}',
+            'task_metadata': '{"files": ["/app/routes/auth.py"]}',
             'created_at': datetime.utcnow() - timedelta(days=7),
             'updated_at': datetime.utcnow(),
             'started_at': datetime.utcnow() - timedelta(days=6),
@@ -291,7 +291,7 @@ def seed_tasks(cursor, user_ids, goal_ids):
             'actual_hours': 3.5,
             'validation_result': '{"passed": true, "score": 0.88}',
             'ai_feedback': 'Buena documentación, considera agregar más ejemplos.',
-            'metadata': '{"files": ["/docs/api.md"]}',
+            'task_metadata': '{"files": ["/docs/api.md"]}',
             'created_at': datetime.utcnow() - timedelta(days=5),
             'updated_at': datetime.utcnow() - timedelta(days=3),
             'started_at': datetime.utcnow() - timedelta(days=5),
@@ -310,7 +310,7 @@ def seed_tasks(cursor, user_ids, goal_ids):
             'actual_hours': None,
             'validation_result': None,
             'ai_feedback': None,
-            'metadata': '{"resources": ["https://github.com/pgvector/pgvector"]}',
+            'task_metadata': '{"resources": ["https://github.com/pgvector/pgvector"]}',
             'created_at': datetime.utcnow() - timedelta(days=1),
             'updated_at': datetime.utcnow() - timedelta(days=1),
             'started_at': None,
@@ -321,10 +321,10 @@ def seed_tasks(cursor, user_ids, goal_ids):
     query = """
         INSERT INTO tasks (id, goal_id, user_id, title, description, task_type, status,
                           priority, estimated_hours, actual_hours, validation_result, ai_feedback,
-                          metadata, created_at, updated_at, started_at, completed_at)
+                          task_metadata, created_at, updated_at, started_at, completed_at)
         VALUES (%(id)s, %(goal_id)s, %(user_id)s, %(title)s, %(description)s, %(task_type)s, %(status)s,
                 %(priority)s, %(estimated_hours)s, %(actual_hours)s, %(validation_result)s::jsonb, %(ai_feedback)s,
-                %(metadata)s::jsonb, %(created_at)s, %(updated_at)s, %(started_at)s, %(completed_at)s)
+                %(task_metadata)s::jsonb, %(created_at)s, %(updated_at)s, %(started_at)s, %(completed_at)s)
         RETURNING id, title
     """
 
@@ -350,7 +350,7 @@ def seed_events(cursor, user_ids):
             'entity_type': 'user',
             'entity_id': user_ids[0],
             'payload': '{"email": "admin@test.com", "username": "admin"}',
-            'metadata': '{"ip_address": "127.0.0.1", "source": "api"}',
+            'event_metadata': '{"ip_address": "127.0.0.1", "source": "api"}',
             'created_at': datetime.utcnow() - timedelta(days=30),
             'processed_at': datetime.utcnow() - timedelta(days=30),
             'parquet_path': None
@@ -362,7 +362,7 @@ def seed_events(cursor, user_ids):
             'entity_type': 'course',
             'entity_id': generate_uuid(),
             'payload': '{"title": "Curso de Python Avanzado"}',
-            'metadata': '{"ip_address": "127.0.0.1", "source": "vscode_extension"}',
+            'event_metadata': '{"ip_address": "127.0.0.1", "source": "vscode_extension"}',
             'created_at': datetime.utcnow() - timedelta(days=30),
             'processed_at': datetime.utcnow() - timedelta(days=30),
             'parquet_path': None
@@ -374,7 +374,7 @@ def seed_events(cursor, user_ids):
             'entity_type': 'task',
             'entity_id': generate_uuid(),
             'payload': '{"task_id": "xxx", "duration_hours": 1.5}',
-            'metadata': '{"ip_address": "192.168.1.100", "source": "vscode_extension"}',
+            'event_metadata': '{"ip_address": "192.168.1.100", "source": "vscode_extension"}',
             'created_at': datetime.utcnow() - timedelta(days=7),
             'processed_at': datetime.utcnow() - timedelta(days=7),
             'parquet_path': None
@@ -383,9 +383,9 @@ def seed_events(cursor, user_ids):
 
     query = """
         INSERT INTO events (id, event_type, user_id, entity_type, entity_id, payload,
-                           metadata, created_at, processed_at, parquet_path)
+                           event_metadata, created_at, processed_at, parquet_path)
         VALUES (%(id)s, %(event_type)s, %(user_id)s, %(entity_type)s, %(entity_id)s, %(payload)s::jsonb,
-                %(metadata)s::jsonb, %(created_at)s, %(processed_at)s, %(parquet_path)s)
+                %(event_metadata)s::jsonb, %(created_at)s, %(processed_at)s, %(parquet_path)s)
         RETURNING id, event_type
     """
 

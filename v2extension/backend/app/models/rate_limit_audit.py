@@ -16,29 +16,29 @@ class RateLimitAction(str, enum.Enum):
     """Tipos de acciones que consumen rate limit."""
 
     # API Calls
-    API_CALL = "api_call"
+    api_call = "api_call"
 
     # OpenAI Operations
-    EMBEDDING_GENERATION = "embedding_generation"
-    CHAT_COMPLETION = "chat_completion"
-    CODE_VALIDATION = "code_validation"
+    embedding_generation = "embedding_generation"
+    chat_completion = "chat_completion"
+    code_validation = "code_validation"
 
     # RAG Operations
-    RAG_SEARCH = "rag_search"
-    SIMILARITY_SEARCH = "similarity_search"
+    rag_search = "rag_search"
+    similarity_search = "similarity_search"
 
     # Bulk Operations
-    BULK_CREATE = "bulk_create"
-    BULK_UPDATE = "bulk_update"
+    bulk_create = "bulk_create"
+    bulk_update = "bulk_update"
 
 
 class RateLimitStatus(str, enum.Enum):
     """Estado del rate limit."""
 
-    ALLOWED = "allowed"
-    RATE_LIMITED = "rate_limited"
-    TOKEN_LIMIT_EXCEEDED = "token_limit_exceeded"
-    QUOTA_EXCEEDED = "quota_exceeded"
+    allowed = "allowed"
+    rate_limited = "rate_limited"
+    token_limit_exceeded = "token_limit_exceeded"
+    quota_exceeded = "quota_exceeded"
 
 
 class RateLimitAudit(Base):
@@ -111,7 +111,7 @@ class RateLimitAudit(Base):
     user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     # Additional metadata
-    audit_metadata: Mapped[Dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    audit_metadata: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
 
     # Timestamps
     timestamp: Mapped[datetime] = mapped_column(

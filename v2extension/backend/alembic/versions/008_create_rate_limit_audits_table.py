@@ -124,7 +124,7 @@ def upgrade() -> None:
         sa.Column('user_agent', sa.String(500), nullable=True),
 
         # Metadata
-        sa.Column('metadata', postgresql.JSONB, default={}, nullable=False),
+        sa.Column('audit_metadata', postgresql.JSONB, default={}, nullable=False),
 
         # Timestamps
         sa.Column('timestamp', sa.DateTime, default=sa.func.now(), nullable=False, index=True),

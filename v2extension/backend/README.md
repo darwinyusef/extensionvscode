@@ -11,10 +11,10 @@ FastAPI backend with LangGraph integration for AI-powered goal tracking.
 - Real-time WebSocket updates
 - OpenAI integration
 
-## Installation
+## Installation requiere python 3.11 >
 
 ```bash
-pip install -e .
+python3 -m pip install -e .
 ```
 
 ## Usage

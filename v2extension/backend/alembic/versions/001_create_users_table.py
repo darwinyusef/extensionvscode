@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column('full_name', sa.String(255), nullable=True),
         sa.Column('is_active', sa.Boolean(), nullable=False, default=True),
         sa.Column('is_superuser', sa.Boolean(), nullable=False, default=False),
-        sa.Column('metadata', JSON, nullable=True),
+        sa.Column('user_metadata', JSON, nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('last_login_at', sa.DateTime(), nullable=True),

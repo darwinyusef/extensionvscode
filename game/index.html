@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Roadmap - Interactive Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+
+            background-color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            min-height: 100vh;
+            margin: 0;
+            background-color: white;
+            /* El orden de los gradientes es importante: los primeros aparecen "encima" */
+            background-image:
+                /* La Cuadrícula */
+                linear-gradient(to right, rgba(229, 231, 235, 0.8) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(229, 231, 235, 0.8) 1px, transparent 1px),
+                /* Los degradados de color */
+                radial-gradient(circle 500px at 20% 20%, rgba(139, 92, 246, 0.3), transparent),
+                radial-gradient(circle 500px at 80% 80%, rgba(59, 130, 246, 0.3), transparent);
+
+            /* Definimos el tamaño para cada capa de fondo */
+            background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%;
+            background-attachment: fixed;
+            /* Mantiene el fondo estático al hacer scroll */
+        }
+
+
+
+        .title {
+            position: absolute;
+            z-index: 1000;
+            top: 13%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 42px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+
+        .subtitle {
+            position: absolute;
+            z-index: 1000;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+
+
+        #game-container {
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        #game-container canvas {
+            cursor: default;
+        }
+
+        /* Asegurar que elementos DOM no interfieran con drag */
+        #game-container img {
+            pointer-events: none !important;
+        }
+
+        /* Asegurar que todos los elementos DOM de Phaser no bloqueen eventos */
+        #game-container .domelement {
+            pointer-events: none !important;
+        }
+
+        #game-container .domelement * {
+            pointer-events: none !important;
+        }
+
+        #game-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 18px;
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+            background-size: 300% 300%;
+        }
+
+        @keyframes borderGlow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Estrellas de fondo */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        /* Estilos mejorados para el Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            /* Efecto de desenfoque de fondo */
+        }
+
+        .modal-content {
+            background: rgba(15, 23, 42, 0.95);
+            margin: 1% auto;
+            padding: 0;
+            border: 1px solid #00ffff;
+            width: 500px;
+            color: white;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            overflow: hidden;
+            position: relative;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .modal-header {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 8px #00ffff);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .modal-description {
+            line-height: 1.6;
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .btn-link {
+            background: #00aaff;
+            color: white;
+            padding: 10px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+        .btn-link:hover {
+            background: #00ffff;
+            box-shadow: 0 0 15px #00ffff;
+            color: #000;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            color: #64748b;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #fff;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+    <h1 class="title">TECH ROADMAP</h1>
+    <p class="subtitle">El objetivo de este roadmap es ayudarte a aprender las tecnologías más relevantes para el
+        desarrollo de software.
+    </p>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <img id="modal-icon" class="modal-icon" src="" alt="icon">
+                <h2 id="modal-title">Título</h2>
+            </div>
+            <div class="modal-body">
+                <div id="modal-status" class="status-badge"></div>
+                <p id="modal-description" class="modal-description"></p>
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <a id="modal-link" href="#" target="_blank" class="btn-link">EMPEZAR APRENDIZAJE</a>
+            </div>
+        </div>
+    </div>
+    <!-- Efecto de estrellas de fondo -->
+    <div class="stars" id="stars"></div>
+
+    <div id="game-container"></div>
+
+    <script>
+        // Crear estrellas de fondo
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+    </script>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

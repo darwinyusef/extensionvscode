@@ -42,7 +42,7 @@ def upgrade() -> None:
         sa.Column('description', sa.Text(), nullable=True),
         sa.Column('status', course_status_enum, nullable=False, server_default='draft'),
         sa.Column('progress_percentage', sa.Float(), nullable=False, server_default='0.0'),
-        sa.Column('metadata', JSON, nullable=True),
+        sa.Column('course_metadata', JSON, nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('completed_at', sa.DateTime(), nullable=True),

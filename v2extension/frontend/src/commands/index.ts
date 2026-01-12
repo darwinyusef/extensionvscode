@@ -17,9 +17,10 @@ export function registerCommands(
     // Connect to server
     context.subscriptions.push(
         vscode.commands.registerCommand('aiGoalsV2.connect', async () => {
-            // TODO: Implement actual authentication
-            const token = 'placeholder-token';
+            const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2N2QzYmZhMi1iZGZjLTQ1NjktYmVmMy1hNTdjMjgxM2FjMTAiLCJ0eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk5NjkyOTc2fQ.sZ6kJsCPiUlHBHiaOkuh34aWJKknPSAualCvelBZgOY';
+            apiService.setToken(token);
             wsClient.connect(token);
+            await goalsTreeProvider.loadGoals();
         })
     );
 

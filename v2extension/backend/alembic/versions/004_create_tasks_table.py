@@ -62,7 +62,7 @@ def upgrade() -> None:
         sa.Column('actual_hours', sa.Float(), nullable=True),
         sa.Column('validation_result', JSON, nullable=True),
         sa.Column('ai_feedback', sa.Text(), nullable=True),
-        sa.Column('metadata', JSON, nullable=True),
+        sa.Column('task_metadata', JSON, nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('started_at', sa.DateTime(), nullable=True),

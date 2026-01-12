@@ -6,11 +6,12 @@ import * as vscode from 'vscode';
 import { WebSocketClient } from '../services/websocket';
 import { ApiService } from '../services/api';
 import { Goal, Task } from '../types/api';
+import { Logger } from '../services/logger';
 
-export class GoalsTreeProvider implements vscode.TreeDataProvider<GoalTreeItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<GoalTreeItem | undefined | null | void> =
-        new vscode.EventEmitter<GoalTreeItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<GoalTreeItem | undefined | null | void> =
+export class GoalsTreeProvider implements vscode.TreeDataProvider<GoalTreeItem | TaskTreeItem> {
+    private _onDidChangeTreeData: vscode.EventEmitter<GoalTreeItem | TaskTreeItem | undefined | null | void> =
+        new vscode.EventEmitter<GoalTreeItem | TaskTreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<GoalTreeItem | TaskTreeItem | undefined | null | void> =
         this._onDidChangeTreeData.event;
 
     private goals: Goal[] = [];
@@ -43,16 +44,25 @@ export class GoalsTreeProvider implements vscode.TreeDataProvider<GoalTreeItem> 
     }
 
     async loadGoals(): Promise<void> {
+        Logger.info('Loading goals from API...');
         try {
             this.goals = await this.apiService.listGoals();
+            Logger.info(`Loaded ${this.goals.length} goals`);
+            vscode.window.showInformationMessage(`AI Goals: Loaded ${this.goals.length} goals`);
 
             for (const goal of this.goals) {
-                const tasks = await this.apiService.listTasks({ goal_id: goal.id });
-                this.tasksCache.set(goal.id, tasks);
+                try {
+                    const tasks = await this.apiService.listTasks({ goal_id: goal.id });
+                    this.tasksCache.set(goal.id, tasks);
+                    Logger.info(`Loaded ${tasks.length} tasks for goal ${goal.id}`);
+                } catch (taskError) {
+                    Logger.error(`Failed to load tasks for goal ${goal.id}`, taskError);
+                }
             }
 
             this.refresh();
         } catch (error) {
+            Logger.error('Failed to load goals', error);
             vscode.window.showErrorMessage(`Failed to load goals: ${error}`);
         }
     }
@@ -61,17 +71,20 @@ export class GoalsTreeProvider implements vscode.TreeDataProvider<GoalTreeItem> 
         this._onDidChangeTreeData.fire();
     }
 
-    getTreeItem(element: GoalTreeItem): vscode.TreeItem {
+    getTreeItem(element: GoalTreeItem | TaskTreeItem): vscode.TreeItem {
         return element;
     }
 
-    async getChildren(element?: GoalTreeItem): Promise<GoalTreeItem[]> {
+    async getChildren(element?: GoalTreeItem | TaskTreeItem): Promise<(GoalTreeItem | TaskTreeItem)[]> {
+        Logger.info(`getChildren called for ${element ? 'element' : 'root'}`);
         if (!element) {
-            return this.goals.map(goal => new GoalTreeItem(goal, 'goal'));
-        } else if (element.contextValue === 'goal') {
-            const tasks = this.tasksCache.get(element.id);
+            Logger.info(`Returning ${this.goals.length} goals as root children`);
+            return this.goals.map(goal => new GoalTreeItem(goal));
+        } else if (element instanceof GoalTreeItem) {
+            const tasks = this.tasksCache.get(element.goal.id);
+            Logger.info(`Returning ${tasks?.length || 0} tasks for goal ${element.goal.id}`);
             if (tasks) {
-                return tasks.map(task => new TaskTreeItem(task, element.id)) as any;
+                return tasks.map(task => new TaskTreeItem(task, element.goal.id));
             }
         }
         return [];
@@ -95,8 +108,7 @@ export class GoalsTreeProvider implements vscode.TreeDataProvider<GoalTreeItem> 
 
 class GoalTreeItem extends vscode.TreeItem {
     constructor(
-        public readonly goal: Goal,
-        public readonly contextValue: string
+        public readonly goal: Goal
     ) {
         super(goal.title, vscode.TreeItemCollapsibleState.Collapsed);
 
@@ -107,9 +119,9 @@ class GoalTreeItem extends vscode.TreeItem {
         // Icon based on status
         this.iconPath = new vscode.ThemeIcon(
             goal.status === 'completed' ? 'check' :
-            goal.status === 'in_progress' ? 'loading~spin' :
-            goal.status === 'failed' ? 'error' :
-            'circle-outline'
+                goal.status === 'in_progress' ? 'loading~spin' :
+                    goal.status === 'failed' ? 'error' :
+                        'circle-outline'
         );
 
         this.contextValue = 'goal';
@@ -131,9 +143,9 @@ class TaskTreeItem extends vscode.TreeItem {
         // Icon based on status
         this.iconPath = new vscode.ThemeIcon(
             task.status === 'completed' ? 'pass' :
-            task.status === 'in_progress' ? 'sync~spin' :
-            task.status === 'blocked' ? 'error' :
-            'circle-outline'
+                task.status === 'in_progress' ? 'sync~spin' :
+                    task.status === 'blocked' ? 'error' :
+                        'circle-outline'
         );
 
         this.contextValue = 'task';

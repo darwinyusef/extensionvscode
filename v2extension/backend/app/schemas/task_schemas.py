@@ -15,7 +15,7 @@ class TaskCreate(BaseModel):
     goal_id: str
     title: str = Field(..., min_length=1, max_length=200)
     description: str = Field(..., min_length=1)
-    task_type: Optional[TaskType] = TaskType.CODE
+    task_type: Optional[TaskType] = TaskType.code
     priority: Optional[int] = 100
     estimated_hours: Optional[float] = Field(None, ge=0.0)
     dependencies: Optional[List[str]] = None
@@ -54,7 +54,7 @@ class TaskResponse(BaseModel):
     dependencies: List[str]
     validation_result: Optional[Dict[str, Any]]
     ai_feedback: Optional[str]
-    metadata: Dict[str, Any]
+    metadata: Dict[str, Any] = Field(..., validation_alias="task_metadata")
     created_at: datetime
     updated_at: datetime
     started_at: Optional[datetime]

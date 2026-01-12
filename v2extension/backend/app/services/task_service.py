@@ -46,8 +46,8 @@ class TaskService:
             user_id=user_id,
             title=task_data.title,
             description=task_data.description,
-            task_type=task_data.task_type or TaskType.CODE,
-            status=TaskStatus.TODO,
+            task_type=task_data.task_type or TaskType.code,
+            status=TaskStatus.todo,
             priority=task_data.priority or 100,
             estimated_hours=task_data.estimated_hours,
             dependencies=task_data.dependencies or [],
@@ -118,9 +118,9 @@ class TaskService:
 
         # Handle status transitions
         if task_update.status:
-            if task_update.status == TaskStatus.IN_PROGRESS and not task.started_at:
+            if task_update.status == TaskStatus.in_progress and not task.started_at:
                 task.started_at = datetime.utcnow()
-            elif task_update.status == TaskStatus.COMPLETED and not task.completed_at:
+            elif task_update.status == TaskStatus.completed and not task.completed_at:
                 task.completed_at = datetime.utcnow()
 
         task.updated_at = datetime.utcnow()

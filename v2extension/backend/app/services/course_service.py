@@ -48,7 +48,7 @@ class CourseService:
             user_id=user_id,
             title=course_data.title,
             description=course_data.description,
-            status=CourseStatus.DRAFT,
+            status=CourseStatus.draft,
             syllabus=course_data.syllabus or {},
             metadata=course_data.metadata or {},
             start_date=course_data.start_date,
@@ -125,7 +125,7 @@ class CourseService:
         if not course:
             return None
 
-        course.status = CourseStatus.ACTIVE
+        course.status = CourseStatus.active
         course.updated_at = datetime.utcnow()
 
         await self.db.commit()
@@ -139,7 +139,7 @@ class CourseService:
         if not course:
             return None
 
-        course.status = CourseStatus.ARCHIVED
+        course.status = CourseStatus.archived
         course.updated_at = datetime.utcnow()
 
         await self.db.commit()

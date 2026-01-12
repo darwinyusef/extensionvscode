@@ -18,11 +18,13 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
 
     Client connects with: ws://host:port/api/v1/ws?token=<jwt_token>
     """
+    logger.info("WebSocket: Connection attempt received")
     # Authenticate connection
     user_id = await connection_manager.authenticate(websocket)
     if not user_id:
-        logger.warning("WebSocket authentication failed")
+        logger.warning("WebSocket: Authentication failed")
         return
+    logger.info(f"WebSocket: Authenticated user {user_id}")
 
     # Accept and register connection
     connection_id = await connection_manager.connect(websocket, user_id)

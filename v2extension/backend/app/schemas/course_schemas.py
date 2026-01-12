@@ -41,7 +41,7 @@ class CourseResponse(BaseModel):
     description: str
     status: CourseStatus
     syllabus: Optional[Dict[str, Any]]
-    metadata: Dict[str, Any]
+    metadata: Dict[str, Any] = Field(..., validation_alias="course_metadata")
     start_date: Optional[datetime]
     end_date: Optional[datetime]
     created_at: datetime

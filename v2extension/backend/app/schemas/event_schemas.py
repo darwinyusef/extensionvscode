@@ -4,7 +4,7 @@ Pydantic schemas for Event entities.
 
 from typing import Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models import EventType
 
@@ -28,7 +28,7 @@ class EventResponse(BaseModel):
     entity_type: str
     entity_id: str
     event_data: Dict[str, Any]
-    metadata: Dict[str, Any]
+    metadata: Dict[str, Any] = Field(..., validation_alias="event_metadata")
     timestamp: datetime
 
     class Config:

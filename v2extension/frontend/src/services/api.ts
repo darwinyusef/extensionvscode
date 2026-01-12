@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
+import axios, { AxiosRequestConfig } from 'axios';
 import { Goal, GoalCreate, GoalUpdate, Task, TaskCreate, TaskUpdate } from '../types/api';
+import { Logger } from './logger';
 
 export class ApiService {
     private baseUrl: string;
@@ -16,7 +18,7 @@ export class ApiService {
 
     private async request<T>(
         endpoint: string,
-        options: RequestInit = {}
+        options: AxiosRequestConfig = {}
     ): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
 
@@ -29,21 +31,22 @@ export class ApiService {
             headers['Authorization'] = `Bearer ${this.token}`;
         }
 
-        const response = await fetch(url, {
-            ...options,
-            headers
-        });
+        try {
+            Logger.info(`API Backend Request: ${url}`);
+            const response = await axios({
+                url,
+                ...options,
+                headers
+            });
 
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(`API Error: ${response.status} - ${error}`);
+            Logger.info(`API Backend Response: ${endpoint} -> Status ${response.status}`);
+            return response.data;
+        } catch (error: any) {
+            const status = error.response?.status;
+            const data = error.response?.data;
+            Logger.error(`API Backend Error for ${endpoint}`, { status, data, message: error.message });
+            throw new Error(`API Error: ${status || 'Unknown'} - ${typeof data === 'object' ? JSON.stringify(data) : data || error.message}`);
         }
-
-        if (response.status === 204) {
-            return {} as T;
-        }
-
-        return response.json();
     }
 
     async listGoals(params?: {
@@ -69,14 +72,14 @@ export class ApiService {
     async createGoal(data: GoalCreate): Promise<Goal> {
         return this.request<Goal>('/goals', {
             method: 'POST',
-            body: JSON.stringify(data)
+            data: JSON.stringify(data)
         });
     }
 
     async updateGoal(goalId: string, data: GoalUpdate): Promise<Goal> {
         return this.request<Goal>(`/goals/${goalId}`, {
             method: 'PUT',
-            body: JSON.stringify(data)
+            data: JSON.stringify(data)
         });
     }
 
@@ -117,14 +120,14 @@ export class ApiService {
     async createTask(data: TaskCreate): Promise<Task> {
         return this.request<Task>('/tasks', {
             method: 'POST',
-            body: JSON.stringify(data)
+            data: JSON.stringify(data)
         });
     }
 
     async updateTask(taskId: string, data: TaskUpdate): Promise<Task> {
         return this.request<Task>(`/tasks/${taskId}`, {
             method: 'PUT',
-            body: JSON.stringify(data)
+            data: JSON.stringify(data)
         });
     }
 

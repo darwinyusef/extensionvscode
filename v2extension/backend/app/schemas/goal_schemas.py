@@ -15,7 +15,7 @@ class GoalCreate(BaseModel):
     course_id: Optional[str] = None
     title: str = Field(..., min_length=1, max_length=200)
     description: str = Field(..., min_length=1)
-    priority: Optional[GoalPriority] = GoalPriority.MEDIUM
+    priority: Optional[GoalPriority] = GoalPriority.medium
     validation_criteria: Optional[List[str]] = None
     ai_generated: bool = False
     due_date: Optional[datetime] = None
@@ -48,7 +48,7 @@ class GoalResponse(BaseModel):
     progress_percentage: float
     ai_generated: bool
     validation_criteria: Optional[Dict[str, Any]]
-    metadata: Dict[str, Any]
+    metadata: Dict[str, Any] = Field(..., validation_alias="goal_metadata")
     due_date: Optional[datetime]
     created_at: datetime
     updated_at: datetime

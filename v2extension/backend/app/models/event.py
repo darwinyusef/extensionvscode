@@ -120,7 +120,7 @@ class Event(Base):
     #   "source": "vscode_extension",
     #   "version": "2.0.0"
     # }
-    event_metadata: Mapped[dict] = mapped_column("metadata", JSON, nullable=True)
+    event_metadata: Mapped[dict] = mapped_column(JSON, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(

@@ -65,7 +65,7 @@ def upgrade() -> None:
         sa.Column('entity_type', sa.String(50), nullable=True),
         sa.Column('entity_id', sa.String(36), nullable=True),
         sa.Column('payload', JSON, nullable=False),
-        sa.Column('metadata', JSON, nullable=True),
+        sa.Column('event_metadata', JSON, nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('processed_at', sa.DateTime(), nullable=True),
         sa.Column('parquet_path', sa.String(500), nullable=True),

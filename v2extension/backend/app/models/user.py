@@ -58,7 +58,7 @@ class User(Base):
     #   "settings": {"notifications": true},
     #   "profile": {"avatar_url": "...", "bio": "..."}
     # }
-    user_metadata: Mapped[dict] = mapped_column("metadata", JSON, nullable=True)
+    user_metadata: Mapped[dict] = mapped_column(JSON, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(

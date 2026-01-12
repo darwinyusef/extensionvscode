@@ -12,7 +12,9 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "*",
+    "onStartupFinished",
+    "onView:goalsTreeView"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -29,17 +31,20 @@
       "ai-goals-v2": [
         {
           "id": "goalsTreeView",
-          "name": "Goals & Tasks"
+          "name": "Goals & Tasks",
+          "icon": "resources/icon.svg"
         },
         {
           "id": "connectionStatus",
           "name": "Connection Status",
-          "type": "webview"
+          "type": "webview",
+          "icon": "resources/icon.svg"
         },
         {
           "id": "goalDocumentation",
           "name": "Documentation",
-          "type": "webview"
+          "type": "webview",
+          "icon": "resources/icon.svg"
         }
       ]
     },

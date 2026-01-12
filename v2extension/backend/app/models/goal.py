@@ -12,19 +12,19 @@ import enum
 
 class GoalStatus(str, enum.Enum):
     """Estados posibles de un goal."""
-    PENDING = "pending"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    BLOCKED = "blocked"
-    CANCELLED = "cancelled"
+    pending = "pending"
+    in_progress = "in_progress"
+    completed = "completed"
+    blocked = "blocked"
+    cancelled = "cancelled"
 
 
 class GoalPriority(str, enum.Enum):
     """Prioridades de un goal."""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    URGENT = "urgent"
+    low = "low"
+    medium = "medium"
+    high = "high"
+    urgent = "urgent"
 
 
 class Goal(Base):
@@ -83,14 +83,14 @@ class Goal(Base):
     # Status & Priority
     status: Mapped[GoalStatus] = mapped_column(
         Enum(GoalStatus),
-        default=GoalStatus.PENDING,
+        default=GoalStatus.pending,
         nullable=False,
         index=True
     )
 
     priority: Mapped[GoalPriority] = mapped_column(
         Enum(GoalPriority),
-        default=GoalPriority.MEDIUM,
+        default=GoalPriority.medium,
         nullable=False,
         index=True
     )
@@ -116,7 +116,7 @@ class Goal(Base):
     #   "difficulty": "medium",
     #   "resources": [...]
     # }
-    goal_metadata: Mapped[dict] = mapped_column("metadata", JSON, nullable=True)
+    goal_metadata: Mapped[dict] = mapped_column(JSON, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(

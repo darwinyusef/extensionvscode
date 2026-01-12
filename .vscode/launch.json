@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run V2 Extension (Root)",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}/v2extension/frontend"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/v2extension/frontend/out/**/*.js"
+            ],
+            "preLaunchTask": "npm: compile v2"
+        },
+        {
+            "name": "Run V1 Extension (Root)",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}/v1extension"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/v1extension/out/**/*.js"
+            ],
+            "preLaunchTask": "npm: compile - v1extension"
+        }
+    ]
+}
