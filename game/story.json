@@ -1,0 +1,123 @@
+{
+  "title": "Tech Learning Journey",
+  "backgroundAudio": "assets/audio/audio1.mp3",
+  "scenes": [
+    {
+      "id": "intro_1",
+      "title": "Bienvenido al Tech Roadmap",
+      "text": "En un mundo dominado por la tecnología, el conocimiento es tu mejor arma. Prepárate para embarcarte en un viaje de aprendizaje que transformará tu futuro.",
+      "background": {
+        "type": "gradient",
+        "colors": ["0x1e3a8a", "0x0f172a"]
+      },
+      "character": {
+        "type": "image",
+        "src": "assets/img/01.gif",
+        "css": "width: 40vw; height: 40vh; object-fit: cover;"
+      },
+      "duration": 4000
+    },
+    {
+      "id": "intro_2",
+      "title": "Tu misión comienza ahora",
+      "text": "Cada tecnología que domines te acercará más a convertirte en un desarrollador completo. El camino es largo, pero cada paso cuenta.",
+      "background": {
+        "type": "gradient",
+        "colors": ["0x312e81", "0x1e1b4b"]
+      },
+      "character": {
+        "type": "image",
+        "src": "assets/img/02.gif",
+        "css": "width: 100vw; height: 100vh; object-fit: cover;"
+      },
+      "duration": 4000
+    },
+    {
+      "id": "intro_3",
+      "title": "HTML: Los cimientos",
+      "text": "Todo comienza con HTML. Es el lenguaje fundamental que estructura la web. Sin él, no hay sitios web, no hay aplicaciones.",
+      "background": {
+        "type": "gradient",
+        "colors": ["0x7c2d12", "0x431407"]
+      },
+      "character": {
+        "type": "image",
+        "src": "assets/img/03.gif",
+        "css": "width: 100vw; height: 100vh; object-fit: cover;"
+      },
+      "duration": 4000
+    },
+    {
+      "id": "intro_4",
+      "title": "CSS: Dale estilo a tu mundo",
+      "text": "Una vez domines la estructura, es hora de dar vida con CSS. Colores, animaciones, diseños responsivos... el límite es tu imaginación.",
+      "background": {
+        "type": "gradient",
+        "colors": ["0x1e40af", "0x1e3a8a"]
+      },
+      "character": {
+        "type": "image",
+        "src": "assets/img/04.gif",
+        "css": "width: 100vw; height: 100vh; object-fit: cover;"
+      },
+      "duration": 4000
+    },
+    {
+      "id": "intro_5",
+      "title": "JavaScript: La magia interactiva",
+      "text": "Ahora viene lo emocionante. JavaScript te permitirá crear experiencias interactivas, desde simples validaciones hasta complejas aplicaciones web.",
+      "background": {
+        "type": "gradient",
+        "colors": ["0xca8a04", "0x854d0e"]
+      },
+      "character": {
+        "type": "image",
+        "src": "assets/img/05.gif",
+        "css": "width: 100vw; height: 100vh; object-fit: cover;"
+      },
+      "duration": 4000
+    },
+    {
+      "id": "intro_6",
+      "title": "Git: Control de versiones",
+      "text": "Aprende a trabajar en equipo y mantener el control de tus proyectos. Git es esencial para cualquier desarrollador profesional.",
+      "background": {
+        "type": "gradient",
+        "colors": ["0xb91c1c", "0x7f1d1d"]
+      },
+      "character": {
+        "type": "emoji",
+        "value": "🔄"
+      },
+      "duration": 3000
+    },
+    {
+      "id": "intro_7",
+      "title": "El viaje continúa",
+      "text": "Esto es solo el comienzo. React, Node.js, bases de datos, APIs... un universo de conocimiento te espera. ¿Estás listo?",
+      "background": {
+        "type": "gradient",
+        "colors": ["0x6d28d9", "0x4c1d95"]
+      },
+      "character": {
+        "type": "emoji",
+        "value": "🌟"
+      },
+      "duration": 3000
+    },
+    {
+      "id": "final",
+      "title": "¡Comencemos!",
+      "text": "Tu roadmap te está esperando. Cada nodo completado es un paso más cerca de tus sueños. No te rindas, el mundo tech te necesita.",
+      "background": {
+        "type": "gradient",
+        "colors": ["0x059669", "0x065f46"]
+      },
+      "character": {
+        "type": "emoji",
+        "value": "💪"
+      },
+      "duration": 3000
+    }
+  ]
+}

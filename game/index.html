@@ -131,15 +131,13 @@
         }
 
         .star {
-            position: absolute;
+            position: relative;
             width: 2px;
             height: 2px;
-            background: white;
             border-radius: 50%;
             animation: twinkle 3s infinite;
         }
 
-        /* Estilos mejorados para el Modal */
         .modal {
             display: none;
             position: fixed;
@@ -148,93 +146,211 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            /* Efecto de desenfoque de fondo */
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.show .modal-content {
+            transform: translateX(0);
         }
 
         .modal-content {
-            background: rgba(15, 23, 42, 0.95);
-            margin: 1% auto;
-            padding: 0;
-            border: 1px solid #00ffff;
-            width: 500px;
+            background: rgba(15, 23, 42, 0.98);
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 450px;
+            max-width: 90vw;
             color: white;
-            border-radius: 16px;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-            overflow: hidden;
-            position: relative;
+            overflow-y: auto;
             font-family: 'Segoe UI', Roboto, sans-serif;
+            transform: translateX(100%);
+            transition: transform 0.25s ease-out;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .modal-header {
-            background: rgba(0, 255, 255, 0.1);
-            padding: 30px;
+            padding: 35px 25px 25px;
             text-align: center;
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .modal-icon {
             width: 60px;
             height: 60px;
-            margin-bottom: 10px;
-            filter: drop-shadow(0 0 8px #00ffff);
+            margin-bottom: 12px;
         }
 
-        .modal-body {
-            padding: 25px;
+        .modal-header h2 {
+            margin-bottom: 8px;
         }
 
-        .status-badge {
+        .modal-rating {
+            display: flex;
+            flex-direction: row;
+            gap: 3px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 14px;
+            line-height: 1;
+            height: 20px;
+        }
+
+        .modal-rating .star {
+            color: #fbbf24;
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-
-        .modal-description {
-            line-height: 1.6;
-            color: #94a3b8;
-            margin-bottom: 20px;
-        }
-
-        .modal-footer {
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.2);
+            width: 14px;
             text-align: center;
         }
 
-        .btn-link {
-            background: #00aaff;
-            color: white;
-            padding: 10px 25px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: 0.3s;
-            display: inline-block;
+        .modal-rating .star.empty {
+            color: #334155;
         }
 
-        .btn-link:hover {
-            background: #00ffff;
-            box-shadow: 0 0 15px #00ffff;
-            color: #000;
+        .status-icon {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 30px 25px;
+        }
+
+
+        .modal-description {
+            line-height: 1.8;
+            color: #cbd5e1;
+            margin-bottom: 25px;
+            font-size: 15px;
+        }
+
+        .modal-detail {
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            line-height: 1.6;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .modal-detail h3 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .modal-detail ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .modal-detail li {
+            margin: 8px 0;
+        }
+
+        .modal-footer {
+            padding: 15px 25px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: normal;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: normal;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
         }
 
         .close {
             position: absolute;
-            right: 20px;
-            top: 15px;
+            right: 25px;
+            top: 25px;
             color: #64748b;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .close:hover {
             color: #fff;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         @keyframes twinkle {
@@ -261,15 +377,26 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <div class="modal-header">
+                <span id="modal-status-icon" class="status-icon"></span>
                 <img id="modal-icon" class="modal-icon" src="" alt="icon">
                 <h2 id="modal-title">Título</h2>
+                <div id="modal-rating" class="modal-rating"></div>
             </div>
             <div class="modal-body">
-                <div id="modal-status" class="status-badge"></div>
                 <p id="modal-description" class="modal-description"></p>
+                <div id="modal-detail" class="modal-detail" style="display: none;"></div>
             </div>
-            <div class="modal-footer" id="modal-footer">
-                <a id="modal-link" href="#" target="_blank" class="btn-link">EMPEZAR APRENDIZAJE</a>
+            <div class="modal-footer">
+                <div class="modal-actions">
+                    <a id="modal-link-resource" href="#" target="_blank" class="btn-secondary" style="display: none;">
+                        <span>📄</span>
+                        <span>Ver recurso</span>
+                    </a>
+                    <a id="modal-link-learn" href="#" target="_blank" class="btn-primary">
+                        <span>→</span>
+                        <span>Empezar aprendizaje</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

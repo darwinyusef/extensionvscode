@@ -59,17 +59,23 @@ const DRAG_THRESHOLD = 3; // Píxeles mínimos para iniciar drag (reducido para 
 let lineDashOffset = 0;
 let modalElement = document.getElementById('modal');
 const modalTitle = document.querySelector('#modal h2');
-const modalBody = document.querySelector('#modal p');
+const modalBody = document.querySelector('#modal-description');
+const modalDetail = document.querySelector('#modal-detail');
 const closeBtn = document.querySelector('.close');
 
 closeBtn.onclick = function () {
-    modalElement.style.display = "none";
+    modalElement.classList.remove('show');
+    setTimeout(() => {
+        modalElement.style.display = "none";
+    }, 300);
 }
 
-// Cerrar si se hace click fuera del contenido
 window.onclick = function (event) {
     if (event.target == modalElement) {
-        modalElement.style.display = "none";
+        modalElement.classList.remove('show');
+        setTimeout(() => {
+            modalElement.style.display = "none";
+        }, 300);
     }
 }
 
@@ -473,31 +479,70 @@ function createPlayer() {
 
 
 function showNodeInModal(nodeData) {
-    // Actualizar contenido del HTML
     modalTitle.innerText = nodeData.title.toUpperCase();
     document.getElementById('modal-icon').src = nodeData.icon;
-    // Construir el cuerpo con la info del nodo
-    let statusColor = nodeData.active ? '#00ff88' : (isNodeUnlocked(nodeData) ? '#00aaff' : '#f43f5e');
-    let statusLabel = nodeData.active ? 'COMPLETADO' : (isNodeUnlocked(nodeData) ? 'DISPONIBLE' : 'BLOQUEADO');
 
-    modalBody.innerHTML = `
-        <div style="margin-bottom: 5px;">
-        <span style="color: ${statusColor}; font-weight: bold;">● ${statusLabel}</span>
-        </div>
-        <div style="margin-bottom: 15px; padding: 10px; overflow-y: scroll; max-height: 5%;">
-            <p style="color: #ccc; line-height: 1.6;">${nodeData.description}</p>
+    const statusIcon = document.getElementById('modal-status-icon');
+    if (nodeData.active) {
+        statusIcon.textContent = '✓';
+        statusIcon.style.color = '#4ade80';
+    } else if (isNodeUnlocked(nodeData)) {
+        statusIcon.textContent = '○';
+        statusIcon.style.color = '#94a3b8';
+    } else {
+        statusIcon.textContent = '🔒';
+        statusIcon.style.color = '#64748b';
+    }
 
-            ${nodeData.detail_info ? `<p style="color: #ccc; line-height: 1.6;">${nodeData.detail_info}</p>` : ''}
-        </div>
-        ${nodeData.url ? `<br><a href="${nodeData.url}" target="_blank" style="display: inline-block; margin-top: 15px; color: #00ffff; text-decoration: none; border: 1px solid #00ffff; padding: 5px 15px; border-radius: 4px;">VER RECURSO</a>` : ''}
-    `;
+    const ratingContainer = document.getElementById('modal-rating');
+    if (ratingContainer) {
+        const rating = nodeData.rating || 0;
+        ratingContainer.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            const star = document.createElement('span');
+            star.className = i <= rating ? 'star' : 'star empty';
+            star.textContent = '★';
+            ratingContainer.appendChild(star);
+        }
+    }
 
-    // Mostrar el modal
+    modalBody.textContent = nodeData.description;
+
+    if (nodeData.detail_info) {
+        modalDetail.innerHTML = nodeData.detail_info;
+        modalDetail.style.display = 'block';
+    } else {
+        modalDetail.style.display = 'none';
+    }
+
+    const btnLearn = document.getElementById('modal-link-learn');
+    const btnResource = document.getElementById('modal-link-resource');
+
+    if (nodeData.url) {
+        btnLearn.href = nodeData.url;
+        btnLearn.style.display = 'inline-flex';
+    } else {
+        btnLearn.style.display = 'none';
+    }
+
+    if (nodeData.resource_url) {
+        btnResource.href = nodeData.resource_url;
+        btnResource.style.display = 'inline-flex';
+    } else {
+        btnResource.style.display = 'none';
+    }
+
     modalElement.style.display = "block";
+    setTimeout(() => {
+        modalElement.classList.add('show');
+    }, 10);
 }
 
 function hideModal() {
-    modalElement.style.display = "none";
+    modalElement.classList.remove('show');
+    setTimeout(() => {
+        modalElement.style.display = "none";
+    }, 300);
 }
 
 function update() {
