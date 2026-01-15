@@ -50,8 +50,8 @@ class GoalService:
             priority=goal_data.priority or GoalPriority.medium,
             progress_percentage=0.0,
             ai_generated=goal_data.ai_generated or False,
-            validation_criteria=goal_data.validation_criteria,
-            metadata=goal_data.metadata or {},
+            validation_criteria={"criteria": goal_data.validation_criteria} if goal_data.validation_criteria else None,
+            goal_metadata=goal_data.metadata if goal_data.metadata else {},
             due_date=goal_data.due_date
         )
 
@@ -109,6 +109,9 @@ class GoalService:
             return None
 
         update_data = goal_update.model_dump(exclude_unset=True)
+
+        if "metadata" in update_data:
+            goal.goal_metadata = update_data.pop("metadata") or {}
 
         for field, value in update_data.items():
             setattr(goal, field, value)

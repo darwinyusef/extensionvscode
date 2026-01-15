@@ -14,9 +14,6 @@ class CourseCreate(BaseModel):
 
     title: str = Field(..., min_length=1, max_length=200)
     description: str = Field(..., min_length=1)
-    syllabus: Optional[Dict[str, Any]] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
     metadata: Optional[Dict[str, Any]] = None
 
 
@@ -26,9 +23,7 @@ class CourseUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=200)
     description: Optional[str] = Field(None, min_length=1)
     status: Optional[CourseStatus] = None
-    syllabus: Optional[Dict[str, Any]] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    progress_percentage: Optional[float] = None
     metadata: Optional[Dict[str, Any]] = None
 
 
@@ -40,12 +35,11 @@ class CourseResponse(BaseModel):
     title: str
     description: str
     status: CourseStatus
-    syllabus: Optional[Dict[str, Any]]
+    progress_percentage: float
     metadata: Dict[str, Any] = Field(..., validation_alias="course_metadata")
-    start_date: Optional[datetime]
-    end_date: Optional[datetime]
     created_at: datetime
     updated_at: datetime
+    completed_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

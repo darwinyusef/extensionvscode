@@ -4,9 +4,11 @@ from logging.config import fileConfig
 import os
 import sys
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+from sqlalchemy.engine.url import URL
 
 from alembic import context
 
@@ -38,9 +40,16 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Set SQLAlchemy URL from environment
-# Convert async URL to sync URL for Alembic
-sync_database_url = settings.DATABASE_URL.replace("+asyncpg", "").replace("postgresql://", "postgresql+psycopg2://")
-config.set_main_option("sqlalchemy.url", sync_database_url)
+# Parse URL and build sync connection string
+parsed = urlparse(settings.DATABASE_URL)
+sync_database_url = URL.create(
+    "postgresql+psycopg2",
+    username=unquote(parsed.username) if parsed.username else None,
+    password=unquote(parsed.password) if parsed.password else None,
+    host=parsed.hostname,
+    port=parsed.port or 5432,
+    database=parsed.path.lstrip('/')
+)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -64,7 +73,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = sync_database_url
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -85,11 +94,8 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    from sqlalchemy import create_engine
+    connectable = create_engine(sync_database_url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(

@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.core.database import init_db
 from app.core.redis_client import init_redis, close_redis
 from app.core.rabbitmq import init_rabbitmq, close_rabbitmq
+from app.agents.checkpointer import AgentCheckpointer
 from app.api import router as api_router
 
 # Configure logging
@@ -43,6 +44,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as e:
         logger.warning(f"⚠ RabbitMQ not available (running without event streaming): {e}")
 
+    # Initialize LangGraph checkpointer
+    await AgentCheckpointer.get_checkpointer()
+    logger.info("✓ LangGraph checkpointer initialized")
+
     logger.info("🚀 Application ready!")
 
     yield
@@ -53,6 +58,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await close_rabbitmq()
     except Exception:
         pass
+    await AgentCheckpointer.close()
     await close_redis()
     logger.info("✓ Cleanup completed")
 
@@ -73,7 +79,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"], # ajustar en producción
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

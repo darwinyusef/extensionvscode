@@ -3,6 +3,13 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { Goal, GoalCreate, GoalUpdate, Task, TaskCreate, TaskUpdate } from '../types/api';
 import { Logger } from './logger';
 
+export interface LoginResponse {
+    access_token: string;
+    refresh_token: string;
+    token_type: string;
+    user_id: string;
+}
+
 export class ApiService {
     private baseUrl: string;
     private token: string | null = null;
@@ -14,6 +21,38 @@ export class ApiService {
 
     setToken(token: string) {
         this.token = token;
+    }
+
+    getToken(): string | null {
+        return this.token;
+    }
+
+    async login(email: string, password: string): Promise<LoginResponse> {
+        const url = `${this.baseUrl}/auth/login`;
+
+        try {
+            Logger.info(`API Backend Request: ${url}`);
+            const response = await axios.post<LoginResponse>(url,
+                new URLSearchParams({
+                    username: email,
+                    password: password
+                }),
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+            );
+
+            Logger.info(`API Backend Response: login -> Status ${response.status}`);
+            this.token = response.data.access_token;
+            return response.data;
+        } catch (error: any) {
+            const status = error.response?.status;
+            const data = error.response?.data;
+            Logger.error(`API Backend Error for login`, { status, data, message: error.message });
+            throw new Error(`Login failed: ${typeof data === 'object' ? JSON.stringify(data) : data || error.message}`);
+        }
     }
 
     private async request<T>(
@@ -72,14 +111,14 @@ export class ApiService {
     async createGoal(data: GoalCreate): Promise<Goal> {
         return this.request<Goal>('/goals', {
             method: 'POST',
-            data: JSON.stringify(data)
+            data
         });
     }
 
     async updateGoal(goalId: string, data: GoalUpdate): Promise<Goal> {
         return this.request<Goal>(`/goals/${goalId}`, {
             method: 'PUT',
-            data: JSON.stringify(data)
+            data
         });
     }
 
@@ -120,14 +159,14 @@ export class ApiService {
     async createTask(data: TaskCreate): Promise<Task> {
         return this.request<Task>('/tasks', {
             method: 'POST',
-            data: JSON.stringify(data)
+            data
         });
     }
 
     async updateTask(taskId: string, data: TaskUpdate): Promise<Task> {
         return this.request<Task>(`/tasks/${taskId}`, {
             method: 'PUT',
-            data: JSON.stringify(data)
+            data
         });
     }
 

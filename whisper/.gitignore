@@ -1,0 +1,10 @@
+*_pb2.py
+*_pb2_grpc.py
+__pycache__/
+*.pyc
+.env
+grpc_service/models/*
+!grpc_service/models/.gitkeep
+/tmp/
+temp/
+*.log

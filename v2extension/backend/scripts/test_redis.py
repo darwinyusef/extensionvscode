@@ -123,7 +123,7 @@ def test_redis_connection(redis_url: str = None):
     except redis.AuthenticationError as e:
         print(f"\n❌ Error de autenticación: {e}")
         print("\nEl servidor Redis requiere password.")
-        print("Actualizar REDIS_URL a: redis://:password@64.23.150.221:6379/0")
+        print("Actualizar REDIS_URL en .env")
         return False
 
     except Exception as e:
@@ -135,7 +135,7 @@ def test_redis_connection(redis_url: str = None):
 
 if __name__ == "__main__":
     # Usar URL de argumentos si se proporciona
-    redis_url = sys.argv[1] if len(sys.argv) > 1 else "redis://64.23.150.221:6379/0"
+    redis_url = sys.argv[1] if len(sys.argv) > 1 else None
 
     success = test_redis_connection(redis_url)
     sys.exit(0 if success else 1)

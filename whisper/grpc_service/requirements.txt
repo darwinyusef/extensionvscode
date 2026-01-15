@@ -1,0 +1,4 @@
+openai-whisper
+grpcio==1.60.0
+grpcio-tools==1.60.0
+nats-py==2.6.0

@@ -1,0 +1,64 @@
+{
+  "name": "Whisper Transcription Workflow",
+  "nodes": [
+    {
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [250, 300],
+      "webhookId": "whisper-input",
+      "parameters": {
+        "path": "whisper-transcribe",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [450, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "http://api_gateway:8000/transcribe/async",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "={{$json.audio_file}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Redis Subscribe",
+      "type": "@n8n/n8n-nodes-redis.redis",
+      "position": [650, 300],
+      "parameters": {
+        "operation": "subscribe",
+        "channel": "={{\"whisper:task:\" + $json.task_id}}"
+      }
+    },
+    {
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [850, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "HTTP Request", "type": "main", "index": 0}]]
+    },
+    "HTTP Request": {
+      "main": [[{"node": "Redis Subscribe", "type": "main", "index": 0}]]
+    },
+    "Redis Subscribe": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  }
+}

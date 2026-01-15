@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    container_name: whisper_nats
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command:
+      - "-js"
+      - "-m=8222"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - whisper_network
+
+  whisper_grpc:
+    build:
+      context: ./grpc_service
+      dockerfile: Dockerfile
+    container_name: whisper_grpc
+    ports:
+      - "50051:50051"
+    volumes:
+      - ./grpc_service/models:/models
+    environment:
+      - MODEL_SIZE=${MODEL_SIZE:-tiny}
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      nats:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import grpc; channel = grpc.insecure_channel(\"localhost:50051\"); channel.close()' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+    networks:
+      - whisper_network
+
+  api_gateway:
+    build:
+      context: ./api_gateway
+      dockerfile: Dockerfile
+    container_name: whisper_api
+    ports:
+      - "8001:8000"
+    environment:
+      - GRPC_HOST=whisper_grpc
+      - GRPC_PORT=50051
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      whisper_grpc:
+        condition: service_started
+      nats:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - whisper_network
+
+networks:
+  whisper_network:
+    name: whisper_network
+    driver: bridge
+
+volumes:
+  models_data:

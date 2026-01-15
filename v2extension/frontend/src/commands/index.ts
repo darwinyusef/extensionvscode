@@ -14,11 +14,52 @@ export function registerCommands(
     apiService: ApiService
 ): void {
 
+    // Login command
+    context.subscriptions.push(
+        vscode.commands.registerCommand('aiGoalsV2.login', async () => {
+            const email = await vscode.window.showInputBox({
+                prompt: 'Enter your email',
+                placeHolder: 'user@example.com',
+                value: 'admin@test.com'
+            });
+
+            if (!email) return;
+
+            const password = await vscode.window.showInputBox({
+                prompt: 'Enter your password',
+                password: true,
+                placeHolder: 'Password'
+            });
+
+            if (!password) return;
+
+            try {
+                const response = await apiService.login(email, password);
+                vscode.window.showInformationMessage(`Logged in as user ${response.user_id}`);
+
+                wsClient.connect(response.access_token);
+                await goalsTreeProvider.loadGoals();
+            } catch (error) {
+                vscode.window.showErrorMessage(`Login failed: ${error}`);
+            }
+        })
+    );
+
     // Connect to server
     context.subscriptions.push(
         vscode.commands.registerCommand('aiGoalsV2.connect', async () => {
-            const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2N2QzYmZhMi1iZGZjLTQ1NjktYmVmMy1hNTdjMjgxM2FjMTAiLCJ0eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk5NjkyOTc2fQ.sZ6kJsCPiUlHBHiaOkuh34aWJKknPSAualCvelBZgOY';
-            apiService.setToken(token);
+            const token = apiService.getToken();
+            if (!token) {
+                const login = await vscode.window.showWarningMessage(
+                    'No token found. Please login first.',
+                    'Login'
+                );
+                if (login === 'Login') {
+                    vscode.commands.executeCommand('aiGoalsV2.login');
+                }
+                return;
+            }
+
             wsClient.connect(token);
             await goalsTreeProvider.loadGoals();
         })
@@ -287,13 +328,22 @@ export function registerCommands(
                         break;
                     }
                     case 'Update Status': {
-                        const statusOptions = ['To Do', 'In Progress', 'Completed', 'Blocked'];
+                        const statusOptions = ['To Do', 'In Progress', 'In Review', 'Completed', 'Failed', 'Skipped'];
                         const status = await vscode.window.showQuickPick(statusOptions, {
                             placeHolder: 'Select new status'
                         });
                         if (status) {
-                            const statusValue = status.toLowerCase().replace(' ', '_') as any;
-                            await apiService.updateTask(task.id, { status: statusValue });
+                            let statusValue: string;
+                            if (status === 'To Do') {
+                                statusValue = 'todo';
+                            } else if (status === 'In Progress') {
+                                statusValue = 'in_progress';
+                            } else if (status === 'In Review') {
+                                statusValue = 'in_review';
+                            } else {
+                                statusValue = status.toLowerCase();
+                            }
+                            await apiService.updateTask(task.id, { status: statusValue as any });
                             vscode.window.showInformationMessage('Task status updated');
                         }
                         break;

@@ -36,13 +36,14 @@ class UserResponse(BaseModel):
     id: str
     email: str
     username: str
-    full_name: str
+    full_name: Optional[str] = None
     is_active: bool
-    preferences: Dict[str, Any]
-    metadata: Dict[str, Any]
+    is_superuser: bool
+    metadata: Dict[str, Any] = Field(default_factory=dict, validation_alias="user_metadata")
     created_at: datetime
     updated_at: datetime
-    last_login: Optional[datetime]
+    last_login_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+        populate_by_name = True

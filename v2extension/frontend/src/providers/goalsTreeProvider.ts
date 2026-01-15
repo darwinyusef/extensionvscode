@@ -120,7 +120,7 @@ class GoalTreeItem extends vscode.TreeItem {
         this.iconPath = new vscode.ThemeIcon(
             goal.status === 'completed' ? 'check' :
                 goal.status === 'in_progress' ? 'loading~spin' :
-                    goal.status === 'failed' ? 'error' :
+                    goal.status === 'blocked' || goal.status === 'cancelled' ? 'error' :
                         'circle-outline'
         );
 
@@ -144,7 +144,7 @@ class TaskTreeItem extends vscode.TreeItem {
         this.iconPath = new vscode.ThemeIcon(
             task.status === 'completed' ? 'pass' :
                 task.status === 'in_progress' ? 'sync~spin' :
-                    task.status === 'blocked' ? 'error' :
+                    task.status === 'failed' ? 'error' :
                         'circle-outline'
         );
 

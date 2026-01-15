@@ -1,0 +1,174 @@
+Whisper Microservice Architecture
+
+Components:
+
+1. Whisper Core (docker-compose.yml)
+   ├── NATS (Message Broker)
+   │   └── Pub/Sub for real-time updates
+   ├── Whisper gRPC (Transcription Service)
+   │   └── OpenAI Whisper model
+   └── API Gateway (FastAPI)
+       └── REST endpoints + webhooks
+
+2. n8n (n8n/docker-compose.yml)
+   └── Workflow automation
+       └── Connects to Whisper API
+
+3. Caddy (caddy/docker-compose.yml)
+   └── Reverse proxy + SSL
+       ├── n8n.darwinyusef.com → n8n:5678
+       └── whisper.darwinyusef.com → api_gateway:8000
+
+Communication Flow:
+
+External Request:
+  Client → API Gateway (REST)
+         → gRPC Service (gRPC)
+         → NATS (Pub)
+         → API Gateway (Sub)
+         → Client (SSE stream)
+
+Internal (n8n):
+  n8n → http://whisper_api:8000/webhook/n8n
+      → gRPC Service
+      → NATS
+      → Callback to n8n
+
+Network:
+  whisper_network (bridge)
+  ├── nats:4222
+  ├── whisper_grpc:50051
+  ├── whisper_api:8000
+  ├── n8n:5678
+  └── caddy:80,443
+
+Ports Mapping:
+  External → Internal
+  8001 → whisper_api:8000 (API Gateway)
+  50051 → whisper_grpc:50051 (gRPC)
+  4222 → nats:4222 (NATS client)
+  8222 → nats:8222 (NATS monitoring)
+  127.0.0.1:5678 → n8n:5678 (n8n, localhost only)
+  80/443 → caddy:80/443 (HTTP/HTTPS)
+
+Data Flow:
+
+1. Sync Transcription:
+   POST /transcribe
+   → API Gateway receives file
+   → Calls gRPC Service
+   → Returns transcription immediately
+
+2. Async Transcription:
+   POST /transcribe/async
+   → API Gateway receives file
+   → Creates task_id
+   → Background: gRPC Service transcribes
+   → gRPC publishes to NATS (whisper.task.{task_id})
+   → API Gateway subscribes to NATS
+   → Client streams via SSE (/stream/{task_id})
+
+3. Webhook (n8n):
+   POST /webhook/n8n
+   → Downloads audio from URL
+   → Transcribes in background
+   → Callback to n8n URL (optional)
+
+Services Independence:
+
+Whisper (standalone):
+  - Can run without n8n or Caddy
+  - Access via http://localhost:8001
+
+n8n (standalone):
+  - Needs whisper_network
+  - Access via https://n8n.darwinyusef.com (with Caddy)
+
+Caddy (standalone):
+  - Needs whisper_network
+  - Proxies to existing services
+
+Scaling Strategy:
+
+Horizontal Scaling:
+  docker-compose up -d --scale whisper_grpc=3
+
+Load Balancing:
+  Caddy automatically load balances
+
+High Availability:
+  - NATS: Single instance (can cluster)
+  - gRPC: Multiple replicas
+  - API Gateway: Multiple replicas
+  - n8n: Single instance (state in volume)
+
+Storage:
+
+Volumes:
+  - models_data: Whisper models (shared)
+  - n8n_data: n8n workflows and state
+  - caddy_data: SSL certificates
+  - caddy_config: Caddy configuration
+
+Temporary:
+  - Audio files: /tmp in containers (auto-cleanup)
+
+Security:
+
+1. Network Isolation:
+   - Services only accessible via whisper_network
+   - n8n only on 127.0.0.1:5678 (not public)
+   - Caddy exposes only HTTPS
+
+2. Authentication:
+   - n8n: Basic Auth (N8N_USER/PASSWORD)
+   - Whisper API: No auth (internal use)
+   - Add auth layer via Caddy if needed
+
+3. SSL:
+   - Caddy auto-provisions Let's Encrypt
+   - Auto-renewal
+
+Monitoring:
+
+Health Endpoints:
+  - http://localhost:8001/health (Whisper API)
+  - http://localhost:8222/healthz (NATS)
+
+Metrics:
+  - NATS monitoring: http://localhost:8222
+  - Docker stats: docker stats
+
+Logs:
+  - docker-compose logs -f
+  - JSON structured logging
+
+Integration Patterns:
+
+Pattern 1 - Direct API:
+  Your App → http://whisper_api:8000/transcribe
+
+Pattern 2 - Via n8n:
+  Your App → n8n webhook
+           → n8n workflow
+           → Whisper API
+           → Callback to Your App
+
+Pattern 3 - Via Caddy (Public):
+  External → https://whisper.darwinyusef.com/transcribe
+          → Caddy
+          → whisper_api:8000
+
+Deployment Modes:
+
+Development:
+  docker-compose up -d
+  Access: localhost:8001
+
+Production (Internal):
+  docker-compose up -d
+  Access: whisper_api:8000 (from other containers)
+
+Production (Public):
+  make all
+  Access: https://whisper.darwinyusef.com

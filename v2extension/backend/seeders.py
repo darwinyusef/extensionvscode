@@ -2,18 +2,26 @@
 Seeders para poblar la base de datos con datos básicos de prueba.
 """
 
+import os
 import uuid
 from datetime import datetime, timedelta
 import psycopg2
 from psycopg2.extras import execute_values
+from dotenv import load_dotenv
 
-# Conexión a la base de datos
+load_dotenv()
+
+# Parsear DATABASE_URL
+db_url = os.getenv('DATABASE_URL', '').replace('postgresql+asyncpg://', 'postgresql://')
+from urllib.parse import urlparse, unquote
+parsed = urlparse(db_url)
+
 DB_CONFIG = {
-    'dbname': 'extension_db',
-    'user': 'yusefgonzalez',
-    'password': '123456',
-    'host': 'localhost',
-    'port': '5432'
+    'dbname': parsed.path[1:],
+    'user': parsed.username,
+    'password': unquote(parsed.password) if parsed.password else None,
+    'host': parsed.hostname,
+    'port': parsed.port or '5432'
 }
 
 
@@ -401,6 +409,8 @@ def main():
     print("Iniciando seeders para extension_db")
     print("=" * 60)
 
+    conn = None
+    cursor = None
     try:
         # Conectar a la base de datos
         conn = psycopg2.connect(**DB_CONFIG)
@@ -448,12 +458,15 @@ def main():
 
     except Exception as e:
         print(f"\n❌ Error ejecutando seeders: {e}")
-        conn.rollback()
+        if conn:
+            conn.rollback()
         raise
 
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 if __name__ == "__main__":

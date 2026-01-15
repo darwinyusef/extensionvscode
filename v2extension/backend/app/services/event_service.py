@@ -138,12 +138,12 @@ class EventService:
             query = query.where(Event.entity_id == entity_id)
 
         if start_date:
-            query = query.where(Event.timestamp >= start_date)
+            query = query.where(Event.created_at >= start_date)
 
         if end_date:
-            query = query.where(Event.timestamp <= end_date)
+            query = query.where(Event.created_at <= end_date)
 
-        query = query.order_by(Event.timestamp.desc()).offset(skip).limit(limit)
+        query = query.order_by(Event.created_at.desc()).offset(skip).limit(limit)
 
         result = await self.db.execute(query)
         return list(result.scalars().all())

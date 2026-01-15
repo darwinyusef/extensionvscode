@@ -40,6 +40,10 @@ class TaskService:
         """
         task_id = str(uuid.uuid4())
 
+        task_meta = task_data.metadata or {}
+        if task_data.dependencies:
+            task_meta["dependencies"] = task_data.dependencies
+
         task = Task(
             id=task_id,
             goal_id=task_data.goal_id,
@@ -50,8 +54,7 @@ class TaskService:
             status=TaskStatus.todo,
             priority=task_data.priority or 100,
             estimated_hours=task_data.estimated_hours,
-            dependencies=task_data.dependencies or [],
-            metadata=task_data.metadata or {}
+            task_metadata=task_meta
         )
 
         self.db.add(task)
@@ -112,6 +115,15 @@ class TaskService:
             return None
 
         update_data = task_update.model_dump(exclude_unset=True)
+
+        if "metadata" in update_data:
+            task.task_metadata = update_data.pop("metadata") or {}
+
+        if "dependencies" in update_data:
+            deps = update_data.pop("dependencies")
+            if task.task_metadata is None:
+                task.task_metadata = {}
+            task.task_metadata["dependencies"] = deps or []
 
         for field, value in update_data.items():
             setattr(task, field, value)

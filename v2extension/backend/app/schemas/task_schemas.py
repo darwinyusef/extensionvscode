@@ -4,7 +4,7 @@ Pydantic schemas for Task entities.
 
 from typing import Optional, Dict, Any, List
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from app.models import TaskStatus, TaskType
 
@@ -51,10 +51,10 @@ class TaskResponse(BaseModel):
     priority: int
     estimated_hours: Optional[float]
     actual_hours: Optional[float]
-    dependencies: List[str]
+    dependencies: List[str] = []
     validation_result: Optional[Dict[str, Any]]
     ai_feedback: Optional[str]
-    metadata: Dict[str, Any] = Field(..., validation_alias="task_metadata")
+    metadata: Dict[str, Any] = Field(default_factory=dict, validation_alias="task_metadata")
     created_at: datetime
     updated_at: datetime
     started_at: Optional[datetime]
@@ -62,3 +62,15 @@ class TaskResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @model_validator(mode="before")
+    @classmethod
+    def extract_dependencies(cls, data):
+        if hasattr(data, "__dict__"):
+            task_meta = getattr(data, "task_metadata", None) or {}
+            deps = task_meta.get("dependencies", []) if isinstance(task_meta, dict) else []
+            return {
+                **{k: getattr(data, k) for k in data.__class__.__table__.columns.keys()},
+                "dependencies": deps,
+            }
+        return data
