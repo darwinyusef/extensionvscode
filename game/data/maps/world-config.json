@@ -1,0 +1,74 @@
+{
+  "id": "main_world",
+  "name": "Mundo Principal - CodeVille",
+  "dimensions": {
+    "width": 4000,
+    "height": 4000,
+    "tileSize": 40
+  },
+  "background": {
+    "type": "image",
+    "src": "assets/maps/grass_background.png",
+    "fallbackColor": "#1a4d2e"
+  },
+  "grid": {
+    "enabled": true,
+    "color": "#222222",
+    "opacity": 0.2
+  },
+  "spawnPoint": {
+    "x": 2000,
+    "y": 2000
+  },
+  "collisionMatrix": "data/maps/collision-matrix.json",
+  "roads": [
+    {
+      "type": "horizontal",
+      "x": 1200,
+      "y": 1950,
+      "width": 1800,
+      "height": 100,
+      "color": "#2a2a2a"
+    },
+    {
+      "type": "vertical",
+      "x": 1950,
+      "y": 1000,
+      "width": 100,
+      "height": 1500,
+      "color": "#2a2a2a"
+    },
+    {
+      "type": "horizontal",
+      "x": 1200,
+      "y": 1350,
+      "width": 1800,
+      "height": 80,
+      "color": "#2a2a2a"
+    },
+    {
+      "type": "horizontal",
+      "x": 1200,
+      "y": 2450,
+      "width": 1800,
+      "height": 80,
+      "color": "#2a2a2a"
+    }
+  ],
+  "decorations": {
+    "trees": [
+      { "x": 1650, "y": 1750, "size": 25, "color": "#2d5016" },
+      { "x": 1720, "y": 1650, "size": 20, "color": "#2d5016" },
+      { "x": 2350, "y": 1750, "size": 30, "color": "#2d5016" },
+      { "x": 2420, "y": 1650, "size": 25, "color": "#2d5016" },
+      { "x": 1300, "y": 2050, "size": 35, "color": "#1f3d0f" },
+      { "x": 1250, "y": 2100, "size": 30, "color": "#2d5016" },
+      { "x": 1350, "y": 2120, "size": 28, "color": "#1f3d0f" }
+    ],
+    "bushes": [
+      { "x": 1650, "y": 2550, "size": 15, "color": "#3d6b27" },
+      { "x": 1800, "y": 2560, "size": 12, "color": "#3d6b27" },
+      { "x": 2300, "y": 2560, "size": 14, "color": "#3d6b27" }
+    ]
+  }
+}

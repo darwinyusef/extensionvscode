@@ -1,0 +1,88 @@
+{
+  "id": "house_2",
+  "name": "Casa de Flexbox Fred",
+  "interior": {
+    "wallColor": "#6a5d4d",
+    "floorColor": "#c9b79c",
+    "width": 800,
+    "height": 600
+  },
+  "spawnPoint": {
+    "x": 400,
+    "y": 550
+  },
+  "exitZone": {
+    "x": 400,
+    "y": 580,
+    "width": 100,
+    "height": 40
+  },
+  "activities": [
+    {
+      "id": "doc_2",
+      "type": "document",
+      "position": { "x": 150, "y": 200 },
+      "icon": "📚",
+      "title": "Guía de CSS Flexbox",
+      "content": "<h2>Flexbox: El Poder del Diseño Flexible</h2><p>CSS Flexbox es un modelo de diseño que facilita la creación de layouts responsivos y flexibles.</p><h3>Propiedades Principales:</h3><ul><li><strong>display: flex</strong>: Activa el contenedor flexbox</li><li><strong>justify-content</strong>: Alinea elementos en el eje principal</li><li><strong>align-items</strong>: Alinea elementos en el eje transversal</li><li><strong>flex-direction</strong>: Define la dirección del flujo</li></ul><p>Flexbox Fred es el maestro de los layouts modernos.</p>",
+      "reward": {
+        "type": "xp",
+        "amount": 50
+      }
+    },
+    {
+      "id": "video_2",
+      "type": "video",
+      "position": { "x": 400, "y": 200 },
+      "icon": "🎥",
+      "title": "Tutorial: Flexbox en 10 Minutos",
+      "videoUrl": "https://www.youtube.com/embed/fYq5PXgSsbE",
+      "reward": {
+        "type": "xp",
+        "amount": 75
+      }
+    },
+    {
+      "id": "question_2",
+      "type": "question",
+      "position": { "x": 650, "y": 200 },
+      "icon": "❓",
+      "title": "Pregunta de CSS",
+      "question": "¿Qué propiedad de flexbox centra elementos en ambos ejes?",
+      "correctAnswer": "center",
+      "hint": "Es el valor que se usa tanto en justify-content como en align-items",
+      "reward": {
+        "type": "xp",
+        "amount": 100
+      }
+    },
+    {
+      "id": "key_2",
+      "type": "key",
+      "position": { "x": 150, "y": 400 },
+      "icon": "🗝️",
+      "keyName": "Llave de CSS",
+      "description": "Esta llave desbloquea ejercicios avanzados de CSS",
+      "reward": {
+        "type": "item",
+        "item": "key_css",
+        "name": "Llave de CSS"
+      }
+    },
+    {
+      "id": "fruit_2",
+      "type": "fruit",
+      "position": { "x": 650, "y": 400 },
+      "icon": "🍊",
+      "fruitName": "Naranja de la Creatividad",
+      "description": "Una naranja que aumenta tu creatividad en diseño",
+      "reward": {
+        "type": "item",
+        "item": "orange",
+        "name": "Naranja de la Creatividad",
+        "effect": "restore_hp",
+        "amount": 1
+      }
+    }
+  ]
+}

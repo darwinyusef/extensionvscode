@@ -668,17 +668,22 @@
     </div>
 
     <!-- Sistema de NPCs -->
-    <script src="npc-system/npc.js?v=19"></script>
-    <script src="npc-system/mouth-animator.js?v=19"></script>
-    <script src="npc-system/dialogue-engine.js?v=19"></script>
-    <script src="npc-system/dialogue-ui.js?v=19"></script>
-    <script src="npc-system/relationship-manager.js?v=19"></script>
-    <script src="npc-system/npc-manager.js?v=19"></script>
+    <script src="npc-system/npc.js?v=23"></script>
+    <script src="npc-system/mouth-animator.js?v=23"></script>
+    <script src="npc-system/dialogue-engine.js?v=23"></script>
+    <script src="npc-system/dialogue-ui.js?v=23"></script>
+    <script src="npc-system/relationship-manager.js?v=23"></script>
+    <script src="npc-system/npc-manager.js?v=23"></script>
 
     <!-- Sistema de AI y Evaluación -->
-    <script src="npc-system/ai-evaluator.js?v=19"></script>
-    <script src="npc-system/evaluation-ui-html.js?v=19"></script>
-    <script src="npc-system/task-manager.js?v=19"></script>
+    <script src="npc-system/ai-evaluator.js?v=23"></script>
+    <script src="npc-system/evaluation-ui-html.js?v=23"></script>
+    <script src="npc-system/task-manager.js?v=23"></script>
+
+    <!-- Sistemas de Carga Dinámica -->
+    <script src="systems/map-loader.js?v=1"></script>
+    <script src="systems/building-loader.js?v=1"></script>
+    <script src="systems/npc-loader.js?v=1"></script>
 
     <!-- Juego standalone de NPCs -->
     <script>
@@ -687,7 +692,7 @@
             width: window.innerWidth,
             height: window.innerHeight,
             parent: 'game-container',
-            backgroundColor: '#2d3436',
+            backgroundColor: 0x1a4d2e,
             dom: {
                 createContainer: true
             },
@@ -735,13 +740,46 @@
         async function create() {
             const scene = this;
 
-            // Configurar mundo grande
-            const worldWidth = 4000;
-            const worldHeight = 4000;
+            // Inicializar array de cuerpos de colisión
+            this.collisionBodies = [];
+
+            // Cargar mundo dinámicamente desde JSON
+            const mapLoader = new MapLoader(this);
+            const worldData = await mapLoader.loadWorld('data/maps/world-config.json');
+
+            if (!worldData) {
+                console.error('Error cargando configuración del mundo');
+                return;
+            }
+
+            const worldWidth = worldData.worldSize.width;
+            const worldHeight = worldData.worldSize.height;
             this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
 
-            // Crear fondo con grid
-            createGrid(this, worldWidth, worldHeight);
+            // Cargar edificios dinámicamente desde JSON
+            const buildingLoader = new BuildingLoader(this);
+            await buildingLoader.loadBuildings('data/buildings/buildings-index.json');
+
+            // Crear zonas de entrada para casas con interiores
+            this.entranceZones = [];
+            const buildingsWithInteriors = buildingLoader.getBuildingsWithInteriors();
+
+            buildingsWithInteriors.forEach(building => {
+                const entranceZone = this.add.zone(
+                    building.entrance.worldX,
+                    building.entrance.worldY,
+                    80,
+                    80
+                );
+                entranceZone.setDepth(1);
+                entranceZone.setData('interiorId', building.id);
+                entranceZone.setData('interiorConfig', building.interiorConfig);
+                entranceZone.setData('houseName', building.name);
+
+                this.entranceZones.push(entranceZone);
+
+                console.log(`Zona de entrada creada para ${building.name} en (${building.entrance.worldX}, ${building.entrance.worldY})`);
+            });
 
             // Referencias visuales estáticas
             createReferenceMarkers(this);
@@ -749,7 +787,31 @@
             // Crear jugador en el centro del mundo
             player = this.physics.add.sprite(worldWidth / 2, worldHeight / 2, 'player');
             player.setCollideWorldBounds(true);
-            player.setDepth(100);
+            player.setDepth(1000); // Aumentado para estar definitivamente encima
+
+            // Restaurar posición si viene de una casa
+            if (localStorage.getItem('returningFromHouse') === 'true') {
+                const lastX = parseFloat(localStorage.getItem('lastPlayerX'));
+                const lastY = parseFloat(localStorage.getItem('lastPlayerY'));
+
+                if (lastX && lastY) {
+                    player.setPosition(lastX, lastY);
+                    console.log('🏠 Jugador regresó de casa a:', lastX, lastY);
+                }
+
+                // Limpiar flag
+                localStorage.removeItem('returningFromHouse');
+            }
+
+            console.log('Player creado en:', player.x, player.y, 'Depth:', player.depth);
+
+            // Configurar colisiones con edificios y zonas de colisión del mapa
+            if (this.collisionBodies && this.collisionBodies.length > 0) {
+                this.collisionBodies.forEach(body => {
+                    this.physics.add.collider(player, body);
+                });
+                console.log('Colisiones configuradas:', this.collisionBodies.length, 'cuerpos');
+            }
 
             // Cámara sigue al jugador
             this.cameras.main.startFollow(player, true, 0.1, 0.1);
@@ -801,8 +863,13 @@
                 this.playerSkills.javascript
             );
 
-            // Cargar NPCs
-            await npcManager.loadNPCs('data/npcs/npcs.json');
+            // Cargar NPCs dinámicamente desde JSON
+            await npcManager.loadNPCs('data/npcs/npcs-index.json');
+
+            console.log('NPCs cargados:', npcManager.getAllNPCs().length);
+            npcManager.getAllNPCs().forEach(npc => {
+                console.log(`NPC ${npc.npcName} en (${npc.x}, ${npc.y}) con depth ${npc.depth}`);
+            });
 
             // Listener para retirar NPCs después de completar su tarea
             this.events.on('npc_task_completed', (npcId) => {
@@ -822,6 +889,13 @@
             // Tecla E para interactuar
             this.input.keyboard.on('keydown-E', () => {
                 if (!dialogueUI.isVisible && !taskManager.evaluationUI.isVisible) {
+                    // Prioridad 1: Intentar entrar a una casa
+                    if (nearestHouse) {
+                        enterHouse();
+                        return;
+                    }
+
+                    // Prioridad 2: Interactuar con NPC
                     const closestNPC = npcManager.getClosestNPC(player.x, player.y, 120);
                     if (closestNPC) {
                         // Buscar siguiente tarea del NPC
@@ -887,13 +961,84 @@
             if (npcManager && player) {
                 npcManager.checkProximity(player.x, player.y, 120);
             }
+
+            // Proximidad a entradas de casas
+            checkHouseProximity(this);
+        }
+
+        let nearestHouse = null;
+        let houseProximityText = null;
+
+        function checkHouseProximity(scene) {
+            if (!scene.entranceZones || !player) return;
+
+            let closest = null;
+            let minDistance = 100; // Radio de detección
+
+            scene.entranceZones.forEach(zone => {
+                const distance = Phaser.Math.Distance.Between(
+                    player.x, player.y,
+                    zone.x, zone.y
+                );
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closest = zone;
+                }
+            });
+
+            // Mostrar/ocultar indicador
+            if (closest && !houseProximityText) {
+                houseProximityText = scene.add.text(
+                    scene.cameras.main.centerX,
+                    scene.cameras.main.height - 100,
+                    'Presiona E para entrar a la casa',
+                    {
+                        fontSize: '20px',
+                        color: '#00ff88',
+                        backgroundColor: '#000000dd',
+                        padding: { x: 20, y: 10 },
+                        fontStyle: 'bold'
+                    }
+                ).setOrigin(0.5).setScrollFactor(0).setDepth(2000);
+
+                scene.tweens.add({
+                    targets: houseProximityText,
+                    alpha: { from: 0, to: 1 },
+                    duration: 200
+                });
+            } else if (!closest && houseProximityText) {
+                houseProximityText.destroy();
+                houseProximityText = null;
+            }
+
+            // Actualizar posición del texto si existe
+            if (houseProximityText) {
+                houseProximityText.x = scene.cameras.main.centerX;
+            }
+
+            nearestHouse = closest;
+        }
+
+        function enterHouse() {
+            if (nearestHouse) {
+                const interiorId = nearestHouse.getData('interiorId');
+                console.log('Entrando a casa:', interiorId);
+
+                // Guardar posición actual
+                localStorage.setItem('lastPlayerX', player.x);
+                localStorage.setItem('lastPlayerY', player.y);
+
+                // Ir a la casa
+                window.location.href = `house-interior.html?house=${interiorId}`;
+            }
         }
 
         function createGrid(scene, worldWidth, worldHeight) {
             const graphics = scene.add.graphics();
-            graphics.lineStyle(1, 0x333333, 0.3);
+            graphics.lineStyle(1, 0x222222, 0.2);
 
-            const gridSize = 100;
+            const gridSize = 40; // Reducido de 100 a 40
 
             // Líneas verticales
             for (let x = 0; x <= worldWidth; x += gridSize) {
@@ -913,12 +1058,280 @@
                 for (let y = 0; y <= worldHeight; y += labelInterval) {
                     scene.add.text(x, y, `(${x},${y})`, {
                         fontSize: '10px',
-                        color: '#666666',
+                        color: '#555555',
                         backgroundColor: '#000000aa',
                         padding: { x: 3, y: 2 }
                     }).setOrigin(0.5).setDepth(-50);
                 }
             }
+        }
+
+        function createBuildings(scene, worldWidth, worldHeight) {
+            const buildings = scene.physics.add.staticGroup();
+            const buildingData = [
+                // Centro - área residencial (CON INTERIOR)
+                { x: 1800, y: 1800, w: 200, h: 200, entrance: 'bottom', color: 0x4a4a4a, hasInterior: true, interiorId: 'house_1' },
+                { x: 2200, y: 1800, w: 200, h: 200, entrance: 'bottom', color: 0x4a4a4a, hasInterior: true, interiorId: 'house_2' },
+                { x: 2000, y: 1500, w: 250, h: 180, entrance: 'right', color: 0x5a5a5a },
+
+                // Norte - edificios comerciales
+                { x: 1900, y: 1200, w: 300, h: 250, entrance: 'bottom', color: 0x3d3d3d },
+                { x: 2300, y: 1200, w: 280, h: 250, entrance: 'bottom', color: 0x3d3d3d },
+
+                // Sur - casas pequeñas
+                { x: 1700, y: 2300, w: 150, h: 150, entrance: 'top', color: 0x555555 },
+                { x: 1900, y: 2300, w: 150, h: 150, entrance: 'top', color: 0x555555 },
+                { x: 2100, y: 2300, w: 150, h: 150, entrance: 'top', color: 0x555555 },
+                { x: 2300, y: 2300, w: 150, h: 150, entrance: 'top', color: 0x555555 },
+
+                // Este - almacenes
+                { x: 2600, y: 1900, w: 220, h: 300, entrance: 'left', color: 0x454545 },
+                { x: 2600, y: 2300, w: 220, h: 200, entrance: 'left', color: 0x454545 },
+
+                // Oeste - tiendas
+                { x: 1400, y: 1900, w: 180, h: 200, entrance: 'right', color: 0x505050 },
+                { x: 1400, y: 2200, w: 180, h: 180, entrance: 'right', color: 0x505050 },
+            ];
+
+            buildingData.forEach(data => {
+                // Dibujar edificio
+                const graphics = scene.add.graphics();
+                graphics.fillStyle(data.color, 1);
+                graphics.fillRect(data.x - data.w / 2, data.y - data.h / 2, data.w, data.h);
+
+                // Bordes más claros
+                graphics.lineStyle(2, 0x666666, 1);
+                graphics.strokeRect(data.x - data.w / 2, data.y - data.h / 2, data.w, data.h);
+
+                // Ventanas decorativas
+                const windowSize = 12;
+                const windowSpacing = 30;
+                graphics.fillStyle(0x222222, 0.8);
+
+                for (let wx = data.x - data.w / 2 + 20; wx < data.x + data.w / 2 - 20; wx += windowSpacing) {
+                    for (let wy = data.y - data.h / 2 + 20; wy < data.y + data.h / 2 - 20; wy += windowSpacing) {
+                        graphics.fillRect(wx, wy, windowSize, windowSize);
+                    }
+                }
+
+                graphics.setDepth(-10);
+
+                // Crear collider invisible (sin entrada)
+                const entranceSize = 60;
+
+                if (data.entrance === 'bottom') {
+                    // Edificio sin entrada abajo (puerta en el centro inferior)
+                    const c1 = buildings.create(data.x, data.y - data.h/4);
+                    c1.setSize(data.w, data.h/2);
+                    c1.setVisible(false);
+                    c1.refreshBody();
+
+                    const c2 = buildings.create(data.x - data.w/4, data.y + data.h/4);
+                    c2.setSize((data.w - entranceSize)/2, data.h/2);
+                    c2.setVisible(false);
+                    c2.refreshBody();
+
+                    const c3 = buildings.create(data.x + data.w/4, data.y + data.h/4);
+                    c3.setSize((data.w - entranceSize)/2, data.h/2);
+                    c3.setVisible(false);
+                    c3.refreshBody();
+                } else if (data.entrance === 'top') {
+                    const c1 = buildings.create(data.x, data.y + data.h/4);
+                    c1.setSize(data.w, data.h/2);
+                    c1.setVisible(false);
+                    c1.refreshBody();
+
+                    const c2 = buildings.create(data.x - data.w/4, data.y - data.h/4);
+                    c2.setSize((data.w - entranceSize)/2, data.h/2);
+                    c2.setVisible(false);
+                    c2.refreshBody();
+
+                    const c3 = buildings.create(data.x + data.w/4, data.y - data.h/4);
+                    c3.setSize((data.w - entranceSize)/2, data.h/2);
+                    c3.setVisible(false);
+                    c3.refreshBody();
+                } else if (data.entrance === 'left') {
+                    const c1 = buildings.create(data.x + data.w/4, data.y);
+                    c1.setSize(data.w/2, data.h);
+                    c1.setVisible(false);
+                    c1.refreshBody();
+
+                    const c2 = buildings.create(data.x - data.w/4, data.y - data.h/4);
+                    c2.setSize(data.w/2, (data.h - entranceSize)/2);
+                    c2.setVisible(false);
+                    c2.refreshBody();
+
+                    const c3 = buildings.create(data.x - data.w/4, data.y + data.h/4);
+                    c3.setSize(data.w/2, (data.h - entranceSize)/2);
+                    c3.setVisible(false);
+                    c3.refreshBody();
+                } else if (data.entrance === 'right') {
+                    const c1 = buildings.create(data.x - data.w/4, data.y);
+                    c1.setSize(data.w/2, data.h);
+                    c1.setVisible(false);
+                    c1.refreshBody();
+
+                    const c2 = buildings.create(data.x + data.w/4, data.y - data.h/4);
+                    c2.setSize(data.w/2, (data.h - entranceSize)/2);
+                    c2.setVisible(false);
+                    c2.refreshBody();
+
+                    const c3 = buildings.create(data.x + data.w/4, data.y + data.h/4);
+                    c3.setSize(data.w/2, (data.h - entranceSize)/2);
+                    c3.setVisible(false);
+                    c3.refreshBody();
+                }
+
+                // Dibujar indicador de entrada
+                const doorGraphics = scene.add.graphics();
+                doorGraphics.fillStyle(0x8b4513, 1);
+
+                if (data.entrance === 'bottom') {
+                    doorGraphics.fillRect(data.x - 20, data.y + data.h/2 - 5, 40, 10);
+                } else if (data.entrance === 'top') {
+                    doorGraphics.fillRect(data.x - 20, data.y - data.h/2 - 5, 40, 10);
+                } else if (data.entrance === 'left') {
+                    doorGraphics.fillRect(data.x - data.w/2 - 5, data.y - 20, 10, 40);
+                } else if (data.entrance === 'right') {
+                    doorGraphics.fillRect(data.x + data.w/2 - 5, data.y - 20, 10, 40);
+                }
+
+                doorGraphics.setDepth(-5);
+
+                // Crear zona de entrada si la casa tiene interior
+                if (data.hasInterior) {
+                    let entranceX, entranceY;
+
+                    if (data.entrance === 'bottom') {
+                        entranceX = data.x;
+                        entranceY = data.y + data.h/2 + 10;
+                    } else if (data.entrance === 'top') {
+                        entranceX = data.x;
+                        entranceY = data.y - data.h/2 - 10;
+                    } else if (data.entrance === 'left') {
+                        entranceX = data.x - data.w/2 - 10;
+                        entranceY = data.y;
+                    } else if (data.entrance === 'right') {
+                        entranceX = data.x + data.w/2 + 10;
+                        entranceY = data.y;
+                    }
+
+                    // Crear zona invisible de entrada
+                    const entranceZone = scene.add.zone(entranceX, entranceY, 80, 80);
+                    entranceZone.setDepth(1);
+                    entranceZone.setData('interiorId', data.interiorId);
+                    entranceZone.setData('houseName', `Casa en (${data.x}, ${data.y})`);
+
+                    // Guardar referencia para detección de proximidad
+                    if (!scene.entranceZones) scene.entranceZones = [];
+                    scene.entranceZones.push(entranceZone);
+
+                    // Indicador visual de entrada
+                    const entranceIndicator = scene.add.text(entranceX, entranceY - 30, '🚪', {
+                        fontSize: '24px'
+                    }).setOrigin(0.5).setDepth(10);
+
+                    scene.tweens.add({
+                        targets: entranceIndicator,
+                        y: entranceY - 35,
+                        duration: 800,
+                        yoyo: true,
+                        repeat: -1,
+                        ease: 'Sine.easeInOut'
+                    });
+                }
+            });
+
+            return buildings;
+        }
+
+        function createRoads(scene) {
+            const graphics = scene.add.graphics();
+            graphics.fillStyle(0x2a2a2a, 1);
+
+            // Camino principal horizontal (centro)
+            graphics.fillRect(1200, 1950, 1800, 100);
+
+            // Camino principal vertical (centro)
+            graphics.fillRect(1950, 1000, 100, 1500);
+
+            // Camino horizontal norte
+            graphics.fillRect(1200, 1350, 1800, 80);
+
+            // Camino horizontal sur
+            graphics.fillRect(1200, 2450, 1800, 80);
+
+            // Líneas de carril (decoración) - líneas discontinuas
+            graphics.lineStyle(2, 0x444444, 0.6);
+
+            // Líneas discontinuas en el centro de los caminos
+            for (let x = 1200; x < 3000; x += 40) {
+                graphics.lineBetween(x, 2000, x + 20, 2000);
+                graphics.lineBetween(x, 1390, x + 20, 1390);
+                graphics.lineBetween(x, 2490, x + 20, 2490);
+            }
+
+            for (let y = 1000; y < 2500; y += 40) {
+                graphics.lineBetween(2000, y, 2000, y + 20);
+            }
+
+            graphics.setDepth(-20);
+        }
+
+        function createVegetation(scene) {
+            const trees = [
+                // Árboles alrededor de edificios
+                { x: 1650, y: 1750, size: 25, color: 0x2d5016 },
+                { x: 1720, y: 1650, size: 20, color: 0x2d5016 },
+                { x: 2350, y: 1750, size: 30, color: 0x2d5016 },
+                { x: 2420, y: 1650, size: 25, color: 0x2d5016 },
+
+                // Parque pequeño al oeste
+                { x: 1300, y: 2050, size: 35, color: 0x1f3d0f },
+                { x: 1250, y: 2100, size: 30, color: 0x2d5016 },
+                { x: 1350, y: 2120, size: 28, color: 0x1f3d0f },
+
+                // Árboles decorativos norte
+                { x: 1750, y: 1100, size: 30, color: 0x2d5016 },
+                { x: 2500, y: 1100, size: 28, color: 0x2d5016 },
+
+                // Árboles decorativos sur
+                { x: 1600, y: 2550, size: 32, color: 0x1f3d0f },
+                { x: 2400, y: 2550, size: 30, color: 0x2d5016 },
+
+                // Árboles en esquinas de edificios
+                { x: 2750, y: 1750, size: 25, color: 0x2d5016 },
+                { x: 2750, y: 2100, size: 22, color: 0x1f3d0f },
+            ];
+
+            trees.forEach(tree => {
+                // Sombra del árbol
+                const shadow = scene.add.ellipse(tree.x, tree.y + tree.size/2 + 5, tree.size * 1.2, tree.size * 0.4, 0x000000, 0.3);
+                shadow.setDepth(-15);
+
+                // Copa del árbol
+                const foliage = scene.add.circle(tree.x, tree.y, tree.size, tree.color);
+                foliage.setDepth(-12);
+
+                // Tronco
+                const trunkWidth = tree.size * 0.3;
+                const trunkHeight = tree.size * 0.5;
+                const trunk = scene.add.rectangle(tree.x, tree.y + tree.size/2, trunkWidth, trunkHeight, 0x4a3322);
+                trunk.setDepth(-13);
+            });
+
+            // Arbustos pequeños
+            const bushes = [
+                { x: 1650, y: 2550, size: 15 },
+                { x: 1800, y: 2560, size: 12 },
+                { x: 2300, y: 2560, size: 14 },
+                { x: 1280, y: 1850, size: 13 },
+                { x: 2720, y: 1850, size: 15 },
+            ];
+
+            bushes.forEach(bush => {
+                scene.add.circle(bush.x, bush.y, bush.size, 0x3d6b27, 0.8).setDepth(-14);
+            });
         }
 
         function createReferenceMarkers(scene) {

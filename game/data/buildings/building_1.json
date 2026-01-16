@@ -1,0 +1,38 @@
+{
+  "id": "building_1",
+  "name": "Edificio Comercial Norte",
+  "type": "commercial",
+  "visual": {
+    "type": "rectangle",
+    "width": 320,
+    "height": 280,
+    "color": "#708090",
+    "roofColor": "#2f4f4f",
+    "windowColor": "#b0c4de",
+    "windowsGrid": {
+      "rows": 3,
+      "cols": 4,
+      "windowWidth": 20,
+      "windowHeight": 25,
+      "spacing": 15
+    }
+  },
+  "position": {
+    "tileRow": 25,
+    "tileCol": 45
+  },
+  "collisionMatrix": [
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00011000",
+    "00000000"
+  ],
+  "entrance": {
+    "direction": "bottom",
+    "width": 80
+  },
+  "hasInterior": false
+}

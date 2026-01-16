@@ -1,0 +1,12 @@
+{
+  "npcs": [
+    {
+      "id": "elder_tim",
+      "file": "data/npcs/elder-tim.json"
+    },
+    {
+      "id": "flexbox_fred",
+      "file": "data/npcs/flexbox-fred.json"
+    }
+  ]
+}

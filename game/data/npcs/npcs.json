@@ -8,8 +8,8 @@
       "specialty": "html",
       "sprite": "npc_elder_tim",
       "image": "assets/characters/elder_tim.svg",
-      "x": 250,
-      "y": 150,
+      "x": 1900,
+      "y": 1520,
       "dialogueFile": "data/dialogues/mentor_html.json",
       "unlockedDialogues": ["first_meeting"]
     },
@@ -21,8 +21,8 @@
       "specialty": "css",
       "sprite": "npc_flexbox_fred",
       "image": "assets/characters/flexbox_fred.svg",
-      "x": 800,
-      "y": 250,
+      "x": 1800,
+      "y": 1930,
       "dialogueFile": "data/dialogues/friend_css_1.json",
       "unlockedDialogues": ["first_meeting"]
     },
@@ -34,8 +34,8 @@
       "specialty": "javascript",
       "sprite": "npc_async_andy",
       "image": "assets/characters/async_andy.svg",
-      "x": 1100,
-      "y": 350,
+      "x": 2200,
+      "y": 1930,
       "dialogueFile": "data/dialogues/friend_js_1.json",
       "unlockedDialogues": ["first_meeting"]
     }

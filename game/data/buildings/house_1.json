@@ -1,0 +1,30 @@
+{
+  "id": "house_1",
+  "name": "Casa de Elder Tim",
+  "type": "house",
+  "visual": {
+    "type": "rectangle",
+    "width": 240,
+    "height": 200,
+    "color": "#8b4513",
+    "roofColor": "#654321",
+    "windowColor": "#87ceeb"
+  },
+  "position": {
+    "tileRow": 42,
+    "tileCol": 42
+  },
+  "collisionMatrix": [
+    "000000",
+    "000000",
+    "000000",
+    "001100",
+    "000000"
+  ],
+  "entrance": {
+    "direction": "bottom",
+    "width": 80
+  },
+  "hasInterior": true,
+  "interiorConfig": "data/houses/house_1_interior.json"
+}

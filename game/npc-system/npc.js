@@ -22,7 +22,7 @@ class NPC extends Phaser.GameObjects.Container {
 
         // NO usar setSize para evitar bloquear clicks
         // Solo el sprite individual será interactivo
-        this.setDepth(50);
+        this.setDepth(500); // Aumentado para estar visible sobre todo
     }
 
     createSprite(data) {
