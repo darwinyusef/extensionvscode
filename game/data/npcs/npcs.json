@@ -1,0 +1,43 @@
+{
+  "npcs": [
+    {
+      "id": "mentor_html",
+      "name": "Elder Tim",
+      "role": "Maestro HTML Ancestral",
+      "personality": "Anciano sabio con siglos de experiencia. Habla con calma y paciencia, usando metáforas de la naturaleza y la construcción. Es gentil pero firme, como un abuelo que enseña a su nieto. Le gusta usar expresiones como 'joven aprendiz' y 'en mis años de código'.",
+      "specialty": "html",
+      "sprite": "npc_elder_tim",
+      "image": "assets/characters/elder_tim.svg",
+      "x": 250,
+      "y": 150,
+      "dialogueFile": "data/dialogues/mentor_html.json",
+      "unlockedDialogues": ["first_meeting"]
+    },
+    {
+      "id": "friend_css_1",
+      "name": "Flexbox Fred",
+      "role": "Guru del Layout Relajado",
+      "personality": "Surfista chill de California que programa mientras toma café. Usa mucho slang relajado como 'tranqui', 'bro', 'onda'. Es amigable, informal y hace que todo parezca fácil. Nunca se estresa y siempre tiene una actitud positiva.",
+      "specialty": "css",
+      "sprite": "npc_flexbox_fred",
+      "image": "assets/characters/flexbox_fred.svg",
+      "x": 800,
+      "y": 250,
+      "dialogueFile": "data/dialogues/friend_css_1.json",
+      "unlockedDialogues": ["first_meeting"]
+    },
+    {
+      "id": "friend_js_1",
+      "name": "Async Andy",
+      "role": "Velocista de Promesas",
+      "personality": "Desarrollador hiperactivo que habla rápido y piensa más rápido. Siempre tiene prisa, usa muchas exclamaciones, y le molesta la lentitud. Es competente pero nervioso, como alguien que ha tomado demasiado café. Usa frases como '¡vamos!', '¡rápido!' y '¡al grano!'.",
+      "specialty": "javascript",
+      "sprite": "npc_async_andy",
+      "image": "assets/characters/async_andy.svg",
+      "x": 1100,
+      "y": 350,
+      "dialogueFile": "data/dialogues/friend_js_1.json",
+      "unlockedDialogues": ["first_meeting"]
+    }
+  ]
+}

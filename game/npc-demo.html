@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de NPCs - Demo Standalone</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .template {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .messages {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .messages > * {
+            pointer-events: auto;
+        }
+
+        .write {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001;
+            pointer-events: none;
+        }
+
+        .write > * {
+            pointer-events: auto;
+        }
+
+        .evaluation-modal {
+            background: rgba(26, 26, 46, 0.95);
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            width: 800px;
+            height: 160px;
+            margin: 0 auto 10px;
+            padding: 15px;
+            display: none;
+            position: relative;
+        }
+
+        .evaluation-modal.active {
+            display: flex;
+            gap: 15px;
+        }
+
+        .npc-portrait {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 2px solid #00ff88;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .modal-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .npc-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #00ff88;
+            margin: 0;
+        }
+
+        .concept-label {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .stage-indicator {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .modal-text {
+            font-size: 15px;
+            color: #ffffff;
+            line-height: 1.4;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .btn-next {
+            background: none;
+            border: none;
+            color: #00ff88;
+            font-size: 14px;
+            font-style: italic;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .btn-next:hover {
+            color: #00cc66;
+            transform: scale(1.1);
+        }
+
+        .btn-submit {
+            background: none;
+            border: none;
+            color: #fbbf24;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px 10px;
+            display: none;
+        }
+
+        .btn-submit:hover {
+            color: #fcd34d;
+            transform: scale(1.1);
+        }
+
+        .btn-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .btn-close:hover {
+            color: #ff6b6b;
+        }
+
+        .evaluation-textarea {
+            width: 720px;
+            height: 100px;
+            padding: 10px;
+            font-size: 15px;
+            font-family: 'Segoe UI', sans-serif;
+            background: #2a2a3e;
+            color: #ffffff;
+            border: 2px solid #00ff88;
+            border-radius: 6px;
+            resize: none;
+            outline: none;
+            display: none;
+            margin: 0 auto 10px;
+        }
+
+        .evaluation-textarea.active {
+            display: block;
+        }
+
+        /* Goal Screen */
+        .goals {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .goals.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .goal-modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 6px solid #00ff88;
+            border-radius: 20px;
+            padding: 60px;
+            max-width: 800px;
+            text-align: center;
+            transform: scale(0.5);
+            animation: popIn 0.5s ease-out forwards;
+            position: relative;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .goal-title {
+            font-size: 64px;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+            50% { text-shadow: 0 0 40px rgba(0, 255, 136, 0.8); }
+        }
+
+        .goal-concept {
+            font-size: 32px;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .goal-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+
+        .goal-message {
+            font-size: 24px;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            min-height: 100px;
+        }
+
+        .typewriter {
+            display: inline-block;
+            border-right: 3px solid #00ff88;
+            animation: blink 0.7s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: #00ff88; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        .goal-btn-continue {
+            background: #00ff88;
+            border: none;
+            color: #000000;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .goal-btn-continue:hover {
+            background: #00cc66;
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        /* HUD */
+        .hud {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1500;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 2px solid #00ff88;
+        }
+
+        .hud-label {
+            color: #00ff88;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .hearts-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .heart {
+            font-size: 28px;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        .heart.lost {
+            opacity: 0.2;
+            filter: grayscale(100%);
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            10%, 30% { transform: scale(1.1); }
+            20%, 40% { transform: scale(1); }
+        }
+
+        .heart.shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .info h3 {
+            margin: 0 0 10px 0;
+            color: #00ff88;
+        }
+
+        .info p {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+
+        .info kbd {
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h3>🎮 Sistema de NPCs + AI - Demo</h3>
+        <p><kbd>WASD</kbd> o <kbd>Flechas</kbd> - Mover jugador</p>
+        <p><kbd>E</kbd> - Interactuar con NPC</p>
+        <p>🤖 <strong>AI Evaluation</strong>: OpenAI GPT-4o-mini</p>
+        <p>✨ Los NPCs evalúan tus respuestas</p>
+        <p>🎯 Completa tareas para ganar XP</p>
+    </div>
+
+    <div class="template">
+        <div class="messages">
+            <!-- Modal de evaluación -->
+            <div id="evaluation-modal" class="evaluation-modal">
+                <div class="npc-portrait" id="npc-portrait">👤</div>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div>
+                            <p class="npc-name" id="npc-name">NPC Name</p>
+                            <p class="concept-label" id="concept-label">Concepto</p>
+                        </div>
+                        <span class="stage-indicator" id="stage-indicator">1/6</span>
+                    </div>
+                    <div class="modal-text" id="modal-text">
+                        Contenido del mensaje...
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-next" id="btn-next">Siguiente &gt;</button>
+                        <button class="btn-submit" id="btn-submit">Enviar &gt;</button>
+                    </div>
+                </div>
+                <button class="btn-close" id="btn-close">×</button>
+            </div>
+        </div>
+        <div class="goals"></div>
+        <div class="hud"></div>
+
+        <div id="game-container"></div>
+
+        <div class="write">
+            <textarea
+                id="evaluation-textarea"
+                class="evaluation-textarea"
+                placeholder="Escribe tu explicación aquí...">
+            </textarea>
+        </div>
+    </div>
+
+    <!-- Sistema de NPCs -->
+    <script src="npc-system/npc.js"></script>
+    <script src="npc-system/mouth-animator.js"></script>
+    <script src="npc-system/dialogue-engine.js"></script>
+    <script src="npc-system/dialogue-ui.js"></script>
+    <script src="npc-system/relationship-manager.js"></script>
+    <script src="npc-system/npc-manager.js"></script>
+
+    <!-- Sistema de AI y Evaluación -->
+    <script src="npc-system/ai-evaluator.js"></script>
+    <script src="npc-system/evaluation-ui-html.js"></script>
+    <script src="npc-system/task-manager.js"></script>
+
+    <!-- Juego standalone de NPCs -->
+    <script>
+        const config = {
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            parent: 'game-container',
+            backgroundColor: '#2d3436',
+            dom: {
+                createContainer: true
+            },
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            }
+        };
+
+        const game = new Phaser.Game(config);
+
+        let player;
+        let cursors;
+        let wasd;
+        let npcManager;
+        let dialogueUI;
+        let taskManager;
+
+        function preload() {
+            // Cargar sprites de NPCs
+            this.load.image('npc_elder_tim', 'assets/characters/elder_tim.svg');
+            this.load.image('npc_flexbox_fred', 'assets/characters/flexbox_fred.svg');
+            this.load.image('npc_async_andy', 'assets/characters/async_andy.svg');
+
+            // Crear sprite simple para jugador
+            const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+            graphics.fillStyle(0xff6b6b, 1);
+            graphics.fillCircle(25, 25, 25);
+            graphics.generateTexture('player', 50, 50);
+            graphics.destroy();
+        }
+
+        async function create() {
+            const scene = this;
+
+            // Configurar mundo grande
+            const worldWidth = 4000;
+            const worldHeight = 4000;
+            this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
+
+            // Crear fondo con grid
+            createGrid(this, worldWidth, worldHeight);
+
+            // Referencias visuales estáticas
+            createReferenceMarkers(this);
+
+            // Crear jugador en el centro del mundo
+            player = this.physics.add.sprite(worldWidth / 2, worldHeight / 2, 'player');
+            player.setCollideWorldBounds(true);
+            player.setDepth(100);
+
+            // Cámara sigue al jugador
+            this.cameras.main.startFollow(player, true, 0.1, 0.1);
+            this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
+
+            // Texto de posición del jugador
+            const posText = this.add.text(10, 10, '', {
+                fontSize: '16px',
+                color: '#00ff88',
+                backgroundColor: '#000000',
+                padding: { x: 10, y: 5 }
+            }).setScrollFactor(0).setDepth(1002);
+
+            // Actualizar posición en tiempo real
+            this.events.on('update', () => {
+                if (player) {
+                    posText.setText(`Jugador: (${Math.round(player.x)}, ${Math.round(player.y)})`);
+                }
+            });
+
+            // Controles
+            cursors = this.input.keyboard.createCursorKeys();
+            wasd = this.input.keyboard.addKeys({
+                up: Phaser.Input.Keyboard.KeyCodes.W,
+                down: Phaser.Input.Keyboard.KeyCodes.S,
+                left: Phaser.Input.Keyboard.KeyCodes.A,
+                right: Phaser.Input.Keyboard.KeyCodes.D
+            });
+
+            // Sistema de NPCs
+            npcManager = new NPCManager(this);
+            dialogueUI = new DialogueUI(this);
+            npcManager.setDialogueUI(dialogueUI);
+
+            // Sistema de Tareas y AI
+            taskManager = new TaskManager(this);
+            await taskManager.aiEvaluator.loadConfig();
+
+            // Cargar NPCs
+            await npcManager.loadNPCs('data/npcs/npcs.json');
+
+            // Deshabilitar clicks en NPCs que usan el sistema de tareas
+            npcManager.getAllNPCs().forEach(npc => {
+                if (taskManager.getTasksForNPC(npc.id).length > 0) {
+                    // Este NPC tiene tareas, deshabilitar su diálogo normal
+                    npc.npcSprite.off('pointerdown');
+                }
+            });
+
+            // Tecla E para interactuar
+            this.input.keyboard.on('keydown-E', () => {
+                if (!dialogueUI.isVisible && !taskManager.evaluationUI.isVisible) {
+                    const closestNPC = npcManager.getClosestNPC(player.x, player.y, 120);
+                    if (closestNPC) {
+                        // Buscar siguiente tarea del NPC
+                        const npcData = npcManager.getNPC(closestNPC.id);
+                        const nextTask = taskManager.getNextTask(closestNPC.id);
+
+                        if (nextTask) {
+                            // Iniciar tarea con AI
+                            taskManager.startTask(npcData, nextTask);
+                        } else {
+                            // Si no hay tareas, usar diálogo normal
+                            npcManager.interact(closestNPC.id);
+                        }
+                    }
+                }
+            });
+
+            // Info text (centrado en la pantalla)
+            const infoText = this.add.text(this.cameras.main.centerX, 50, 'Acércate a los NPCs y presiona E', {
+                fontSize: '18px',
+                color: '#00ff88',
+                backgroundColor: '#000000aa',
+                padding: { x: 15, y: 8 }
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
+
+            console.log('✅ Sistema de NPCs cargado:', npcManager.getAllNPCs().length, 'NPCs');
+
+            // Exportar player globalmente
+            window.player = player;
+        }
+
+        function update(time, delta) {
+            // Update NPCs primero
+            if (npcManager) {
+                npcManager.update();
+            }
+
+            // Si no hay player o alguna UI está abierta, no mover
+            if (!player || dialogueUI?.isVisible || taskManager?.evaluationUI?.isVisible) return;
+
+            // Movimiento del jugador
+            const speed = 200;
+            player.setVelocity(0);
+
+            if (cursors.left.isDown || wasd.left.isDown) {
+                player.setVelocityX(-speed);
+            } else if (cursors.right.isDown || wasd.right.isDown) {
+                player.setVelocityX(speed);
+            }
+
+            if (cursors.up.isDown || wasd.up.isDown) {
+                player.setVelocityY(-speed);
+            } else if (cursors.down.isDown || wasd.down.isDown) {
+                player.setVelocityY(speed);
+            }
+
+            // Normalizar velocidad diagonal
+            if (player.body && player.body.velocity.x !== 0 && player.body.velocity.y !== 0) {
+                player.body.velocity.normalize().scale(speed);
+            }
+
+            // Proximidad a NPCs
+            if (npcManager && player) {
+                npcManager.checkProximity(player.x, player.y, 120);
+            }
+        }
+
+        function createGrid(scene, worldWidth, worldHeight) {
+            const graphics = scene.add.graphics();
+            graphics.lineStyle(1, 0x333333, 0.3);
+
+            const gridSize = 100;
+
+            // Líneas verticales
+            for (let x = 0; x <= worldWidth; x += gridSize) {
+                graphics.lineBetween(x, 0, x, worldHeight);
+            }
+
+            // Líneas horizontales
+            for (let y = 0; y <= worldHeight; y += gridSize) {
+                graphics.lineBetween(0, y, worldWidth, y);
+            }
+
+            graphics.setDepth(-100);
+
+            // Etiquetas de coordenadas cada 500px
+            const labelInterval = 500;
+            for (let x = 0; x <= worldWidth; x += labelInterval) {
+                for (let y = 0; y <= worldHeight; y += labelInterval) {
+                    scene.add.text(x, y, `(${x},${y})`, {
+                        fontSize: '10px',
+                        color: '#666666',
+                        backgroundColor: '#000000aa',
+                        padding: { x: 3, y: 2 }
+                    }).setOrigin(0.5).setDepth(-50);
+                }
+            }
+        }
+
+        function createReferenceMarkers(scene) {
+            const worldWidth = 4000;
+            const worldHeight = 4000;
+
+            // Marcador en el centro del mundo
+            const centerX = worldWidth / 2;
+            const centerY = worldHeight / 2;
+
+            scene.add.circle(centerX, centerY, 20, 0x00ff88, 0.5).setDepth(1);
+            scene.add.text(centerX, centerY - 40, '⭐ SPAWN POINT', {
+                fontSize: '16px',
+                fontStyle: 'bold',
+                color: '#00ff88',
+                backgroundColor: '#000000',
+                padding: { x: 8, y: 5 }
+            }).setOrigin(0.5).setDepth(2);
+
+            // Marcadores en las esquinas del mundo
+            const corners = [
+                { x: 100, y: 100, label: '↖ NW' },
+                { x: worldWidth - 100, y: 100, label: '↗ NE' },
+                { x: 100, y: worldHeight - 100, label: '↙ SW' },
+                { x: worldWidth - 100, y: worldHeight - 100, label: '↘ SE' }
+            ];
+
+            corners.forEach(corner => {
+                scene.add.circle(corner.x, corner.y, 15, 0xff6b6b, 0.5).setDepth(1);
+                scene.add.text(corner.x, corner.y - 25, corner.label, {
+                    fontSize: '12px',
+                    color: '#ff6b6b',
+                    backgroundColor: '#000000',
+                    padding: { x: 5, y: 3 }
+                }).setOrigin(0.5).setDepth(2);
+            });
+        }
+    </script>
+</body>
+</html>
