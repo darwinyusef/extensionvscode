@@ -146,11 +146,12 @@ class TaskManager {
         if (!this.currentTask) return;
 
         const task = this.currentTask.task;
+        const completedNpcId = this.currentTask.npc.id;
 
         // Marcar como completada
         this.completedTasks.push({
             taskId: task.id,
-            npcId: this.currentTask.npc.id,
+            npcId: completedNpcId,
             score: result.score,
             attempts: this.currentTask.attempts,
             completedAt: Date.now(),
@@ -170,6 +171,9 @@ class TaskManager {
             `¡Has dominado ${task.title}!\n${result.feedback}`
         );
 
+        // Emitir evento para retirar al NPC
+        this.scene.events.emit('npc_task_completed', completedNpcId);
+
         // Limpiar tarea actual
         this.currentTask = null;
     }
@@ -183,6 +187,11 @@ class TaskManager {
         // XP
         if (reward.xp) {
             this.scene.events.emit('add_xp', reward.xp);
+
+            // Actualizar XP en HUD (simulado por ahora)
+            const currentXP = (this.scene.playerXP || 0) + reward.xp;
+            this.scene.playerXP = currentXP;
+            this.evaluationUI.updateXPBar(currentXP % 100, 100);
         }
 
         // Amistad con NPC
@@ -191,6 +200,11 @@ class TaskManager {
             if (npc) {
                 npc.addFriendship(reward.friendship);
             }
+        }
+
+        // Actualizar skills según el concepto completado
+        if (this.currentTask && this.currentTask.task.concept) {
+            this.updateSkillProgress(this.currentTask.task.concept);
         }
 
         // Desbloquear siguiente tarea
@@ -204,6 +218,33 @@ class TaskManager {
                 this.scene.events.emit('add_item', item);
             });
         }
+    }
+
+    /**
+     * Actualiza el progreso de skills en el HUD
+     */
+    updateSkillProgress(concept) {
+        // Inicializar skills si no existen
+        if (!this.scene.playerSkills) {
+            this.scene.playerSkills = { html: 0, css: 0, javascript: 0 };
+        }
+
+        // Determinar qué skill mejorar según el concepto
+        const conceptLower = concept.toLowerCase();
+        if (conceptLower.includes('html') || conceptLower.includes('semántic')) {
+            this.scene.playerSkills.html = Math.min(5, this.scene.playerSkills.html + 1);
+        } else if (conceptLower.includes('css') || conceptLower.includes('flexbox') || conceptLower.includes('grid')) {
+            this.scene.playerSkills.css = Math.min(5, this.scene.playerSkills.css + 1);
+        } else if (conceptLower.includes('javascript') || conceptLower.includes('js') || conceptLower.includes('async')) {
+            this.scene.playerSkills.javascript = Math.min(5, this.scene.playerSkills.javascript + 1);
+        }
+
+        // Actualizar HUD
+        this.evaluationUI.updateSkills(
+            this.scene.playerSkills.html,
+            this.scene.playerSkills.css,
+            this.scene.playerSkills.javascript
+        );
     }
 
     /**

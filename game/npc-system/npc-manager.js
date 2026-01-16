@@ -177,6 +177,25 @@ class NPCManager {
         return this.relationshipManager.getBestFriends(limit);
     }
 
+    retireNPC(npcId) {
+        const npc = this.getNPC(npcId);
+        if (!npc) return;
+
+        // Animación de despedida
+        this.scene.tweens.add({
+            targets: npc,
+            alpha: 0,
+            y: npc.y - 100,
+            duration: 1000,
+            ease: 'Power2',
+            onComplete: () => {
+                npc.destroy();
+                this.npcs.delete(npcId);
+                console.log(`👋 ${npc.npcName} se ha retirado`);
+            }
+        });
+    }
+
     destroy() {
         this.npcs.forEach(npc => {
             if (npc.mouthAnimator) {

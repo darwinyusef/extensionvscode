@@ -314,61 +314,209 @@
             top: 20px;
             right: 20px;
             z-index: 1500;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px 20px;
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 0;
             border: 2px solid #00ff88;
-        }
-
-        .hud-label {
+            font-family: 'Courier New', monospace;
             color: #00ff88;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 8px;
+            line-height: 1.4;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            min-width: 380px;
+            transition: all 0.3s ease;
         }
 
-        .hearts-container {
+        .hud-border {
+            color: #00ff88;
+            font-size: 13px;
+            white-space: pre;
+            letter-spacing: 0;
+        }
+
+        .hud-header {
+            background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%);
+            color: #000;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 14px;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00ff88;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .hud-header:hover {
+            background: linear-gradient(90deg, #00cc66 0%, #00aa55 100%);
+        }
+
+        .hud-minimize-btn {
+            background: #000;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            padding: 2px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .hud-minimize-btn:hover {
+            background: #00ff88;
+            color: #000;
+        }
+
+        .hud.minimized {
+            min-width: 280px;
+        }
+
+        .hud-section {
+            padding: 10px 15px;
+            border-bottom: 1px solid #00ff8844;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .hud-section:last-child {
+            border-bottom: none;
+        }
+
+        .hud.minimized .hud-section {
+            max-height: 0;
+            padding: 0;
+            opacity: 0;
+        }
+
+        .hud-player-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .hud-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .hud-bar {
+            display: flex;
+            align-items: center;
             gap: 8px;
         }
 
-        .heart {
-            font-size: 28px;
-            animation: heartbeat 1.5s ease-in-out infinite;
+        .hud-bar-label {
+            min-width: 30px;
+            font-weight: bold;
         }
 
-        .heart.lost {
-            opacity: 0.2;
-            filter: grayscale(100%);
+        .hud-bar-fill {
+            flex: 1;
+            font-size: 14px;
+            letter-spacing: -1px;
         }
 
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            10%, 30% { transform: scale(1.1); }
-            20%, 40% { transform: scale(1); }
+        .hud-bar-percent {
+            min-width: 40px;
+            text-align: right;
+            font-size: 11px;
         }
 
-        .heart.shake {
-            animation: shake 0.5s ease-in-out;
+        .hud-skills {
+            font-size: 12px;
+        }
+
+        .hud-skills-title {
+            margin-bottom: 8px;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .hud-skill-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding-left: 10px;
+        }
+
+        .hud-skill-stars {
+            color: #ffd700;
+        }
+
+        .hud-skill-locked {
+            color: #666;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .hud::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: scanline 3s linear infinite;
+            pointer-events: none;
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
         }
 
         .info {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.95);
             color: white;
-            padding: 15px 20px;
             border-radius: 8px;
             font-size: 14px;
             z-index: 1000;
-            max-width: 300px;
+            max-width: 350px;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .info-header {
+            background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%);
+            color: #000;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .info-header:hover {
+            background: linear-gradient(90deg, #00cc66 0%, #00aa55 100%);
+        }
+
+        .info-content {
+            padding: 15px 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .info.minimized .info-content {
+            max-height: 0;
+            padding: 0;
+            opacity: 0;
         }
 
         .info h3 {
@@ -387,16 +535,40 @@
             border-radius: 3px;
             font-family: monospace;
         }
+
+        .minimize-btn {
+            background: #000;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            padding: 2px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .minimize-btn:hover {
+            background: #00ff88;
+            color: #000;
+        }
     </style>
 </head>
 <body>
-    <div class="info">
-        <h3>🎮 Sistema de NPCs + AI - Demo</h3>
-        <p><kbd>WASD</kbd> o <kbd>Flechas</kbd> - Mover jugador</p>
-        <p><kbd>E</kbd> - Interactuar con NPC</p>
-        <p>🤖 <strong>AI Evaluation</strong>: OpenAI GPT-4o-mini</p>
-        <p>✨ Los NPCs evalúan tus respuestas</p>
-        <p>🎯 Completa tareas para ganar XP</p>
+    <div class="info" id="info-panel">
+        <div class="info-header" onclick="toggleInfo()">
+            <span>🎮 CONTROLES & INFO</span>
+            <button class="minimize-btn" title="Minimizar Info (I)" onclick="event.stopPropagation(); toggleInfo()">_</button>
+        </div>
+        <div class="info-content">
+            <h3>Sistema de NPCs + AI - Demo</h3>
+            <p><kbd>WASD</kbd> o <kbd>Flechas</kbd> - Mover jugador</p>
+            <p><kbd>E</kbd> - Interactuar con NPC</p>
+            <p><kbd>H</kbd> - Toggle HUD</p>
+            <p><kbd>I</kbd> - Toggle Info Panel</p>
+            <p>🤖 <strong>AI Evaluation</strong>: OpenAI GPT-4o-mini</p>
+            <p>✨ Los NPCs evalúan tus respuestas</p>
+            <p>🎯 Completa tareas para ganar XP</p>
+        </div>
     </div>
 
     <div class="template">
@@ -423,8 +595,66 @@
                 <button class="btn-close" id="btn-close">×</button>
             </div>
         </div>
-        <div class="goals"></div>
-        <div class="hud"></div>
+
+        <!-- Goal Screen -->
+        <div class="goals" id="goal-screen">
+            <div class="goal-modal">
+                <div class="goal-title">🎯 ¡GOAL ALCANZADO! 🎯</div>
+                <div class="goal-concept" id="goal-concept">HTML Semántico</div>
+                <div class="goal-score" id="goal-score">Score: 100/100</div>
+                <div class="goal-message">
+                    <span class="typewriter" id="goal-message"></span>
+                </div>
+                <button class="goal-btn-continue" id="goal-btn-continue">CONTINUAR</button>
+            </div>
+        </div>
+
+        <!-- HUD -->
+        <div class="hud" id="hud">
+            <div class="hud-header" onclick="toggleHUD()">
+                <span>⚡ SYSTEM STATUS : ONLINE</span>
+                <div>
+                    <button class="hud-minimize-btn" id="hud-minimize-btn" title="Minimizar HUD (H)" onclick="event.stopPropagation(); toggleHUD()">_</button>
+                    <span style="margin-left: 10px;">[ v1.0.2 ]</span>
+                </div>
+            </div>
+
+            <div class="hud-section">
+                <div class="hud-player-info">
+                    <span>👤 [ <span id="player-name">PLAYER_01</span> ]</span>
+                    <span>LVL. <span id="player-level">01</span> [<span id="player-rank">NOVICE</span>]</span>
+                </div>
+
+                <div class="hud-bars">
+                    <div class="hud-bar">
+                        <span class="hud-bar-label">HP</span>
+                        <span class="hud-bar-fill" id="hp-bar">[██████████░░░░]</span>
+                        <span class="hud-bar-percent" id="hp-percent">75%</span>
+                    </div>
+                    <div class="hud-bar">
+                        <span class="hud-bar-label">XP</span>
+                        <span class="hud-bar-fill" id="xp-bar">[▓▓▓░░░░░]</span>
+                        <span class="hud-bar-percent" id="xp-percent">30%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-section hud-skills">
+                <div class="hud-skills-title">&gt; SKILLS_LOG:</div>
+                <div class="hud-skill-item">
+                    <span>- HTML:</span>
+                    <span class="hud-skill-stars" id="skill-html">[★★☆☆☆] (2/5)</span>
+                </div>
+                <div class="hud-skill-item">
+                    <span>- CSS:</span>
+                    <span class="hud-skill-stars" id="skill-css">[★☆☆☆☆] (1/5)</span>
+                </div>
+                <div class="hud-skill-item">
+                    <span>- JS:</span>
+                    <span class="hud-skill-locked" id="skill-js">[☆☆☆☆☆] (LOCKED)</span>
+                </div>
+            </div>
+        </div>
 
         <div id="game-container"></div>
 
@@ -438,17 +668,17 @@
     </div>
 
     <!-- Sistema de NPCs -->
-    <script src="npc-system/npc.js"></script>
-    <script src="npc-system/mouth-animator.js"></script>
-    <script src="npc-system/dialogue-engine.js"></script>
-    <script src="npc-system/dialogue-ui.js"></script>
-    <script src="npc-system/relationship-manager.js"></script>
-    <script src="npc-system/npc-manager.js"></script>
+    <script src="npc-system/npc.js?v=19"></script>
+    <script src="npc-system/mouth-animator.js?v=19"></script>
+    <script src="npc-system/dialogue-engine.js?v=19"></script>
+    <script src="npc-system/dialogue-ui.js?v=19"></script>
+    <script src="npc-system/relationship-manager.js?v=19"></script>
+    <script src="npc-system/npc-manager.js?v=19"></script>
 
     <!-- Sistema de AI y Evaluación -->
-    <script src="npc-system/ai-evaluator.js"></script>
-    <script src="npc-system/evaluation-ui-html.js"></script>
-    <script src="npc-system/task-manager.js"></script>
+    <script src="npc-system/ai-evaluator.js?v=19"></script>
+    <script src="npc-system/evaluation-ui-html.js?v=19"></script>
+    <script src="npc-system/task-manager.js?v=19"></script>
 
     <!-- Juego standalone de NPCs -->
     <script>
@@ -558,8 +788,28 @@
             taskManager = new TaskManager(this);
             await taskManager.aiEvaluator.loadConfig();
 
+            // Inicializar stats del jugador
+            this.playerXP = 0;
+            this.playerLevel = 1;
+            this.playerSkills = { html: 2, css: 1, javascript: 0 };
+
+            // Inicializar HUD
+            taskManager.evaluationUI.updateXPBar(30, 100); // XP inicial 30%
+            taskManager.evaluationUI.updateSkills(
+                this.playerSkills.html,
+                this.playerSkills.css,
+                this.playerSkills.javascript
+            );
+
             // Cargar NPCs
             await npcManager.loadNPCs('data/npcs/npcs.json');
+
+            // Listener para retirar NPCs después de completar su tarea
+            this.events.on('npc_task_completed', (npcId) => {
+                setTimeout(() => {
+                    npcManager.retireNPC(npcId);
+                }, 500); // Esperar medio segundo después de cerrar la goal screen
+            });
 
             // Deshabilitar clicks en NPCs que usan el sistema de tareas
             npcManager.getAllNPCs().forEach(npc => {
@@ -706,6 +956,44 @@
                 }).setOrigin(0.5).setDepth(2);
             });
         }
+
+        // Funciones globales para minimizar ventanas
+        function toggleHUD() {
+            const hud = document.getElementById('hud');
+            const btn = document.getElementById('hud-minimize-btn');
+
+            hud.classList.toggle('minimized');
+
+            if (hud.classList.contains('minimized')) {
+                btn.textContent = '□';
+                btn.title = 'Maximizar HUD';
+            } else {
+                btn.textContent = '_';
+                btn.title = 'Minimizar HUD';
+            }
+        }
+
+        function toggleInfo() {
+            const info = document.getElementById('info-panel');
+            info.classList.toggle('minimized');
+        }
+
+        // Atajos de teclado para minimizar ventanas
+        document.addEventListener('keydown', (e) => {
+            // H para toggle HUD
+            if (e.key === 'h' || e.key === 'H') {
+                // Solo si no estamos escribiendo en un textarea
+                if (document.activeElement.tagName !== 'TEXTAREA') {
+                    toggleHUD();
+                }
+            }
+            // I para toggle Info
+            if (e.key === 'i' || e.key === 'I') {
+                if (document.activeElement.tagName !== 'TEXTAREA') {
+                    toggleInfo();
+                }
+            }
+        });
     </script>
 </body>
 </html>

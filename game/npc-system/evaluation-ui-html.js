@@ -10,9 +10,12 @@ class EvaluationUIHTML {
         this.generatedGreeting = '';
         this.taskQuestion = '';
         this.taskData = null;
+        this.lives = 3;
+        this.maxLives = 3;
 
         this.initElements();
         this.attachEvents();
+        this.initHearts();
     }
 
     initElements() {
@@ -26,12 +29,77 @@ class EvaluationUIHTML {
         this.btnSubmit = document.getElementById('btn-submit');
         this.btnClose = document.getElementById('btn-close');
         this.textarea = document.getElementById('evaluation-textarea');
+
+        // Goal screen
+        this.goalScreen = document.getElementById('goal-screen');
+        this.goalConcept = document.getElementById('goal-concept');
+        this.goalScore = document.getElementById('goal-score');
+        this.goalMessage = document.getElementById('goal-message');
+        this.goalBtnContinue = document.getElementById('goal-btn-continue');
+
+        // HUD
+        this.hpBar = document.getElementById('hp-bar');
+        this.hpPercent = document.getElementById('hp-percent');
+        this.xpBar = document.getElementById('xp-bar');
+        this.xpPercent = document.getElementById('xp-percent');
     }
 
     attachEvents() {
         this.btnNext.addEventListener('click', () => this.nextStage());
         this.btnSubmit.addEventListener('click', () => this.submitAnswer());
         this.btnClose.addEventListener('click', () => this.hide());
+        this.goalBtnContinue.addEventListener('click', () => this.hideGoalScreen());
+    }
+
+    initHearts() {
+        this.updateHPBar();
+    }
+
+    updateHPBar() {
+        const hpPercent = Math.round((this.lives / this.maxLives) * 100);
+        const totalBlocks = 14;
+        const filledBlocks = Math.round((hpPercent / 100) * totalBlocks);
+        const emptyBlocks = totalBlocks - filledBlocks;
+
+        const barFill = '█'.repeat(filledBlocks) + '░'.repeat(emptyBlocks);
+        this.hpBar.textContent = `[${barFill}]`;
+        this.hpPercent.textContent = `${hpPercent}%`;
+
+        // Cambiar color según el HP
+        if (hpPercent <= 33) {
+            this.hpBar.style.color = '#ff6b6b';
+        } else if (hpPercent <= 66) {
+            this.hpBar.style.color = '#fbbf24';
+        } else {
+            this.hpBar.style.color = '#00ff88';
+        }
+    }
+
+    loseLife() {
+        if (this.lives > 0) {
+            this.lives--;
+            this.updateHPBar();
+
+            // Efecto de shake en el HUD
+            const hud = document.querySelector('.hud');
+            hud.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                hud.style.animation = '';
+            }, 500);
+
+            // Si no quedan vidas, game over
+            if (this.lives === 0) {
+                setTimeout(() => this.gameOver(), 1000);
+            }
+        }
+    }
+
+    gameOver() {
+        this.hide();
+        alert('💀 GAME OVER\n\n¡Te quedaste sin vidas! El NPC se ha ido...');
+        // Recargar vidas
+        this.lives = this.maxLives;
+        this.updateHPBar();
     }
 
     async show(npcData, concept, taskData, onSubmit) {
@@ -194,6 +262,9 @@ class EvaluationUIHTML {
             this.btnNext.textContent = 'Ver recompensa >';
             this.btnNext.style.color = '#fbbf24';
         } else {
+            // Perder una vida cuando la respuesta es incorrecta
+            this.loseLife();
+
             this.btnNext.textContent = 'Reintentar >';
             this.btnNext.style.color = '#ff6b6b';
 
@@ -222,11 +293,77 @@ class EvaluationUIHTML {
         this.btnSubmit.style.display = 'none';
     }
 
-    showGoalScreen(concept, score, message) {
-        // Por ahora simplemente cerramos el modal
-        // TODO: Implementar goal screen separado
-        alert(`🎯 GOAL ALCANZADO!\n\n${concept}\nScore: ${score}/100\n\n${message}`);
+    async showGoalScreen(concept, score, message) {
+        // Ocultar modal de evaluación
+        this.modal.classList.remove('active');
+
+        // Mostrar goal screen
+        this.goalScreen.classList.add('active');
+        this.goalConcept.textContent = concept;
+        this.goalScore.textContent = `Score: ${score}/100`;
+
+        // Efecto typewriter para el mensaje del NPC
+        this.goalMessage.textContent = '';
+        this.goalMessage.classList.add('typewriter');
+        await this.typewriterEffect(message, this.goalMessage, 30);
+    }
+
+    hideGoalScreen() {
+        this.goalScreen.classList.remove('active');
         this.hide();
+    }
+
+    async typewriterEffect(text, element, speed = 50) {
+        element.textContent = '';
+
+        for (let i = 0; i < text.length; i++) {
+            element.textContent += text.charAt(i);
+            await this.sleep(speed);
+        }
+
+        // Remover cursor parpadeante al terminar
+        element.classList.remove('typewriter');
+    }
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    updateXPBar(xp, maxXp = 100) {
+        const xpPercent = Math.round((xp / maxXp) * 100);
+        const totalBlocks = 8;
+        const filledBlocks = Math.round((xpPercent / 100) * totalBlocks);
+        const emptyBlocks = totalBlocks - filledBlocks;
+
+        const barFill = '▓'.repeat(filledBlocks) + '░'.repeat(emptyBlocks);
+        this.xpBar.textContent = `[${barFill}]`;
+        this.xpPercent.textContent = `${xpPercent}%`;
+    }
+
+    updateSkills(htmlLevel, cssLevel, jsLevel) {
+        // HTML skill
+        if (htmlLevel > 0) {
+            const htmlStars = '★'.repeat(htmlLevel) + '☆'.repeat(5 - htmlLevel);
+            document.getElementById('skill-html').textContent = `[${htmlStars}] (${htmlLevel}/5)`;
+            document.getElementById('skill-html').className = 'hud-skill-stars';
+        }
+
+        // CSS skill
+        if (cssLevel > 0) {
+            const cssStars = '★'.repeat(cssLevel) + '☆'.repeat(5 - cssLevel);
+            document.getElementById('skill-css').textContent = `[${cssStars}] (${cssLevel}/5)`;
+            document.getElementById('skill-css').className = 'hud-skill-stars';
+        }
+
+        // JS skill
+        if (jsLevel > 0) {
+            const jsStars = '★'.repeat(jsLevel) + '☆'.repeat(5 - jsLevel);
+            document.getElementById('skill-js').textContent = `[${jsStars}] (${jsLevel}/5)`;
+            document.getElementById('skill-js').className = 'hud-skill-stars';
+        } else {
+            document.getElementById('skill-js').textContent = '[☆☆☆☆☆] (LOCKED)';
+            document.getElementById('skill-js').className = 'hud-skill-locked';
+        }
     }
 
     hide() {
@@ -235,8 +372,9 @@ class EvaluationUIHTML {
             this.scene.input.keyboard.enabled = true;
         }
 
-        // Ocultar modal y textarea
+        // Ocultar modal, textarea y goal screen
         this.modal.classList.remove('active');
+        this.goalScreen.classList.remove('active');
         this.textarea.classList.remove('active');
         this.textarea.value = '';
 
