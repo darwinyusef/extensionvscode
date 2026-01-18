@@ -680,10 +680,20 @@
     <script src="npc-system/evaluation-ui-html.js?v=23"></script>
     <script src="npc-system/task-manager.js?v=23"></script>
 
+    <!-- Sistemas Especializados de NPCs -->
+    <script src="npc-system/npc-king.js?v=5"></script>
+    <script src="npc-system/npc-storyteller.js?v=5"></script>
+    <script src="npc-system/npc-motivator.js?v=5"></script>
+    <script src="npc-system/npc-enemy.js?v=5"></script>
+    <script src="npc-system/npc-healer.js?v=5"></script>
+
+    <!-- Estilos para NPCs Especializados -->
+    <link rel="stylesheet" href="npc-system/npc-styles.css?v=5">
+
     <!-- Sistemas de Carga Dinámica -->
-    <script src="systems/map-loader.js?v=1"></script>
-    <script src="systems/building-loader.js?v=1"></script>
-    <script src="systems/npc-loader.js?v=1"></script>
+    <script src="systems/map-loader.js?v=7"></script>
+    <script src="systems/building-loader.js?v=7"></script>
+    <script src="systems/npc-loader.js?v=7"></script>
 
     <!-- Juego standalone de NPCs -->
     <script>
@@ -720,6 +730,7 @@
         let cursors;
         let wasd;
         let npcManager;
+        let npcLoader;
         let dialogueUI;
         let taskManager;
 
@@ -863,27 +874,13 @@
                 this.playerSkills.javascript
             );
 
-            // Cargar NPCs dinámicamente desde JSON
-            await npcManager.loadNPCs('data/npcs/npcs-index.json');
+            // Cargar NPCs usando el nuevo sistema NPCLoader
+            npcLoader = new NPCLoader(this);
+            await npcLoader.loadNPCs('data/npcs/npcs-index.json');
 
-            console.log('NPCs cargados:', npcManager.getAllNPCs().length);
-            npcManager.getAllNPCs().forEach(npc => {
-                console.log(`NPC ${npc.npcName} en (${npc.x}, ${npc.y}) con depth ${npc.depth}`);
-            });
-
-            // Listener para retirar NPCs después de completar su tarea
-            this.events.on('npc_task_completed', (npcId) => {
-                setTimeout(() => {
-                    npcManager.retireNPC(npcId);
-                }, 500); // Esperar medio segundo después de cerrar la goal screen
-            });
-
-            // Deshabilitar clicks en NPCs que usan el sistema de tareas
-            npcManager.getAllNPCs().forEach(npc => {
-                if (taskManager.getTasksForNPC(npc.id).length > 0) {
-                    // Este NPC tiene tareas, deshabilitar su diálogo normal
-                    npc.npcSprite.off('pointerdown');
-                }
+            console.log('NPCs especializados cargados:', npcLoader.getAllNPCs().length);
+            npcLoader.getAllNPCs().forEach(npc => {
+                console.log(`NPC ${npc.npcName} (tipo: ${npc.npcType}) en (${npc.x}, ${npc.y})`);
             });
 
             // Tecla E para interactuar
@@ -895,7 +892,17 @@
                         return;
                     }
 
-                    // Prioridad 2: Interactuar con NPC
+                    // Prioridad 2: Interactuar con NPCs especializados
+                    const closestSpecialNPC = npcLoader.getClosestNPC(player.x, player.y, 120);
+                    if (closestSpecialNPC) {
+                        // Si tiene comportamiento especializado, llamarlo
+                        if (closestSpecialNPC.specialBehavior && closestSpecialNPC.specialBehavior.interact) {
+                            npcLoader.handleSpecializedNPCClick(closestSpecialNPC);
+                            return;
+                        }
+                    }
+
+                    // Prioridad 3: Interactuar con NPCs clásicos (questioner)
                     const closestNPC = npcManager.getClosestNPC(player.x, player.y, 120);
                     if (closestNPC) {
                         // Buscar siguiente tarea del NPC
@@ -921,7 +928,10 @@
                 padding: { x: 15, y: 8 }
             }).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
 
-            console.log('✅ Sistema de NPCs cargado:', npcManager.getAllNPCs().length, 'NPCs');
+            const totalNPCs = npcManager.getAllNPCs().length + npcLoader.getAllNPCs().length;
+            console.log('✅ Sistema de NPCs cargado:', totalNPCs, 'NPCs totales');
+            console.log('  - NPCs clásicos (questioner):', npcManager.getAllNPCs().length);
+            console.log('  - NPCs especializados:', npcLoader.getAllNPCs().length);
 
             // Exportar player globalmente
             window.player = player;
@@ -931,6 +941,9 @@
             // Update NPCs primero
             if (npcManager) {
                 npcManager.update();
+            }
+            if (npcLoader) {
+                npcLoader.update();
             }
 
             // Si no hay player o alguna UI está abierta, no mover

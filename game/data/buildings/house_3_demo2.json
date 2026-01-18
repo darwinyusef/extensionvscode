@@ -1,0 +1,31 @@
+{
+  "id": "house_3",
+  "name": "Guarida Oscura",
+  "type": "house",
+  "visual": {
+    "type": "simple-rectangle",
+    "width": 280,
+    "height": 240,
+    "color": "#ffffff",
+    "borderColor": "#000000",
+    "borderWidth": 2
+  },
+  "position": {
+    "tileRow": 25,
+    "tileCol": 45
+  },
+  "collisionMatrix": [
+    "0000000",
+    "0000000",
+    "0000000",
+    "0000000",
+    "0011000",
+    "0000000"
+  ],
+  "entrance": {
+    "direction": "bottom",
+    "width": 80
+  },
+  "hasInterior": true,
+  "interiorConfig": "data/houses/house_3_interior.json"
+}

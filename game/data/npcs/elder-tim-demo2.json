@@ -1,0 +1,38 @@
+{
+  "id": "elder_tim",
+  "name": "Elder Tim",
+  "role": "Maestro de HTML",
+  "personality": "sabio",
+  "specialty": "HTML Semántico",
+  "position": {
+    "x": 1000,
+    "y": 1000
+  },
+  "sprite": {
+    "type": "circle",
+    "color": "#4a90e2",
+    "size": 40,
+    "emoji": "👴"
+  },
+  "dialogue": {
+    "greeting": "¡Saludos, joven aprendiz! Soy Elder Tim, guardián del conocimiento HTML.",
+    "topic": "HTML Semántico",
+    "firstMeeting": true
+  },
+  "tasks": [
+    {
+      "id": "html_basics",
+      "concept": "HTML Semántico",
+      "difficulty": "beginner",
+      "description": "Aprende sobre las etiquetas semánticas de HTML5",
+      "requiredLevel": 0
+    }
+  ],
+  "unlockedDialogues": ["first_meeting"],
+  "relationship": {
+    "friendship": 0,
+    "conversationCount": 0,
+    "questsGiven": [],
+    "questsCompleted": []
+  }
+}

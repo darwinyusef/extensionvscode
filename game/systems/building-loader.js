@@ -43,8 +43,12 @@ class BuildingLoader {
 
         if (data.visual.type === 'rectangle') {
             this.createRectangleBuilding(buildingContainer, data);
+        } else if (data.visual.type === 'simple-rectangle') {
+            this.createSimpleRectangleBuilding(buildingContainer, data);
         } else if (data.visual.type === 'image' && data.visual.src) {
             this.createImageBuilding(buildingContainer, data);
+        } else if (data.visual.type === 'sprite' && data.visual.sprite) {
+            this.createSpriteBuilding(buildingContainer, data);
         }
 
         if (data.hasInterior) {
@@ -63,6 +67,28 @@ class BuildingLoader {
         this.buildings.push(buildingInfo);
 
         return buildingInfo;
+    }
+
+    createSimpleRectangleBuilding(container, data) {
+        const visual = data.visual;
+        const width = visual.width;
+        const height = visual.height;
+        const color = parseInt(visual.color.replace('#', '0x'));
+
+        const rect = this.scene.add.rectangle(
+            width / 2,
+            height / 2,
+            width,
+            height,
+            color
+        );
+
+        if (visual.borderColor && visual.borderWidth) {
+            const borderColor = parseInt(visual.borderColor.replace('#', '0x'));
+            rect.setStrokeStyle(visual.borderWidth, borderColor);
+        }
+
+        container.add(rect);
     }
 
     createRectangleBuilding(container, data) {
@@ -127,6 +153,16 @@ class BuildingLoader {
         const sprite = this.scene.add.image(0, 0, data.visual.src);
         sprite.setDisplaySize(data.visual.width, data.visual.height);
         sprite.setOrigin(0, 0);
+        container.add(sprite);
+    }
+
+    createSpriteBuilding(container, data) {
+        const sprite = this.scene.add.sprite(
+            data.visual.width / 2,
+            data.visual.height / 2,
+            data.visual.sprite
+        );
+        sprite.setDisplaySize(data.visual.width, data.visual.height);
         container.add(sprite);
     }
 

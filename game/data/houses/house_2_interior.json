@@ -17,6 +17,21 @@
     "width": 100,
     "height": 40
   },
+  "npcs": [
+    {
+      "id": "friend_css_1",
+      "name": "Flexbox Fred",
+      "role": "Maestro de CSS",
+      "position": { "x": 550, "y": 300 },
+      "emoji": "🎨",
+      "color": "#e74c3c",
+      "dialogue": {
+        "greeting": "¡Ey! Bienvenido a mi casa del diseño. Aquí todo es flexbox, hermano.",
+        "aboutKeys": "La Llave de CSS está por aquí. Explora y aprende sobre Flexbox.",
+        "aboutFruits": "La Naranja de la Creatividad te ayudará en tu camino. ¡Encuéntrala!"
+      }
+    }
+  ],
   "activities": [
     {
       "id": "doc_2",

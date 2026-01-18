@@ -48,12 +48,13 @@ class MapLoader {
             bg.setDisplaySize(width, height);
             bg.setDepth(-1000);
         } else {
+            const color = bgConfig.color || bgConfig.fallbackColor;
             const bg = this.scene.add.rectangle(
                 width / 2,
                 height / 2,
                 width,
                 height,
-                parseInt(bgConfig.fallbackColor.replace('#', '0x'))
+                parseInt(color.replace('#', '0x'))
             );
             bg.setDepth(-1000);
         }
@@ -170,7 +171,6 @@ class MapLoader {
 
                     this.scene.physics.add.existing(collisionBody, true);
                     collisionBody.setVisible(false);
-                    collisionBody.body.setImmovable(true);
 
                     if (this.scene.collisionBodies) {
                         this.scene.collisionBodies.push(collisionBody);
@@ -201,7 +201,6 @@ class MapLoader {
 
                     this.scene.physics.add.existing(collisionBody, true);
                     collisionBody.setVisible(false);
-                    collisionBody.body.setImmovable(true);
 
                     if (this.scene.collisionBodies) {
                         this.scene.collisionBodies.push(collisionBody);

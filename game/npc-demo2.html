@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Demo 2 - NPCs con OpenAI v5</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+
+    <!-- Sistema de NPCs Base -->
+    <script src="npc-system/npc.js?v=11"></script>
+    <script src="npc-system/mouth-animator.js?v=11"></script>
+    <script src="npc-system/dialogue-engine.js?v=11"></script>
+    <script src="npc-system/dialogue-ui.js?v=11"></script>
+    <script src="npc-system/relationship-manager.js?v=11"></script>
+    <script src="npc-system/npc-manager.js?v=11"></script>
+
+    <!-- Sistema de Tareas y AI -->
+    <script src="npc-system/ai-evaluator.js?v=11"></script>
+    <script src="npc-system/evaluation-ui.js?v=11"></script>
+    <script src="npc-system/task-manager.js?v=11"></script>
+
+    <!-- Sistemas Especializados de NPCs -->
+    <script src="npc-system/npc-king.js?v=11"></script>
+    <script src="npc-system/npc-storyteller.js?v=11"></script>
+    <script src="npc-system/npc-motivator.js?v=11"></script>
+    <script src="npc-system/npc-enemy.js?v=11"></script>
+    <script src="npc-system/npc-healer.js?v=11"></script>
+
+    <!-- Estilos para NPCs Especializados -->
+    <link rel="stylesheet" href="npc-system/npc-styles.css?v=11">
+
+    <!-- Sistemas de Carga -->
+    <script src="systems/npc-loader.js?v=11"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #333;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+        #game-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollbar personalizado para el chat */
+        #chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-messages::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 10px;
+        }
+        #chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <script>
+        const config = {
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            parent: 'game-container',
+            backgroundColor: 0xaaaaaa,
+            dom: {
+                createContainer: true
+            },
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            }
+        };
+
+        const game = new Phaser.Game(config);
+
+        let player;
+        let cursors;
+        let wasd;
+        let npcManager;
+        let npcLoader;
+        let dialogueUI;
+        let taskManager;
+        let houses = [];
+        let nearestHouse = null;
+
+        // OpenAI Configuration
+        let OPENAI_API_KEY = '';
+        let OPENAI_MODEL = 'gpt-4o-mini';
+
+        // Cargar configuración de OpenAI
+        async function loadOpenAIConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                OPENAI_API_KEY = config.OPENAI_API_KEY;
+                OPENAI_MODEL = config.OPENAI_MODEL || 'gpt-4o-mini';
+                console.log('✅ OpenAI configurado:', OPENAI_MODEL);
+            } catch (error) {
+                console.error('❌ Error cargando configuración OpenAI:', error);
+            }
+        }
+
+        // Mapeo de imágenes para cada NPC
+        const NPC_IMAGES = {
+            'mentor_html': 'assets/characters/npc1.svg',
+            'friend_css_1': 'assets/characters/flexbox_fred.svg',
+            'friend_js_1': 'assets/characters/async_andy.svg',
+            'dark_coder': 'assets/characters/npc010.svg',
+            'king_arthur': 'assets/characters/npc7.svg',
+            'sage_storyteller': 'assets/characters/npc2.svg',
+            'coach_motivator': 'assets/characters/npc5.svg',
+            'healer_sage': 'assets/characters/npc6.svg'
+        };
+
+        // Personalidades de los NPCs
+        const NPC_PERSONALITIES = {
+            'mentor_html': {
+                name: 'Elder Tim',
+                role: 'Maestro de HTML',
+                personality: 'Eres un maestro sabio y paciente de HTML, con décadas de experiencia. Hablas con calma, usas metáforas de construcción (HTML es la estructura de la web como los cimientos de una casa). Eres alentador y didáctico. Nunca das respuestas directas, prefieres guiar con preguntas socráticas.',
+                greeting: '¡Bienvenido, joven aprendiz! Soy Elder Tim, guardián de los secretos del HTML.',
+                image: 'assets/characters/npc1.svg'
+            },
+            'friend_css_1': {
+                name: 'Flexbox Fred',
+                role: 'Maestro de CSS',
+                personality: 'Eres un diseñador moderno y entusiasta, obsesionado con Flexbox y diseño responsivo. Hablas con energía, usas muchos emojis mentalmente, y siempre estás emocionado por hacer las cosas "más flexibles y hermosas". Eres positivo y creativo.',
+                greeting: '¡Ey! Soy Flexbox Fred, y aquí todo se trata de hacer diseños increíbles. ¿Listo para dar estilo al mundo?',
+                image: 'assets/characters/flexbox_fred.svg'
+            },
+            'dark_coder': {
+                name: 'Codificador Oscuro',
+                role: 'Enemigo - Maestro de JavaScript',
+                personality: 'Eres un maestro misterioso y algo arrogante del JavaScript asíncrono. Hablas en acertijos y retos, con un tono dramático pero no malvado. Disfrutas poner a prueba a los estudiantes con desafíos difíciles. Respetas a quienes demuestran habilidad.',
+                greeting: '¿Así que has llegado hasta aquí? Veamos si realmente comprendes el poder del código asíncrono...',
+                image: 'assets/characters/npc010.svg'
+            }
+        };
+
+        function preload() {
+            // Cargar imágenes de NPCs
+            const scene = this;
+            Object.entries(NPC_IMAGES).forEach(([npcId, imagePath]) => {
+                scene.load.image(npcId, imagePath);
+                console.log(`📥 Cargando imagen: ${npcId} <- ${imagePath}`);
+            });
+        }
+
+        async function create() {
+            const scene = this;
+            const worldWidth = 4000;
+            const worldHeight = 4000;
+
+            // Cargar configuración de OpenAI
+            await loadOpenAIConfig();
+
+            // Configurar límites del mundo de física (CRÍTICO)
+            scene.physics.world.setBounds(0, 0, worldWidth, worldHeight);
+            console.log('✅ Límites del mundo físico:', worldWidth, 'x', worldHeight);
+
+            // Inicializar colisiones PRIMERO
+            scene.collisionBodies = [];
+            console.log('✅ scene.collisionBodies inicializado');
+
+            // Mundo simple - fondo gris
+            scene.add.rectangle(worldWidth / 2, worldHeight / 2, worldWidth, worldHeight, 0xaaaaaa).setDepth(-1000);
+
+            // CAMINOS DE COLOR HACIA LAS CASAS
+            // Camino principal vertical desde jugador (2000, 2000) hacia arriba
+            scene.add.rectangle(2000, 1500, 100, 1000, 0x90EE90).setDepth(-500); // Camino vertical principal
+
+            // Camino horizontal hacia casa 1 (izquierda)
+            scene.add.rectangle(1840, 1680, 420, 100, 0x90EE90).setDepth(-500);
+
+            // Camino horizontal hacia casa 2 (derecha)
+            scene.add.rectangle(2040, 1680, 180, 100, 0x90EE90).setDepth(-500);
+
+            // Camino desde cruce hacia casa 3 (arriba)
+            scene.add.rectangle(1900, 1340, 100, 680, 0x90EE90).setDepth(-500);
+
+            // Marcadores de color para cada casa
+            scene.add.circle(1680, 1680, 60, 0x4a90e2, 0.5).setDepth(-400); // Casa 1 - Azul (HTML)
+            scene.add.circle(2080, 1680, 60, 0xe74c3c, 0.5).setDepth(-400); // Casa 2 - Rojo (CSS)
+            scene.add.circle(1800, 1000, 60, 0x8B008B, 0.5).setDepth(-400); // Casa 3 - Púrpura (JavaScript)
+
+            // Marcador de inicio (amarillo)
+            scene.add.circle(2000, 2000, 60, 0xFFFF00, 0.5).setDepth(-400); // Posición inicial
+
+            // Crear jugador (círculo rojo con borde negro)
+            player = scene.add.circle(2000, 2000, 20, 0xff0000);
+            player.setStrokeStyle(2, 0x000000);
+            scene.physics.add.existing(player);
+            console.log('✅ Jugador creado:', player);
+            console.log('✅ Jugador tiene física:', !!player.body);
+
+            // Crear 3 casas simples (rectángulos blancos con borde negro)
+            createSimpleHouse(scene, 1680, 1680, 240, 200, 'house_1', 'data/houses/house_1_interior.json'); // Casa 1 - Elder Tim (HTML)
+            createSimpleHouse(scene, 2080, 1680, 240, 200, 'house_2', 'data/houses/house_2_interior.json'); // Casa 2 - Flexbox Fred (CSS)
+            createSimpleHouse(scene, 1800, 1000, 280, 240, 'house_3', 'data/houses/house_3_interior.json'); // Casa 3 - Enemigo (JavaScript)
+            player.body.setCollideWorldBounds(true);
+            player.setDepth(1000);
+
+            // Cámara sigue al jugador
+            scene.cameras.main.startFollow(player, true, 0.1, 0.1);
+            scene.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
+
+            // Controles
+            cursors = scene.input.keyboard.createCursorKeys();
+            wasd = scene.input.keyboard.addKeys({
+                up: Phaser.Input.Keyboard.KeyCodes.W,
+                down: Phaser.Input.Keyboard.KeyCodes.S,
+                left: Phaser.Input.Keyboard.KeyCodes.A,
+                right: Phaser.Input.Keyboard.KeyCodes.D
+            });
+            console.log('✅ Controles inicializados:', cursors, wasd);
+
+            // Sistema de NPCs clásicos
+            npcManager = new NPCManager(scene);
+            dialogueUI = new DialogueUI(scene);
+            npcManager.setDialogueUI(dialogueUI);
+
+            // Sistema de Tareas y AI
+            taskManager = new TaskManager(scene);
+            await taskManager.aiEvaluator.loadConfig();
+
+            // HUD comentado - no necesario para esta demo
+            // taskManager.evaluationUI.updateXPBar(0, 100);
+            // taskManager.evaluationUI.updateSkills(0, 0, 0);
+
+            // Cargar NPCs especializados
+            npcLoader = new NPCLoader(scene);
+            await loadAllNPCs(scene);
+
+            // Tecla E para interactuar
+            scene.input.keyboard.on('keydown-E', () => {
+                if (!dialogueUI.isVisible && !taskManager.evaluationUI.isVisible) {
+                    // Prioridad 0: Verificar si está cerca de una casa
+                    const nearestHouse = findNearestHouse(player.x, player.y, 150);
+                    if (nearestHouse) {
+                        console.log('🏠 Entrando a casa:', nearestHouse.id);
+                        enterHouse(scene, nearestHouse);
+                        return;
+                    }
+
+                    // Prioridad 1: Interactuar con NPCs especializados
+                    const closestSpecialNPC = npcLoader.getClosestNPC(player.x, player.y, 120);
+                    if (closestSpecialNPC) {
+                        if (closestSpecialNPC.specialBehavior && closestSpecialNPC.specialBehavior.interact) {
+                            npcLoader.handleSpecializedNPCClick(closestSpecialNPC);
+                            return;
+                        }
+                    }
+
+                    // Prioridad 2: Interactuar con NPCs clásicos (questioners)
+                    const closestNPC = npcManager.getClosestNPC(player.x, player.y, 120);
+                    if (closestNPC) {
+                        console.log('📝 Interactuando con NPC clásico:', closestNPC.id);
+                        const npcData = npcManager.getNPC(closestNPC.id);
+                        const nextTask = taskManager.getNextTask(closestNPC.id);
+
+                        console.log('📚 Próxima tarea:', nextTask ? nextTask.id : 'ninguna');
+
+                        if (nextTask) {
+                            taskManager.startTask(npcData, nextTask);
+                        } else {
+                            // Si no hay más tareas, mostrar mensaje de completado
+                            const completionMessage = document.createElement('div');
+                            completionMessage.style.cssText = `
+                                position: fixed;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                background: white;
+                                padding: 30px;
+                                border: 2px solid black;
+                                border-radius: 10px;
+                                z-index: 10000;
+                                max-width: 400px;
+                                text-align: center;
+                            `;
+                            completionMessage.innerHTML = `
+                                <h3>✅ ${npcData.name}</h3>
+                                <p>¡Has completado todas mis tareas!</p>
+                                <p>Excelente trabajo, estudiante. 🎓</p>
+                                <button onclick="this.parentElement.remove()" style="
+                                    margin-top: 15px;
+                                    padding: 10px 20px;
+                                    background: #4CAF50;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                ">Cerrar</button>
+                            `;
+                            document.body.appendChild(completionMessage);
+                        }
+                    }
+                }
+            });
+
+            // Texto de instrucciones
+            scene.add.text(scene.cameras.main.centerX, 50, 'Usa WASD o flechas - Presiona E para interactuar', {
+                fontSize: '16px',
+                color: '#fff',
+                backgroundColor: '#000',
+                padding: { x: 10, y: 5 }
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
+
+            console.log('✅ Demo 2 cargada correctamente');
+            console.log('📊 NPCs especializados:', npcLoader.getAllNPCs().length);
+            console.log('📊 NPCs clásicos:', npcManager.getAllNPCs().length);
+            console.log('🏠 Casas creadas:', houses.length);
+
+            window.player = player;
+        }
+
+        function createSimpleHouse(scene, x, y, width, height, id, interiorPath) {
+            try {
+                // Rectángulo blanco con borde negro (SIN COLISIONES)
+                const house = scene.add.rectangle(x, y, width, height, 0xffffff);
+                house.setStrokeStyle(2, 0x000000);
+                house.setDepth(200);
+
+                // Puerta (rectángulo marrón)
+                const door = scene.add.rectangle(x, y + height/2 - 10, 60, 20, 0x8b4513);
+                door.setStrokeStyle(2, 0x000000);
+                door.setDepth(201);
+
+                // SIN COLISIONES - Puedes atravesar las casas libremente
+
+                houses.push({
+                    id,
+                    x,
+                    y,
+                    width,
+                    height,
+                    sprite: house,
+                    interiorPath
+                });
+                console.log(`✅ Casa creada: ${id} en (${x}, ${y})`);
+            } catch (error) {
+                console.error('❌ Error creando casa:', error);
+            }
+        }
+
+        function findNearestHouse(playerX, playerY, maxDistance) {
+            let nearest = null;
+            let minDist = maxDistance;
+
+            houses.forEach(house => {
+                const dist = Phaser.Math.Distance.Between(playerX, playerY, house.x, house.y);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = house;
+                }
+            });
+
+            return nearest;
+        }
+
+        async function enterHouse(scene, house) {
+            console.log('🏠 Entrando a casa:', house.id, house.interiorPath);
+
+            try {
+                // Cargar datos del interior
+                const response = await fetch(house.interiorPath);
+                const interiorData = await response.json();
+
+                // Crear modal de interior
+                const modal = document.createElement('div');
+                modal.className = 'house-interior-modal';
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.9);
+                    z-index: 10000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-family: Arial, sans-serif;
+                `;
+
+                const interiorContainer = document.createElement('div');
+                interiorContainer.style.cssText = `
+                    background: ${interiorData.interior.wallColor};
+                    width: ${interiorData.interior.width}px;
+                    height: ${interiorData.interior.height}px;
+                    position: relative;
+                    border: 4px solid #000;
+                    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+                `;
+
+                // Piso
+                const floor = document.createElement('div');
+                floor.style.cssText = `
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 100px;
+                    background: ${interiorData.interior.floorColor};
+                    border-top: 3px solid #000;
+                `;
+                interiorContainer.appendChild(floor);
+
+                // Título de la casa
+                const title = document.createElement('h2');
+                title.textContent = interiorData.name;
+                title.style.cssText = `
+                    position: absolute;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: white;
+                    text-shadow: 2px 2px 4px #000;
+                    margin: 0;
+                    font-size: 28px;
+                `;
+                interiorContainer.appendChild(title);
+
+                // NPCs en el interior
+                if (interiorData.npcs) {
+                    interiorData.npcs.forEach(npc => {
+                        const npcDiv = document.createElement('div');
+                        npcDiv.style.cssText = `
+                            position: absolute;
+                            left: ${npc.position.x}px;
+                            top: ${npc.position.y}px;
+                            transform: translate(-50%, -50%);
+                            text-align: center;
+                            cursor: pointer;
+                            transition: transform 0.2s;
+                        `;
+
+                        // Obtener imagen del NPC
+                        const npcImage = NPC_IMAGES[npc.id] || NPC_PERSONALITIES[npc.id]?.image;
+
+                        npcDiv.innerHTML = `
+                            <div style="width: 80px; height: 80px; margin: 0 auto;">
+                                ${npcImage
+                                    ? `<img src="${npcImage}" alt="${npc.name}" style="width: 100%; height: 100%; object-fit: contain;">`
+                                    : `<div style="font-size: 48px;">${npc.emoji}</div>`
+                                }
+                            </div>
+                            <div style="background: rgba(0,0,0,0.8); color: white; padding: 8px 12px; border-radius: 8px; font-size: 14px; margin-top: 10px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                ${npc.name}
+                            </div>
+                        `;
+
+                        npcDiv.onmouseenter = () => {
+                            npcDiv.style.transform = 'translate(-50%, -50%) scale(1.1)';
+                        };
+                        npcDiv.onmouseleave = () => {
+                            npcDiv.style.transform = 'translate(-50%, -50%) scale(1)';
+                        };
+                        npcDiv.onclick = () => {
+                            openNPCChat(npc);
+                        };
+                        interiorContainer.appendChild(npcDiv);
+                    });
+                }
+
+                // Actividades en el interior
+                if (interiorData.activities) {
+                    interiorData.activities.forEach(activity => {
+                        const activityDiv = document.createElement('div');
+                        activityDiv.style.cssText = `
+                            position: absolute;
+                            left: ${activity.position.x}px;
+                            top: ${activity.position.y}px;
+                            transform: translate(-50%, -50%);
+                            text-align: center;
+                            cursor: pointer;
+                        `;
+                        activityDiv.innerHTML = `
+                            <div style="font-size: 36px;">${activity.icon}</div>
+                            <div style="background: rgba(0,0,0,0.7); color: white; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin-top: 3px;">
+                                ${activity.type}
+                            </div>
+                        `;
+                        activityDiv.onclick = () => {
+                            handleActivity(activity);
+                        };
+                        interiorContainer.appendChild(activityDiv);
+                    });
+                }
+
+                // Botón de salida
+                const exitBtn = document.createElement('button');
+                exitBtn.textContent = '← Salir';
+                exitBtn.style.cssText = `
+                    position: absolute;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    padding: 15px 40px;
+                    background: #e74c3c;
+                    color: white;
+                    border: 3px solid #000;
+                    border-radius: 8px;
+                    font-size: 18px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                `;
+                exitBtn.onclick = () => {
+                    modal.remove();
+                };
+                interiorContainer.appendChild(exitBtn);
+
+                modal.appendChild(interiorContainer);
+                document.body.appendChild(modal);
+
+            } catch (error) {
+                console.error('❌ Error cargando interior:', error);
+                alert('Error al cargar el interior de la casa');
+            }
+        }
+
+        // Función para abrir chat con NPC usando OpenAI
+        async function openNPCChat(npc) {
+            const personality = NPC_PERSONALITIES[npc.id];
+            if (!personality) {
+                alert(`Personalidad no configurada para ${npc.name}`);
+                return;
+            }
+
+            // Crear modal de chat HTML
+            const chatModal = document.createElement('div');
+            chatModal.className = 'npc-chat-modal';
+            chatModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.85);
+                z-index: 10002;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: Arial, sans-serif;
+            `;
+
+            const chatContainer = document.createElement('div');
+            chatContainer.style.cssText = `
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                width: 90%;
+                max-width: 600px;
+                height: 80%;
+                max-height: 700px;
+                border-radius: 20px;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            `;
+
+            // Header del chat
+            const chatHeader = document.createElement('div');
+            chatHeader.style.cssText = `
+                background: rgba(0, 0, 0, 0.3);
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 2px solid rgba(255,255,255,0.2);
+            `;
+            const npcImage = NPC_IMAGES[npc.id] || personality.image;
+
+            chatHeader.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; padding: 8px; display: flex; align-items: center; justify-content: center;">
+                        ${npcImage
+                            ? `<img src="${npcImage}" alt="${personality.name}" style="width: 100%; height: 100%; object-fit: contain;">`
+                            : `<div style="font-size: 40px;">${npc.emoji}</div>`
+                        }
+                    </div>
+                    <div>
+                        <div style="color: white; font-size: 20px; font-weight: bold;">${personality.name}</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 14px;">${personality.role}</div>
+                    </div>
+                </div>
+                <button id="closeChatBtn" style="
+                    background: rgba(255,255,255,0.2);
+                    border: none;
+                    color: white;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    font-size: 24px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                ">×</button>
+            `;
+
+            // Área de mensajes
+            const messagesArea = document.createElement('div');
+            messagesArea.id = 'chat-messages';
+            messagesArea.style.cssText = `
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px;
+                background: rgba(255, 255, 255, 0.95);
+            `;
+
+            // Input area
+            const inputArea = document.createElement('div');
+            inputArea.style.cssText = `
+                padding: 20px;
+                background: rgba(0, 0, 0, 0.3);
+                display: flex;
+                gap: 10px;
+            `;
+            inputArea.innerHTML = `
+                <input
+                    type="text"
+                    id="chat-input"
+                    placeholder="Escribe tu mensaje..."
+                    style="
+                        flex: 1;
+                        padding: 15px;
+                        border: none;
+                        border-radius: 25px;
+                        font-size: 16px;
+                        outline: none;
+                    "
+                />
+                <button id="send-btn" style="
+                    background: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    border-radius: 25px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                ">Enviar</button>
+            `;
+
+            chatContainer.appendChild(chatHeader);
+            chatContainer.appendChild(messagesArea);
+            chatContainer.appendChild(inputArea);
+            chatModal.appendChild(chatContainer);
+            document.body.appendChild(chatModal);
+
+            // Historial de conversación
+            const conversationHistory = [
+                { role: 'system', content: personality.personality },
+                { role: 'assistant', content: personality.greeting }
+            ];
+
+            // Mostrar mensaje inicial
+            addMessageToChat(messagesArea, personality.greeting, 'assistant', npc.emoji, false, npcImage);
+
+            // Event listeners - esperar al siguiente tick para asegurar que el DOM está listo
+            setTimeout(() => {
+                const closeBtn = chatModal.querySelector('#closeChatBtn');
+                const sendBtn = chatModal.querySelector('#send-btn');
+                const input = chatModal.querySelector('#chat-input');
+
+                console.log('🔍 Botón cerrar encontrado:', closeBtn);
+                console.log('🔍 Input encontrado:', input);
+                console.log('🔍 Botón enviar encontrado:', sendBtn);
+
+                // Cerrar chat
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('❌ Cerrando chat');
+                        // Re-habilitar teclado al cerrar
+                        if (scene.input.keyboard) {
+                            scene.input.keyboard.enabled = true;
+                        }
+                        chatModal.remove();
+                    });
+                } else {
+                    console.error('❌ No se encontró el botón de cerrar');
+                }
+
+                // Configurar input
+                if (input) {
+                    input.addEventListener('focus', () => {
+                        if (scene.input.keyboard) {
+                            scene.input.keyboard.enabled = false;
+                        }
+                    });
+
+                    input.addEventListener('blur', () => {
+                        if (scene.input.keyboard) {
+                            scene.input.keyboard.enabled = true;
+                        }
+                    });
+
+                    // Prevenir que Phaser capture eventos de teclado en el input
+                    input.addEventListener('keydown', (e) => {
+                        e.stopPropagation();
+                    });
+
+                    input.addEventListener('keyup', (e) => {
+                        e.stopPropagation();
+                    });
+
+                    input.addEventListener('keypress', (e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Enter') sendMessage();
+                    });
+
+                    input.focus();
+                }
+
+                // Configurar botón enviar
+                if (sendBtn) {
+                    sendBtn.onclick = sendMessage;
+                }
+
+                // Definir sendMessage dentro del setTimeout para tener acceso a input
+                async function sendMessage() {
+                const userMessage = input.value.trim();
+                if (!userMessage) return;
+
+                // Mostrar mensaje del usuario
+                addMessageToChat(messagesArea, userMessage, 'user');
+                input.value = '';
+
+                // Agregar al historial
+                conversationHistory.push({ role: 'user', content: userMessage });
+
+                // Mostrar indicador de "escribiendo..."
+                const typingIndicator = addMessageToChat(messagesArea, 'Escribiendo...', 'assistant', npc.emoji, true, npcImage);
+
+                // Llamar a OpenAI
+                try {
+                    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${OPENAI_API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: OPENAI_MODEL,
+                            messages: conversationHistory,
+                            max_tokens: 300,
+                            temperature: 0.8
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    // Remover indicador de escritura
+                    typingIndicator.remove();
+
+                    if (data.choices && data.choices[0]) {
+                        const aiMessage = data.choices[0].message.content;
+                        conversationHistory.push({ role: 'assistant', content: aiMessage });
+                        addMessageToChat(messagesArea, aiMessage, 'assistant', npc.emoji, false, npcImage);
+                    } else {
+                        addMessageToChat(messagesArea, 'Lo siento, no pude procesar tu mensaje.', 'assistant', npc.emoji, false, npcImage);
+                    }
+                } catch (error) {
+                    console.error('Error con OpenAI:', error);
+                    typingIndicator.remove();
+                    addMessageToChat(messagesArea, 'Error de conexión. Intenta de nuevo.', 'assistant', npc.emoji, false, npcImage);
+                }
+                }
+            }, 0);
+        }
+
+        function addMessageToChat(container, text, role, emoji = '', isTyping = false, npcImage = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                margin-bottom: 15px;
+                display: flex;
+                ${role === 'user' ? 'justify-content: flex-end;' : 'justify-content: flex-start;'}
+                animation: slideIn 0.3s ease-out;
+            `;
+
+            const bubble = document.createElement('div');
+            bubble.style.cssText = `
+                max-width: 70%;
+                padding: 12px 18px;
+                border-radius: 18px;
+                ${role === 'user'
+                    ? 'background: #4CAF50; color: white;'
+                    : 'background: white; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.1);'
+                }
+                ${isTyping ? 'font-style: italic; opacity: 0.7;' : ''}
+            `;
+
+            if (role === 'assistant' && (npcImage || emoji)) {
+                bubble.innerHTML = `
+                    <div style="display: flex; align-items: start; gap: 10px;">
+                        ${npcImage
+                            ? `<div style="width: 32px; height: 32px; flex-shrink: 0;"><img src="${npcImage}" style="width: 100%; height: 100%; object-fit: contain;"></div>`
+                            : `<div style="font-size: 24px;">${emoji}</div>`
+                        }
+                        <div>${text}</div>
+                    </div>
+                `;
+            } else {
+                bubble.textContent = text;
+            }
+
+            messageDiv.appendChild(bubble);
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+
+            return messageDiv;
+        }
+
+        function handleActivity(activity) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 30px;
+                border: 3px solid #000;
+                border-radius: 10px;
+                z-index: 10001;
+                max-width: 500px;
+                max-height: 80vh;
+                overflow-y: auto;
+            `;
+
+            let content = `<h3>${activity.icon} ${activity.title || activity.type}</h3>`;
+
+            if (activity.type === 'document' && activity.content) {
+                content += activity.content;
+            } else if (activity.type === 'key') {
+                content += `<p><strong>${activity.keyName}</strong></p>`;
+                content += `<p>${activity.description}</p>`;
+            } else if (activity.type === 'fruit') {
+                content += `<p><strong>${activity.fruitName}</strong></p>`;
+                content += `<p>${activity.description}</p>`;
+            } else if (activity.type === 'video') {
+                content += `<iframe width="100%" height="315" src="${activity.videoUrl}" frameborder="0" allowfullscreen></iframe>`;
+            }
+
+            content += `
+                <button onclick="this.parentElement.remove()" style="
+                    margin-top: 20px;
+                    padding: 10px 30px;
+                    background: #3498db;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                ">Cerrar</button>
+            `;
+
+            modal.innerHTML = content;
+            document.body.appendChild(modal);
+        }
+
+        async function loadAllNPCs(scene) {
+            // Cargar NPCs clásicos (questioners) en posiciones alejadas de casas
+            await loadClassicNPCs(scene);
+
+            // Cargar NPCs especializados
+            await loadSpecializedNPCs(scene);
+        }
+
+        async function loadClassicNPCs(scene) {
+            // ============================================
+            // NOTA: Elder Tim y Flexbox Fred están DENTRO de sus casas
+            // Casa 1: Elder Tim 👴 (mentor_html) - Llave de HTML
+            // Casa 2: Flexbox Fred 🎨 (friend_css_1) - Llave de CSS
+            // ============================================
+
+            // ============================================
+            // ASYNC ANDY ⚡ - AMARILLO/NARANJA #f39c12
+            // Posición: (3600, 400) - Esquina superior derecha
+            // Rol: Maestro de JavaScript (NPC preguntón sin casa)
+            // ============================================
+            const asyncAndy = {
+                id: 'friend_js_1',
+                name: 'Async Andy',
+                role: 'Maestro de JavaScript',
+                personality: 'misterioso',
+                specialty: 'JavaScript Asíncrono',
+                x: 3600,
+                y: 400,
+                sprite: 'friend_js_1', // Usa la imagen cargada en preload
+                unlockedDialogues: ['first_meeting']
+            };
+
+            const andyNPC = new NPC(scene, asyncAndy);
+            npcManager.npcs.set(asyncAndy.id, andyNPC);
+
+            // Escalar la imagen del NPC
+            if (andyNPC.npcSprite) {
+                andyNPC.npcSprite.setDisplaySize(80, 80);
+            }
+        }
+
+        async function loadSpecializedNPCs(scene) {
+            // ============================================
+            // REY 👑 - DORADO #FFD700
+            // Posición: (400, 3600) - Esquina inferior izquierda
+            // Rol: Sistema de progresión por niveles
+            // ============================================
+            await createSpecializedNPC(scene, {
+                id: 'king_arthur',
+                name: 'Rey Arthur',
+                type: 'king',
+                role: 'Rey del Código',
+                x: 400,
+                y: 3600,
+                color: 0xFFD700, // DORADO
+                emoji: '👑',
+                maxHP: 0
+            });
+
+            // ============================================
+            // STORYTELLER 📖 - CAFÉ/MARRÓN #8B4513
+            // Posición: (400, 2000) - Borde izquierdo (centro vertical)
+            // Rol: Cuentahistorias (explica la quest)
+            // ============================================
+            await createSpecializedNPC(scene, {
+                id: 'sage_storyteller',
+                name: 'El Sabio',
+                type: 'storyteller',
+                role: 'Cuentahistorias',
+                x: 400,
+                y: 2000,
+                color: 0x8B4513, // CAFÉ/MARRÓN
+                emoji: '📖'
+            });
+
+            // ============================================
+            // MOTIVADOR 💪 - ROSA/ROJO CLARO #FF6B6B
+            // Posición: (3600, 2000) - Borde derecho (centro vertical)
+            // Rol: Mensajes motivacionales + XP
+            // ============================================
+            await createSpecializedNPC(scene, {
+                id: 'coach_motivator',
+                name: 'Coach',
+                type: 'motivator',
+                role: 'Motivador',
+                x: 3600,
+                y: 2000,
+                color: 0xFF6B6B, // ROSA/ROJO CLARO
+                emoji: '💪'
+            });
+
+            // ============================================
+            // NOTA: El Enemigo ⚔️ (Codificador Oscuro) está DENTRO de Casa 3
+            // Casa 3: Guarida del Codificador Oscuro - Llave de JavaScript
+            // ============================================
+
+            // ============================================
+            // CURANDERO 💚 - VERDE #228B22
+            // Posición: (2000, 3600) - Borde inferior (centro horizontal)
+            // Rol: Restaura vidas del jugador
+            // ============================================
+            await createSpecializedNPC(scene, {
+                id: 'healer_sage',
+                name: 'Sanador',
+                type: 'healer',
+                role: 'Curandero',
+                x: 2000,
+                y: 3600,
+                color: 0x228B22, // VERDE
+                emoji: '💚'
+            });
+        }
+
+        function createCircleNPC(scene, data, color, emoji) {
+            // Crear textura circular con borde
+            const graphics = scene.add.graphics();
+
+            // Círculo de relleno
+            graphics.fillStyle(color, 1);
+            graphics.fillCircle(40, 40, 38);
+
+            // Borde negro 2px
+            graphics.lineStyle(2, 0x000000, 1);
+            graphics.strokeCircle(40, 40, 38);
+
+            graphics.generateTexture(data.sprite, 80, 80);
+            graphics.destroy();
+
+            // Añadir emoji al NPC después de crearlo
+            scene.time.delayedCall(100, () => {
+                const emojiText = scene.add.text(data.x, data.y, emoji, {
+                    fontSize: '24px',
+                    align: 'center'
+                });
+                emojiText.setOrigin(0.5, 0.5);
+                emojiText.setDepth(501);
+            });
+        }
+
+        async function createSpecializedNPC(scene, config) {
+            // Usar la imagen cargada en preload
+            const npcData = {
+                id: config.id,
+                name: config.name,
+                role: config.role,
+                x: config.x,
+                y: config.y,
+                sprite: config.id, // Usa el ID del NPC para obtener la imagen
+                unlockedDialogues: ['first_meeting'],
+                maxHP: config.maxHP,
+                rewards: config.rewards
+            };
+
+            const npc = new NPC(scene, npcData);
+            npc.npcType = config.type;
+
+            // Escalar la imagen del NPC
+            if (npc.npcSprite) {
+                npc.npcSprite.setDisplaySize(80, 80);
+            }
+
+            // CUARTO: Crear comportamiento especializado
+            switch (config.type) {
+                case 'king':
+                    npc.specialBehavior = new NPCKing(scene, npc);
+                    break;
+                case 'storyteller':
+                    npc.specialBehavior = new NPCStoryteller(scene, npc);
+                    break;
+                case 'motivator':
+                    npc.specialBehavior = new NPCMotivator(scene, npc);
+                    break;
+                case 'enemy':
+                    npc.specialBehavior = new NPCEnemy(scene, npc);
+                    break;
+                case 'healer':
+                    npc.specialBehavior = new NPCHealer(scene, npc);
+                    break;
+            }
+
+            // QUINTO: Configurar handlers de click
+            if (npc.specialBehavior) {
+                npc.npcSprite.off('pointerdown');
+                npc.npcSprite.on('pointerdown', () => {
+                    switch (npc.npcType) {
+                        case 'king':
+                            window.currentKingNPC = npc.specialBehavior;
+                            break;
+                        case 'storyteller':
+                            window.currentStoryteller = npc.specialBehavior;
+                            break;
+                        case 'motivator':
+                            window.currentMotivator = npc.specialBehavior;
+                            break;
+                        case 'enemy':
+                            window.currentEnemy = npc.specialBehavior;
+                            break;
+                        case 'healer':
+                            window.currentHealer = npc.specialBehavior;
+                            break;
+                    }
+                    if (npc.specialBehavior.interact) {
+                        npc.specialBehavior.interact();
+                    }
+                });
+            }
+
+            npcLoader.npcs.push(npc);
+        }
+
+        function update(time, delta) {
+            // Update NPCs
+            if (npcManager) {
+                npcManager.update();
+            }
+            if (npcLoader) {
+                npcLoader.update();
+            }
+
+            // Movimiento del jugador - SIN RESTRICCIONES
+            if (!player) {
+                console.error('❌ Player no existe');
+                return;
+            }
+            if (!player.body) {
+                console.error('❌ Player.body no existe');
+                return;
+            }
+
+            const speed = 200;
+            player.body.setVelocity(0);
+
+            let moved = false;
+
+            if (cursors.left.isDown || wasd.left.isDown) {
+                player.body.setVelocityX(-speed);
+                moved = true;
+            } else if (cursors.right.isDown || wasd.right.isDown) {
+                player.body.setVelocityX(speed);
+                moved = true;
+            }
+
+            if (cursors.up.isDown || wasd.up.isDown) {
+                player.body.setVelocityY(-speed);
+                moved = true;
+            } else if (cursors.down.isDown || wasd.down.isDown) {
+                player.body.setVelocityY(speed);
+                moved = true;
+            }
+
+            if (moved) {
+                console.log('🏃 Moviendo jugador:', player.x.toFixed(0), player.y.toFixed(0));
+            }
+        }
+    </script>
+</body>
+</html>

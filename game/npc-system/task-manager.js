@@ -6,7 +6,7 @@ class TaskManager {
         this.currentTask = null;
 
         this.aiEvaluator = new AIEvaluator();
-        this.evaluationUI = new EvaluationUIHTML(scene, this.aiEvaluator);
+        this.evaluationUI = new EvaluationUI(scene, this.aiEvaluator);
 
         this.loadTasks();
     }

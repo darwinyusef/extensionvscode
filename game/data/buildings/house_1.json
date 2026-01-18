@@ -3,12 +3,12 @@
   "name": "Casa de Elder Tim",
   "type": "house",
   "visual": {
-    "type": "rectangle",
+    "type": "simple-rectangle",
     "width": 240,
     "height": 200,
     "color": "#8b4513",
-    "roofColor": "#654321",
-    "windowColor": "#87ceeb"
+    "borderColor": "#000000",
+    "borderWidth": 2
   },
   "position": {
     "tileRow": 42,

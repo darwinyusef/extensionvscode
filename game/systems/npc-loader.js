@@ -44,10 +44,38 @@ class NPCLoader {
             x: data.position.x,
             y: data.position.y,
             sprite: this.getSpriteKey(data),
-            unlockedDialogues: data.unlockedDialogues || ['first_meeting']
+            unlockedDialogues: data.unlockedDialogues || ['first_meeting'],
+            maxHP: data.maxHP,
+            rewards: data.rewards
         };
 
         const npc = new NPC(this.scene, npcData);
+
+        // Create specialized behavior based on NPC type
+        npc.npcType = data.type || 'questioner';
+
+        switch (npc.npcType) {
+            case 'king':
+                npc.specialBehavior = new NPCKing(this.scene, npc);
+                break;
+            case 'storyteller':
+                npc.specialBehavior = new NPCStoryteller(this.scene, npc);
+                break;
+            case 'motivator':
+                npc.specialBehavior = new NPCMotivator(this.scene, npc);
+                break;
+            case 'enemy':
+                npc.specialBehavior = new NPCEnemy(this.scene, npc);
+                break;
+            case 'healer':
+                npc.specialBehavior = new NPCHealer(this.scene, npc);
+                break;
+            case 'questioner':
+            default:
+                // Original behavior - uses task manager
+                npc.specialBehavior = null;
+                break;
+        }
 
         if (data.relationship) {
             const savedRelationship = this.loadSavedRelationship(data.id);
@@ -58,13 +86,47 @@ class NPCLoader {
             }
         }
 
-        if (data.sprite.type === 'svg') {
-            this.createSVGSprite(npc, data.sprite);
+        if (data.sprite.type === 'svg' || data.sprite.type === 'circle') {
+            this.createCircleSprite(npc, data.sprite);
         } else if (data.sprite.type === 'image') {
             this.loadImageSprite(npc, data.sprite);
         }
 
+        // Add click handler for specialized NPCs
+        if (npc.specialBehavior) {
+            npc.npcSprite.off('pointerdown'); // Remove default handler
+            npc.npcSprite.on('pointerdown', () => {
+                this.handleSpecializedNPCClick(npc);
+            });
+        }
+
         return npc;
+    }
+
+    handleSpecializedNPCClick(npc) {
+        // Store current NPC globally for the specialized UI
+        switch (npc.npcType) {
+            case 'king':
+                window.currentKingNPC = npc.specialBehavior;
+                break;
+            case 'storyteller':
+                window.currentStoryteller = npc.specialBehavior;
+                break;
+            case 'motivator':
+                window.currentMotivator = npc.specialBehavior;
+                break;
+            case 'enemy':
+                window.currentEnemy = npc.specialBehavior;
+                break;
+            case 'healer':
+                window.currentHealer = npc.specialBehavior;
+                break;
+        }
+
+        // Call the interact method
+        if (npc.specialBehavior && npc.specialBehavior.interact) {
+            npc.specialBehavior.interact();
+        }
     }
 
     getSpriteKey(data) {
@@ -74,7 +136,7 @@ class NPCLoader {
         return `npc_${data.id}`;
     }
 
-    createSVGSprite(npc, spriteConfig) {
+    createCircleSprite(npc, spriteConfig) {
         const color = parseInt(spriteConfig.color.replace('#', '0x'));
         const size = spriteConfig.size || 80;
 
@@ -87,6 +149,16 @@ class NPCLoader {
 
         if (npc.npcSprite) {
             npc.npcSprite.setTexture(`npc_${npc.id}`);
+
+            // Add emoji if present
+            if (spriteConfig.emoji) {
+                const emojiText = this.scene.add.text(0, 0, spriteConfig.emoji, {
+                    fontSize: `${size * 0.6}px`,
+                    align: 'center'
+                });
+                emojiText.setOrigin(0.5, 0.5);
+                npc.add(emojiText);
+            }
         }
     }
 
@@ -129,6 +201,29 @@ class NPCLoader {
 
     getAllNPCs() {
         return this.npcs;
+    }
+
+    getClosestNPC(x, y, maxDistance) {
+        let closestNPC = null;
+        let closestDistance = maxDistance;
+
+        this.npcs.forEach(npc => {
+            const distance = Phaser.Math.Distance.Between(x, y, npc.x, npc.y);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestNPC = npc;
+            }
+        });
+
+        return closestNPC;
+    }
+
+    update() {
+        this.npcs.forEach(npc => {
+            if (npc.update) {
+                npc.update();
+            }
+        });
     }
 
     saveAllRelationships() {

@@ -3,12 +3,12 @@
   "name": "Casa de Flexbox Fred",
   "type": "house",
   "visual": {
-    "type": "rectangle",
+    "type": "simple-rectangle",
     "width": 240,
     "height": 200,
     "color": "#cd853f",
-    "roofColor": "#8b6914",
-    "windowColor": "#87ceeb"
+    "borderColor": "#000000",
+    "borderWidth": 2
   },
   "position": {
     "tileRow": 42,

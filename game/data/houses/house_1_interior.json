@@ -17,6 +17,21 @@
     "width": 100,
     "height": 40
   },
+  "npcs": [
+    {
+      "id": "mentor_html",
+      "name": "Elder Tim",
+      "role": "Maestro de HTML",
+      "position": { "x": 250, "y": 300 },
+      "emoji": "👴",
+      "color": "#4a90e2",
+      "dialogue": {
+        "greeting": "¡Bienvenido a mi casa, joven estudiante! Aquí encontrarás todo lo que necesitas para dominar HTML.",
+        "aboutKeys": "La Llave de HTML está guardada en esta casa. Completa las actividades para encontrarla.",
+        "aboutFruits": "También hay una Manzana del Conocimiento escondida aquí. ¡Búscala!"
+      }
+    }
+  ],
   "activities": [
     {
       "id": "doc_1",

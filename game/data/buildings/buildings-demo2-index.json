@@ -1,0 +1,16 @@
+{
+  "buildings": [
+    {
+      "id": "house_1",
+      "file": "data/buildings/house_1_demo2.json"
+    },
+    {
+      "id": "house_2",
+      "file": "data/buildings/house_2_demo2.json"
+    },
+    {
+      "id": "building_1",
+      "file": "data/buildings/building_1_demo2.json"
+    }
+  ]
+}

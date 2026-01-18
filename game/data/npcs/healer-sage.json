@@ -1,0 +1,23 @@
+{
+  "id": "healer_sage",
+  "name": "Sanador del Bosque",
+  "type": "healer",
+  "role": "Curandero del Reino",
+  "personality": "compasivo",
+  "specialty": "Curación y Comercio",
+  "position": {
+    "x": 1200,
+    "y": 2600
+  },
+  "sprite": {
+    "type": "circle",
+    "color": "#228B22",
+    "size": 40,
+    "emoji": "💚"
+  },
+  "dialogue": {
+    "greeting": "Bienvenido a mi santuario. Puedo curar tus heridas y ofrecerte items que te ayudarán en tu viaje.",
+    "topic": "Curación",
+    "firstMeeting": true
+  }
+}
