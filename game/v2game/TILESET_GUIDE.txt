@@ -1,0 +1,62 @@
+GUÍA DE TILESET - ERA MEIJI JAPÓN
+==================================
+
+Archivo: assets/tilesets/tileset1.png
+Tamaño tiles: 32x32 pixels
+Layout: 16 tiles por fila
+
+ÍNDICES DE TILES:
+-----------------
+
+TERRENO (Fila 0):
+  0: Pasto verde
+  1: Pasto claro
+  2: Pasto oscuro
+  3: Pasto amarillento
+
+CAMINOS (Fila 1):
+  16: Camino principal (tierra)
+  17: Camino secundario (piedras)
+
+NATURALEZA (Fila 2):
+  32: Árbol (cerezo/sakura)
+  33: Pino
+  34: Arbusto/bush
+
+MONTAÑAS (Fila 3):
+  48: Montaña tipo 1
+  49: Montaña tipo 2
+  50: Montaña tipo 3
+
+EDIFICIOS - CASAS (Fila 4):
+  64: Casa parte 1
+  65: Casa parte 2
+  66: Casa parte 3
+
+EDIFICIOS - TEMPLOS (Fila 5):
+  80: Templo parte 1
+  81: Templo parte 2
+  82: Templo parte 3
+  83: Templo parte 4
+
+EDIFICIOS - TIENDAS (Fila 6):
+  96: Tienda parte 1
+  97: Tienda parte 2
+
+JUGADOR:
+--------
+Archivo: assets/characters/player.png
+Tamaño: 32x32 pixels
+Sprite del personaje jugador
+
+ESTRUCTURA:
+-----------
+v2game/
+  ├── assets/
+  │   ├── tilesets/
+  │   │   └── meiji-tileset.png (512x512px, 16x16 tiles de 32x32)
+  │   └── characters/
+  │       └── player.png (32x32px)
+  ├── game.html (usa tilemap-game-images.js)
+  ├── index.html (usa tilemap-game-canvas.js - gráficos generados)
+  └── tilemap-game-images.js

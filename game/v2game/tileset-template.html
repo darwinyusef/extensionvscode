@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plantilla Tileset - Era Meiji</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #2a2a2a;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .info {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .info strong {
+            color: #4ECDC4;
+        }
+
+        .grid-container {
+            display: inline-block;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+
+        .wrapper {
+            text-align: center;
+        }
+
+        .tileset-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 32px);
+            grid-template-rows: repeat(16, 32px);
+            gap: 1px;
+            background: #000;
+            border: 2px solid #000;
+        }
+
+        .tile {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: bold;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .tile:hover {
+            transform: scale(1.8);
+            z-index: 100;
+            border: 2px solid #fff;
+        }
+
+        .tile-grass { background: #6B8E23; color: #fff; }
+        .tile-path { background: #D2B48C; color: #000; }
+        .tile-tree { background: #228B22; color: #fff; }
+        .tile-mountain { background: #696969; color: #fff; }
+        .tile-house { background: #8B4513; color: #fff; }
+        .tile-temple { background: #B22222; color: #fff; }
+        .tile-shop { background: #4169E1; color: #fff; }
+        .tile-empty { background: #f0f0f0; color: #999; }
+
+        .legend {
+            margin-top: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .legend h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .legend-item {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+
+        .legend-item h3 {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .legend-item p {
+            font-size: 12px;
+            color: #aaa;
+            margin: 2px 0;
+        }
+
+        .legend-grass { border-color: #6B8E23; }
+        .legend-path { border-color: #D2B48C; }
+        .legend-tree { border-color: #228B22; }
+        .legend-mountain { border-color: #696969; }
+        .legend-house { border-color: #8B4513; }
+        .legend-temple { border-color: #B22222; }
+        .legend-shop { border-color: #4169E1; }
+
+        .download-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: #4ECDC4;
+            color: #000;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #45b8b0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📐 PLANTILLA TILESET - ERA MEIJI JAPÓN</h1>
+        <p>Guía visual para construir meiji-tileset.png (512x512 pixels)</p>
+    </div>
+
+    <div class="info">
+        <p><strong>Tamaño total del archivo PNG:</strong> 512 x 512 pixels</p>
+        <p><strong>Tamaño de cada tile:</strong> 32 x 32 pixels</p>
+        <p><strong>Grid:</strong> 16 columnas x 16 filas = 256 tiles posibles</p>
+        <p><strong>Cálculo de índice:</strong> índice = (fila × 16) + columna</p>
+        <p><strong>Ejemplo:</strong> Fila 2, Columna 3 → (2 × 16) + 3 = 35</p>
+    </div>
+
+    <div class="wrapper">
+        <div class="grid-container">
+            <div class="tileset-grid" id="tileset"></div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <h2>🎨 LEYENDA DE TILES</h2>
+        <div class="legend-grid">
+            <div class="legend-item legend-grass">
+                <h3>TERRENO (Fila 0)</h3>
+                <p>0: Pasto verde</p>
+                <p>1: Pasto claro</p>
+                <p>2: Pasto oscuro</p>
+                <p>3: Pasto amarillento</p>
+            </div>
+
+            <div class="legend-item legend-path">
+                <h3>CAMINOS (Fila 1)</h3>
+                <p>16: Camino principal (tierra)</p>
+                <p>17: Camino secundario (piedras)</p>
+            </div>
+
+            <div class="legend-item legend-tree">
+                <h3>NATURALEZA (Fila 2)</h3>
+                <p>32: Árbol (cerezo/sakura)</p>
+                <p>33: Pino</p>
+                <p>34: Arbusto/bush</p>
+            </div>
+
+            <div class="legend-item legend-mountain">
+                <h3>MONTAÑAS (Fila 3)</h3>
+                <p>48: Montaña tipo 1</p>
+                <p>49: Montaña tipo 2</p>
+                <p>50: Montaña tipo 3</p>
+            </div>
+
+            <div class="legend-item legend-house">
+                <h3>CASAS (Fila 4)</h3>
+                <p>64: Casa parte 1</p>
+                <p>65: Casa parte 2</p>
+                <p>66: Casa parte 3</p>
+            </div>
+
+            <div class="legend-item legend-temple">
+                <h3>TEMPLOS (Fila 5)</h3>
+                <p>80: Templo parte 1</p>
+                <p>81: Templo parte 2</p>
+                <p>82: Templo parte 3</p>
+                <p>83: Templo parte 4</p>
+            </div>
+
+            <div class="legend-item legend-shop">
+                <h3>TIENDAS (Fila 6)</h3>
+                <p>96: Tienda parte 1</p>
+                <p>97: Tienda parte 2</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="download-section">
+        <p style="margin-bottom: 10px;">Descarga esta plantilla como imagen de referencia:</p>
+        <button class="btn" onclick="downloadAsImage()">⬇️ Descargar Plantilla PNG</button>
+    </div>
+
+    <script>
+        const tileConfig = {
+            0: { type: 'grass', label: 'Pasto\nVerde' },
+            1: { type: 'grass', label: 'Pasto\nClaro' },
+            2: { type: 'grass', label: 'Pasto\nOscuro' },
+            3: { type: 'grass', label: 'Pasto\nAmarill.' },
+            16: { type: 'path', label: 'Camino\nPrincipal' },
+            17: { type: 'path', label: 'Camino\nSecund.' },
+            32: { type: 'tree', label: 'Cerezo\nSakura' },
+            33: { type: 'tree', label: 'Pino' },
+            34: { type: 'tree', label: 'Arbusto\nBush' },
+            48: { type: 'mountain', label: 'Montaña\n1' },
+            49: { type: 'mountain', label: 'Montaña\n2' },
+            50: { type: 'mountain', label: 'Montaña\n3' },
+            64: { type: 'house', label: 'Casa\n1' },
+            65: { type: 'house', label: 'Casa\n2' },
+            66: { type: 'house', label: 'Casa\n3' },
+            80: { type: 'temple', label: 'Templo\n1' },
+            81: { type: 'temple', label: 'Templo\n2' },
+            82: { type: 'temple', label: 'Templo\n3' },
+            83: { type: 'temple', label: 'Templo\n4' },
+            96: { type: 'shop', label: 'Tienda\n1' },
+            97: { type: 'shop', label: 'Tienda\n2' }
+        };
+
+        const tileset = document.getElementById('tileset');
+
+        for (let i = 0; i < 256; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+
+            if (tileConfig[i]) {
+                tile.classList.add(`tile-${tileConfig[i].type}`);
+                tile.innerHTML = `<div style="text-align: center; line-height: 10px;">${i}<br><span style="font-size: 7px;">${tileConfig[i].label.replace('\n', '<br>')}</span></div>`;
+                tile.title = `Índice ${i}: ${tileConfig[i].label.replace('\n', ' ')}`;
+            } else {
+                tile.classList.add('tile-empty');
+                tile.textContent = i;
+                tile.title = `Índice ${i}: Vacío (disponible)`;
+            }
+
+            tileset.appendChild(tile);
+        }
+
+        function downloadAsImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 512, 512);
+
+            const colors = {
+                'grass': '#6B8E23',
+                'path': '#D2B48C',
+                'tree': '#228B22',
+                'mountain': '#696969',
+                'house': '#8B4513',
+                'temple': '#B22222',
+                'shop': '#4169E1',
+                'empty': '#f0f0f0'
+            };
+
+            for (let i = 0; i < 256; i++) {
+                const row = Math.floor(i / 16);
+                const col = i % 16;
+                const x = col * 32;
+                const y = row * 32;
+
+                const config = tileConfig[i];
+                ctx.fillStyle = config ? colors[config.type] : colors.empty;
+                ctx.fillRect(x, y, 32, 32);
+
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x, y, 32, 32);
+
+                ctx.fillStyle = config ? '#ffffff' : '#999999';
+                ctx.font = 'bold 10px Courier New';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(i, x + 16, y + 16);
+            }
+
+            const link = document.createElement('a');
+            link.download = 'meiji-tileset-template.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
