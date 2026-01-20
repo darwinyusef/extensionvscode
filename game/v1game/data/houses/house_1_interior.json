@@ -1,0 +1,116 @@
+{
+  "id": "house_1",
+  "name": "Casa de Elder Tim",
+  "interior": {
+    "wallColor": "#8b7355",
+    "floorColor": "#d2b48c",
+    "width": 800,
+    "height": 600
+  },
+  "spawnPoint": {
+    "x": 400,
+    "y": 550
+  },
+  "exitZone": {
+    "x": 400,
+    "y": 580,
+    "width": 100,
+    "height": 40
+  },
+  "npcs": [
+    {
+      "id": "mentor_html",
+      "name": "Elder Tim",
+      "role": "Maestro de HTML",
+      "position": { "x": 250, "y": 300 },
+      "emoji": "👴",
+      "color": "#4a90e2",
+      "dialogue": {
+        "greeting": "¡Bienvenido a mi casa, joven estudiante! Aquí encontrarás todo lo que necesitas para dominar HTML.",
+        "aboutKeys": "La Llave de HTML está guardada en esta casa. Completa las actividades para encontrarla.",
+        "aboutFruits": "También hay una Manzana del Conocimiento escondida aquí. ¡Búscala!"
+      }
+    }
+  ],
+  "activities": [
+    {
+      "id": "doc_1",
+      "type": "document",
+      "position": { "x": 150, "y": 200 },
+      "icon": "📚",
+      "title": "Historia del HTML",
+      "content": "<h2>El Nacimiento de HTML</h2><p>HTML (HyperText Markup Language) fue creado por Tim Berners-Lee en 1991 como un sistema para compartir documentos científicos en el CERN.</p><h3>Conceptos Clave:</h3><ul><li><strong>Etiquetas semánticas</strong>: Describen el significado del contenido</li><li><strong>Estructura jerárquica</strong>: Los elementos se anidan unos dentro de otros</li><li><strong>Accesibilidad</strong>: HTML bien estructurado facilita el acceso para todos</li></ul><p>Elder Tim te enseñará los fundamentos de HTML en tu viaje.</p>",
+      "reward": {
+        "type": "xp",
+        "amount": 50
+      }
+    },
+    {
+      "id": "video_1",
+      "type": "video",
+      "position": { "x": 400, "y": 200 },
+      "icon": "🎥",
+      "title": "Tutorial: Introducción a HTML5",
+      "videoUrl": "https://www.youtube.com/embed/UB1O30fR-EE",
+      "reward": {
+        "type": "xp",
+        "amount": 75
+      }
+    },
+    {
+      "id": "question_1",
+      "type": "question",
+      "position": { "x": 650, "y": 200 },
+      "icon": "❓",
+      "title": "Pregunta de HTML",
+      "question": "¿Qué etiqueta se utiliza para definir un párrafo en HTML?",
+      "correctAnswer": "p",
+      "hint": "Es una letra sola, la inicial de 'paragraph'",
+      "reward": {
+        "type": "xp",
+        "amount": 100
+      }
+    },
+    {
+      "id": "key_1",
+      "type": "key",
+      "position": { "x": 150, "y": 400 },
+      "icon": "🗝️",
+      "keyName": "Llave de HTML",
+      "description": "Esta llave te permitirá acceder a contenido avanzado de HTML",
+      "reward": {
+        "type": "item",
+        "item": "key_html",
+        "name": "Llave de HTML"
+      }
+    },
+    {
+      "id": "fruit_1",
+      "type": "fruit",
+      "position": { "x": 650, "y": 400 },
+      "icon": "🍎",
+      "fruitName": "Manzana del Conocimiento",
+      "description": "Una manzana que restaura tu energía y te da conocimiento",
+      "reward": {
+        "type": "item",
+        "item": "apple",
+        "name": "Manzana del Conocimiento",
+        "effect": "restore_hp",
+        "amount": 1
+      }
+    },
+    {
+      "id": "podcast_1",
+      "type": "podcast",
+      "position": { "x": 400, "y": 400 },
+      "icon": "🎧",
+      "title": "Podcast: La Evolución de la Web",
+      "audioUrl": "assets/audio/web-evolution-podcast.mp3",
+      "description": "Escucha sobre cómo ha evolucionado la web desde sus inicios",
+      "reward": {
+        "type": "xp",
+        "amount": 60
+      }
+    }
+  ]
+}

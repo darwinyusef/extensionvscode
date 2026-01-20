@@ -1,0 +1,78 @@
+{
+  "npc_id": "friend_js_1",
+  "dialogues": [
+    {
+      "id": "first_meeting",
+      "trigger": "first_interaction",
+      "nodes": [
+        {
+          "id": "node_1",
+          "speaker": "friend_js_1",
+          "text": "¡Vamos, vamos! Soy Async Andy. No tengo tiempo que perder, hablemos de código.",
+          "emotion": "excited",
+          "next": "node_2"
+        },
+        {
+          "id": "node_2",
+          "speaker": "friend_js_1",
+          "text": "Dime rápido: ¿promesas o callbacks? ¡Necesito saber si puedo confiar en ti!",
+          "emotion": "curious",
+          "choices": [
+            {
+              "text": "Promesas siempre, async/await es el camino",
+              "next": "node_modern",
+              "friendship": 15
+            },
+            {
+              "text": "Callbacks... son más simples",
+              "next": "node_oldschool",
+              "friendship": 3
+            },
+            {
+              "text": "¿Cuál es la diferencia?",
+              "next": "node_confused",
+              "friendship": 5
+            }
+          ]
+        },
+        {
+          "id": "node_modern",
+          "speaker": "friend_js_1",
+          "text": "¡SÍ! ¡Exacto! async/await hace que el código asíncrono sea legible. ¡Me gusta tu estilo!",
+          "emotion": "excited",
+          "reward": { "xp": 20 },
+          "next": "end"
+        },
+        {
+          "id": "node_oldschool",
+          "speaker": "friend_js_1",
+          "text": "Ugh, callback hell... ¿en serio? Necesitas actualizarte, amigo. Las promesas son el presente.",
+          "emotion": "disappointed",
+          "reward": { "xp": 5 },
+          "next": "end"
+        },
+        {
+          "id": "node_confused",
+          "speaker": "friend_js_1",
+          "text": "Ok, ok. Te lo explico RÁPIDO: las promesas evitan el callback hell. Con async/await escribes código asíncrono como si fuera síncrono. ¡BOOM!",
+          "emotion": "teaching",
+          "reward": { "xp": 10 },
+          "next": "end"
+        }
+      ]
+    },
+    {
+      "id": "default",
+      "trigger": "manual",
+      "nodes": [
+        {
+          "id": "default_node",
+          "speaker": "friend_js_1",
+          "text": "Recuerda: await solo funciona dentro de funciones async. ¡No lo olvides!",
+          "emotion": "neutral",
+          "next": "end"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "npcs": [
+    {
+      "id": "elder_tim",
+      "type": "questioner",
+      "file": "data/npcs/elder-tim.json"
+    },
+    {
+      "id": "flexbox_fred",
+      "type": "questioner",
+      "file": "data/npcs/flexbox-fred.json"
+    },
+    {
+      "id": "king_arthur",
+      "type": "king",
+      "file": "data/npcs/king-arthur.json"
+    },
+    {
+      "id": "sage_storyteller",
+      "type": "storyteller",
+      "file": "data/npcs/sage-storyteller.json"
+    },
+    {
+      "id": "coach_motivator",
+      "type": "motivator",
+      "file": "data/npcs/coach-motivator.json"
+    },
+    {
+      "id": "dark_coder",
+      "type": "enemy",
+      "file": "data/npcs/dark-coder.json"
+    },
+    {
+      "id": "healer_sage",
+      "type": "healer",
+      "file": "data/npcs/healer-sage.json"
+    }
+  ]
+}

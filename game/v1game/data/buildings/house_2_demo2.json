@@ -1,0 +1,30 @@
+{
+  "id": "house_2",
+  "name": "Casa 2",
+  "type": "house",
+  "visual": {
+    "type": "simple-rectangle",
+    "width": 240,
+    "height": 200,
+    "color": "#ffffff",
+    "borderColor": "#000000",
+    "borderWidth": 2
+  },
+  "position": {
+    "tileRow": 42,
+    "tileCol": 52
+  },
+  "collisionMatrix": [
+    "000000",
+    "000000",
+    "000000",
+    "001100",
+    "000000"
+  ],
+  "entrance": {
+    "direction": "bottom",
+    "width": 80
+  },
+  "hasInterior": true,
+  "interiorConfig": "data/houses/house_2_interior.json"
+}

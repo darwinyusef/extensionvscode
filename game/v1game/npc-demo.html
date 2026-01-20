@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de NPCs - Demo Standalone</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .template {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .messages {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .messages > * {
+            pointer-events: auto;
+        }
+
+        .write {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001;
+            pointer-events: none;
+        }
+
+        .write > * {
+            pointer-events: auto;
+        }
+
+        .evaluation-modal {
+            background: rgba(26, 26, 46, 0.95);
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            width: 800px;
+            height: 160px;
+            margin: 0 auto 10px;
+            padding: 15px;
+            display: none;
+            position: relative;
+        }
+
+        .evaluation-modal.active {
+            display: flex;
+            gap: 15px;
+        }
+
+        .npc-portrait {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 2px solid #00ff88;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .modal-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .npc-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #00ff88;
+            margin: 0;
+        }
+
+        .concept-label {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .stage-indicator {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .modal-text {
+            font-size: 15px;
+            color: #ffffff;
+            line-height: 1.4;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .btn-next {
+            background: none;
+            border: none;
+            color: #00ff88;
+            font-size: 14px;
+            font-style: italic;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .btn-next:hover {
+            color: #00cc66;
+            transform: scale(1.1);
+        }
+
+        .btn-submit {
+            background: none;
+            border: none;
+            color: #fbbf24;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px 10px;
+            display: none;
+        }
+
+        .btn-submit:hover {
+            color: #fcd34d;
+            transform: scale(1.1);
+        }
+
+        .btn-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .btn-close:hover {
+            color: #ff6b6b;
+        }
+
+        .evaluation-textarea {
+            width: 720px;
+            height: 100px;
+            padding: 10px;
+            font-size: 15px;
+            font-family: 'Segoe UI', sans-serif;
+            background: #2a2a3e;
+            color: #ffffff;
+            border: 2px solid #00ff88;
+            border-radius: 6px;
+            resize: none;
+            outline: none;
+            display: none;
+            margin: 0 auto 10px;
+        }
+
+        .evaluation-textarea.active {
+            display: block;
+        }
+
+        /* Goal Screen */
+        .goals {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .goals.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .goal-modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 6px solid #00ff88;
+            border-radius: 20px;
+            padding: 60px;
+            max-width: 800px;
+            text-align: center;
+            transform: scale(0.5);
+            animation: popIn 0.5s ease-out forwards;
+            position: relative;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .goal-title {
+            font-size: 64px;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+            50% { text-shadow: 0 0 40px rgba(0, 255, 136, 0.8); }
+        }
+
+        .goal-concept {
+            font-size: 32px;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .goal-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+
+        .goal-message {
+            font-size: 24px;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            min-height: 100px;
+        }
+
+        .typewriter {
+            display: inline-block;
+            border-right: 3px solid #00ff88;
+            animation: blink 0.7s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: #00ff88; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        .goal-btn-continue {
+            background: #00ff88;
+            border: none;
+            color: #000000;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .goal-btn-continue:hover {
+            background: #00cc66;
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        /* HUD */
+        .hud {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1500;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 0;
+            border: 2px solid #00ff88;
+            font-family: 'Courier New', monospace;
+            color: #00ff88;
+            line-height: 1.4;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            min-width: 380px;
+            transition: all 0.3s ease;
+        }
+
+        .hud-border {
+            color: #00ff88;
+            font-size: 13px;
+            white-space: pre;
+            letter-spacing: 0;
+        }
+
+        .hud-header {
+            background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%);
+            color: #000;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00ff88;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .hud-header:hover {
+            background: linear-gradient(90deg, #00cc66 0%, #00aa55 100%);
+        }
+
+        .hud-minimize-btn {
+            background: #000;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            padding: 2px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .hud-minimize-btn:hover {
+            background: #00ff88;
+            color: #000;
+        }
+
+        .hud.minimized {
+            min-width: 280px;
+        }
+
+        .hud-section {
+            padding: 10px 15px;
+            border-bottom: 1px solid #00ff8844;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .hud-section:last-child {
+            border-bottom: none;
+        }
+
+        .hud.minimized .hud-section {
+            max-height: 0;
+            padding: 0;
+            opacity: 0;
+        }
+
+        .hud-player-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .hud-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .hud-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hud-bar-label {
+            min-width: 30px;
+            font-weight: bold;
+        }
+
+        .hud-bar-fill {
+            flex: 1;
+            font-size: 14px;
+            letter-spacing: -1px;
+        }
+
+        .hud-bar-percent {
+            min-width: 40px;
+            text-align: right;
+            font-size: 11px;
+        }
+
+        .hud-skills {
+            font-size: 12px;
+        }
+
+        .hud-skills-title {
+            margin-bottom: 8px;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .hud-skill-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding-left: 10px;
+        }
+
+        .hud-skill-stars {
+            color: #ffd700;
+        }
+
+        .hud-skill-locked {
+            color: #666;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .hud::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: scanline 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+        }
+
+        .info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            max-width: 350px;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .info-header {
+            background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%);
+            color: #000;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .info-header:hover {
+            background: linear-gradient(90deg, #00cc66 0%, #00aa55 100%);
+        }
+
+        .info-content {
+            padding: 15px 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .info.minimized .info-content {
+            max-height: 0;
+            padding: 0;
+            opacity: 0;
+        }
+
+        .info h3 {
+            margin: 0 0 10px 0;
+            color: #00ff88;
+        }
+
+        .info p {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+
+        .info kbd {
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .minimize-btn {
+            background: #000;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            padding: 2px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .minimize-btn:hover {
+            background: #00ff88;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="info" id="info-panel">
+        <div class="info-header" onclick="toggleInfo()">
+            <span>🎮 CONTROLES & INFO</span>
+            <button class="minimize-btn" title="Minimizar Info (I)" onclick="event.stopPropagation(); toggleInfo()">_</button>
+        </div>
+        <div class="info-content">
+            <h3>Sistema de NPCs + AI - Demo</h3>
+            <p><kbd>WASD</kbd> o <kbd>Flechas</kbd> - Mover jugador</p>
+            <p><kbd>E</kbd> - Interactuar con NPC</p>
+            <p><kbd>H</kbd> - Toggle HUD</p>
+            <p><kbd>I</kbd> - Toggle Info Panel</p>
+            <p>🤖 <strong>AI Evaluation</strong>: OpenAI GPT-4o-mini</p>
+            <p>✨ Los NPCs evalúan tus respuestas</p>
+            <p>🎯 Completa tareas para ganar XP</p>
+        </div>
+    </div>
+
+    <div class="template">
+        <div class="messages">
+            <!-- Modal de evaluación -->
+            <div id="evaluation-modal" class="evaluation-modal">
+                <div class="npc-portrait" id="npc-portrait">👤</div>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div>
+                            <p class="npc-name" id="npc-name">NPC Name</p>
+                            <p class="concept-label" id="concept-label">Concepto</p>
+                        </div>
+                        <span class="stage-indicator" id="stage-indicator">1/6</span>
+                    </div>
+                    <div class="modal-text" id="modal-text">
+                        Contenido del mensaje...
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-next" id="btn-next">Siguiente &gt;</button>
+                        <button class="btn-submit" id="btn-submit">Enviar &gt;</button>
+                    </div>
+                </div>
+                <button class="btn-close" id="btn-close">×</button>
+            </div>
+        </div>
+
+        <!-- Goal Screen -->
+        <div class="goals" id="goal-screen">
+            <div class="goal-modal">
+                <div class="goal-title">🎯 ¡GOAL ALCANZADO! 🎯</div>
+                <div class="goal-concept" id="goal-concept">HTML Semántico</div>
+                <div class="goal-score" id="goal-score">Score: 100/100</div>
+                <div class="goal-message">
+                    <span class="typewriter" id="goal-message"></span>
+                </div>
+                <button class="goal-btn-continue" id="goal-btn-continue">CONTINUAR</button>
+            </div>
+        </div>
+
+        <!-- HUD -->
+        <div class="hud" id="hud">
+            <div class="hud-header" onclick="toggleHUD()">
+                <span>⚡ SYSTEM STATUS : ONLINE</span>
+                <div>
+                    <button class="hud-minimize-btn" id="hud-minimize-btn" title="Minimizar HUD (H)" onclick="event.stopPropagation(); toggleHUD()">_</button>
+                    <span style="margin-left: 10px;">[ v1.0.2 ]</span>
+                </div>
+            </div>
+
+            <div class="hud-section">
+                <div class="hud-player-info">
+                    <span>👤 [ <span id="player-name">PLAYER_01</span> ]</span>
+                    <span>LVL. <span id="player-level">01</span> [<span id="player-rank">NOVICE</span>]</span>
+                </div>
+
+                <div class="hud-bars">
+                    <div class="hud-bar">
+                        <span class="hud-bar-label">HP</span>
+                        <span class="hud-bar-fill" id="hp-bar">[██████████░░░░]</span>
+                        <span class="hud-bar-percent" id="hp-percent">75%</span>
+                    </div>
+                    <div class="hud-bar">
+                        <span class="hud-bar-label">XP</span>
+                        <span class="hud-bar-fill" id="xp-bar">[▓▓▓░░░░░]</span>
+                        <span class="hud-bar-percent" id="xp-percent">30%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-section hud-skills">
+                <div class="hud-skills-title">&gt; SKILLS_LOG:</div>
+                <div class="hud-skill-item">
+                    <span>- HTML:</span>
+                    <span class="hud-skill-stars" id="skill-html">[★★☆☆☆] (2/5)</span>
+                </div>
+                <div class="hud-skill-item">
+                    <span>- CSS:</span>
+                    <span class="hud-skill-stars" id="skill-css">[★☆☆☆☆] (1/5)</span>
+                </div>
+                <div class="hud-skill-item">
+                    <span>- JS:</span>
+                    <span class="hud-skill-locked" id="skill-js">[☆☆☆☆☆] (LOCKED)</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-container"></div>
+
+        <div class="write">
+            <textarea
+                id="evaluation-textarea"
+                class="evaluation-textarea"
+                placeholder="Escribe tu explicación aquí...">
+            </textarea>
+        </div>
+    </div>
+
+    <!-- Sistema de NPCs -->
+    <script src="npc-system/npc.js?v=23"></script>
+    <script src="npc-system/mouth-animator.js?v=23"></script>
+    <script src="npc-system/dialogue-engine.js?v=23"></script>
+    <script src="npc-system/dialogue-ui.js?v=23"></script>
+    <script src="npc-system/relationship-manager.js?v=23"></script>
+    <script src="npc-system/npc-manager.js?v=23"></script>
+
+    <!-- Sistema de AI y Evaluación -->
+    <script src="npc-system/ai-evaluator.js?v=23"></script>
+    <script src="npc-system/evaluation-ui-html.js?v=23"></script>
+    <script src="npc-system/task-manager.js?v=23"></script>
+
+    <!-- Sistemas Especializados de NPCs -->
+    <script src="npc-system/npc-king.js?v=5"></script>
+    <script src="npc-system/npc-storyteller.js?v=5"></script>
+    <script src="npc-system/npc-motivator.js?v=5"></script>
+    <script src="npc-system/npc-enemy.js?v=5"></script>
+    <script src="npc-system/npc-healer.js?v=5"></script>
+
+    <!-- Estilos para NPCs Especializados -->
+    <link rel="stylesheet" href="npc-system/npc-styles.css?v=5">
+
+    <!-- Sistemas de Carga Dinámica -->
+    <script src="systems/map-loader.js?v=7"></script>
+    <script src="systems/building-loader.js?v=7"></script>
+    <script src="systems/npc-loader.js?v=7"></script>
+
+    <!-- Juego standalone de NPCs -->
+    <script>
+        const config = {
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            parent: 'game-container',
+            backgroundColor: 0x1a4d2e,
+            dom: {
+                createContainer: true
+            },
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            }
+        };
+
+        const game = new Phaser.Game(config);
+
+        let player;
+        let cursors;
+        let wasd;
+        let npcManager;
+        let npcLoader;
+        let dialogueUI;
+        let taskManager;
+
+        function preload() {
+            // Cargar sprites de NPCs
+            this.load.image('npc_elder_tim', 'assets/characters/elder_tim.svg');
+            this.load.image('npc_flexbox_fred', 'assets/characters/flexbox_fred.svg');
+            this.load.image('npc_async_andy', 'assets/characters/async_andy.svg');
+
+            // Crear sprite simple para jugador
+            const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+            graphics.fillStyle(0xff6b6b, 1);
+            graphics.fillCircle(25, 25, 25);
+            graphics.generateTexture('player', 50, 50);
+            graphics.destroy();
+        }
+
+        async function create() {
+            const scene = this;
+
+            // Inicializar array de cuerpos de colisión
+            this.collisionBodies = [];
+
+            // Cargar mundo dinámicamente desde JSON
+            const mapLoader = new MapLoader(this);
+            const worldData = await mapLoader.loadWorld('data/maps/world-config.json');
+
+            if (!worldData) {
+                console.error('Error cargando configuración del mundo');
+                return;
+            }
+
+            const worldWidth = worldData.worldSize.width;
+            const worldHeight = worldData.worldSize.height;
+            this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
+
+            // Cargar edificios dinámicamente desde JSON
+            const buildingLoader = new BuildingLoader(this);
+            await buildingLoader.loadBuildings('data/buildings/buildings-index.json');
+
+            // Crear zonas de entrada para casas con interiores
+            this.entranceZones = [];
+            const buildingsWithInteriors = buildingLoader.getBuildingsWithInteriors();
+
+            buildingsWithInteriors.forEach(building => {
+                const entranceZone = this.add.zone(
+                    building.entrance.worldX,
+                    building.entrance.worldY,
+                    80,
+                    80
+                );
+                entranceZone.setDepth(1);
+                entranceZone.setData('interiorId', building.id);
+                entranceZone.setData('interiorConfig', building.interiorConfig);
+                entranceZone.setData('houseName', building.name);
+
+                this.entranceZones.push(entranceZone);
+
+                console.log(`Zona de entrada creada para ${building.name} en (${building.entrance.worldX}, ${building.entrance.worldY})`);
+            });
+
+            // Referencias visuales estáticas
+            createReferenceMarkers(this);
+
+            // Crear jugador en el centro del mundo
+            player = this.physics.add.sprite(worldWidth / 2, worldHeight / 2, 'player');
+            player.setCollideWorldBounds(true);
+            player.setDepth(1000); // Aumentado para estar definitivamente encima
+
+            // Restaurar posición si viene de una casa
+            if (localStorage.getItem('returningFromHouse') === 'true') {
+                const lastX = parseFloat(localStorage.getItem('lastPlayerX'));
+                const lastY = parseFloat(localStorage.getItem('lastPlayerY'));
+
+                if (lastX && lastY) {
+                    player.setPosition(lastX, lastY);
+                    console.log('🏠 Jugador regresó de casa a:', lastX, lastY);
+                }
+
+                // Limpiar flag
+                localStorage.removeItem('returningFromHouse');
+            }
+
+            console.log('Player creado en:', player.x, player.y, 'Depth:', player.depth);
+
+            // Configurar colisiones con edificios y zonas de colisión del mapa
+            if (this.collisionBodies && this.collisionBodies.length > 0) {
+                this.collisionBodies.forEach(body => {
+                    this.physics.add.collider(player, body);
+                });
+                console.log('Colisiones configuradas:', this.collisionBodies.length, 'cuerpos');
+            }
+
+            // Cámara sigue al jugador
+            this.cameras.main.startFollow(player, true, 0.1, 0.1);
+            this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
+
+            // Texto de posición del jugador
+            const posText = this.add.text(10, 10, '', {
+                fontSize: '16px',
+                color: '#00ff88',
+                backgroundColor: '#000000',
+                padding: { x: 10, y: 5 }
+            }).setScrollFactor(0).setDepth(1002);
+
+            // Actualizar posición en tiempo real
+            this.events.on('update', () => {
+                if (player) {
+                    posText.setText(`Jugador: (${Math.round(player.x)}, ${Math.round(player.y)})`);
+                }
+            });
+
+            // Controles
+            cursors = this.input.keyboard.createCursorKeys();
+            wasd = this.input.keyboard.addKeys({
+                up: Phaser.Input.Keyboard.KeyCodes.W,
+                down: Phaser.Input.Keyboard.KeyCodes.S,
+                left: Phaser.Input.Keyboard.KeyCodes.A,
+                right: Phaser.Input.Keyboard.KeyCodes.D
+            });
+
+            // Sistema de NPCs
+            npcManager = new NPCManager(this);
+            dialogueUI = new DialogueUI(this);
+            npcManager.setDialogueUI(dialogueUI);
+
+            // Sistema de Tareas y AI
+            taskManager = new TaskManager(this);
+            await taskManager.aiEvaluator.loadConfig();
+
+            // Inicializar stats del jugador
+            this.playerXP = 0;
+            this.playerLevel = 1;
+            this.playerSkills = { html: 2, css: 1, javascript: 0 };
+
+            // Inicializar HUD
+            taskManager.evaluationUI.updateXPBar(30, 100); // XP inicial 30%
+            taskManager.evaluationUI.updateSkills(
+                this.playerSkills.html,
+                this.playerSkills.css,
+                this.playerSkills.javascript
+            );
+
+            // Cargar NPCs usando el nuevo sistema NPCLoader
+            npcLoader = new NPCLoader(this);
+            await npcLoader.loadNPCs('data/npcs/npcs-index.json');
+
+            console.log('NPCs especializados cargados:', npcLoader.getAllNPCs().length);
+            npcLoader.getAllNPCs().forEach(npc => {
+                console.log(`NPC ${npc.npcName} (tipo: ${npc.npcType}) en (${npc.x}, ${npc.y})`);
+            });
+
+            // Tecla E para interactuar
+            this.input.keyboard.on('keydown-E', () => {
+                if (!dialogueUI.isVisible && !taskManager.evaluationUI.isVisible) {
+                    // Prioridad 1: Intentar entrar a una casa
+                    if (nearestHouse) {
+                        enterHouse();
+                        return;
+                    }
+
+                    // Prioridad 2: Interactuar con NPCs especializados
+                    const closestSpecialNPC = npcLoader.getClosestNPC(player.x, player.y, 120);
+                    if (closestSpecialNPC) {
+                        // Si tiene comportamiento especializado, llamarlo
+                        if (closestSpecialNPC.specialBehavior && closestSpecialNPC.specialBehavior.interact) {
+                            npcLoader.handleSpecializedNPCClick(closestSpecialNPC);
+                            return;
+                        }
+                    }
+
+                    // Prioridad 3: Interactuar con NPCs clásicos (questioner)
+                    const closestNPC = npcManager.getClosestNPC(player.x, player.y, 120);
+                    if (closestNPC) {
+                        // Buscar siguiente tarea del NPC
+                        const npcData = npcManager.getNPC(closestNPC.id);
+                        const nextTask = taskManager.getNextTask(closestNPC.id);
+
+                        if (nextTask) {
+                            // Iniciar tarea con AI
+                            taskManager.startTask(npcData, nextTask);
+                        } else {
+                            // Si no hay tareas, usar diálogo normal
+                            npcManager.interact(closestNPC.id);
+                        }
+                    }
+                }
+            });
+
+            // Info text (centrado en la pantalla)
+            const infoText = this.add.text(this.cameras.main.centerX, 50, 'Acércate a los NPCs y presiona E', {
+                fontSize: '18px',
+                color: '#00ff88',
+                backgroundColor: '#000000aa',
+                padding: { x: 15, y: 8 }
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
+
+            const totalNPCs = npcManager.getAllNPCs().length + npcLoader.getAllNPCs().length;
+            console.log('✅ Sistema de NPCs cargado:', totalNPCs, 'NPCs totales');
+            console.log('  - NPCs clásicos (questioner):', npcManager.getAllNPCs().length);
+            console.log('  - NPCs especializados:', npcLoader.getAllNPCs().length);
+
+            // Exportar player globalmente
+            window.player = player;
+        }
+
+        function update(time, delta) {
+            // Update NPCs primero
+            if (npcManager) {
+                npcManager.update();
+            }
+            if (npcLoader) {
+                npcLoader.update();
+            }
+
+            // Si no hay player o alguna UI está abierta, no mover
+            if (!player || dialogueUI?.isVisible || taskManager?.evaluationUI?.isVisible) return;
+
+            // Movimiento del jugador
+            const speed = 200;
+            player.setVelocity(0);
+
+            if (cursors.left.isDown || wasd.left.isDown) {
+                player.setVelocityX(-speed);
+            } else if (cursors.right.isDown || wasd.right.isDown) {
+                player.setVelocityX(speed);
+            }
+
+            if (cursors.up.isDown || wasd.up.isDown) {
+                player.setVelocityY(-speed);
+            } else if (cursors.down.isDown || wasd.down.isDown) {
+                player.setVelocityY(speed);
+            }
+
+            // Normalizar velocidad diagonal
+            if (player.body && player.body.velocity.x !== 0 && player.body.velocity.y !== 0) {
+                player.body.velocity.normalize().scale(speed);
+            }
+
+            // Proximidad a NPCs
+            if (npcManager && player) {
+                npcManager.checkProximity(player.x, player.y, 120);
+            }
+
+            // Proximidad a entradas de casas
+            checkHouseProximity(this);
+        }
+
+        let nearestHouse = null;
+        let houseProximityText = null;
+
+        function checkHouseProximity(scene) {
+            if (!scene.entranceZones || !player) return;
+
+            let closest = null;
+            let minDistance = 100; // Radio de detección
+
+            scene.entranceZones.forEach(zone => {
+                const distance = Phaser.Math.Distance.Between(
+                    player.x, player.y,
+                    zone.x, zone.y
+                );
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closest = zone;
+                }
+            });
+
+            // Mostrar/ocultar indicador
+            if (closest && !houseProximityText) {
+                houseProximityText = scene.add.text(
+                    scene.cameras.main.centerX,
+                    scene.cameras.main.height - 100,
+                    'Presiona E para entrar a la casa',
+                    {
+                        fontSize: '20px',
+                        color: '#00ff88',
+                        backgroundColor: '#000000dd',
+                        padding: { x: 20, y: 10 },
+                        fontStyle: 'bold'
+                    }
+                ).setOrigin(0.5).setScrollFactor(0).setDepth(2000);
+
+                scene.tweens.add({
+                    targets: houseProximityText,
+                    alpha: { from: 0, to: 1 },
+                    duration: 200
+                });
+            } else if (!closest && houseProximityText) {
+                houseProximityText.destroy();
+                houseProximityText = null;
+            }
+
+            // Actualizar posición del texto si existe
+            if (houseProximityText) {
+                houseProximityText.x = scene.cameras.main.centerX;
+            }
+
+            nearestHouse = closest;
+        }
+
+        function enterHouse() {
+            if (nearestHouse) {
+                const interiorId = nearestHouse.getData('interiorId');
+                console.log('Entrando a casa:', interiorId);
+
+                // Guardar posición actual
+                localStorage.setItem('lastPlayerX', player.x);
+                localStorage.setItem('lastPlayerY', player.y);
+
+                // Ir a la casa
+                window.location.href = `house-interior.html?house=${interiorId}`;
+            }
+        }
+
+        function createGrid(scene, worldWidth, worldHeight) {
+            const graphics = scene.add.graphics();
+            graphics.lineStyle(1, 0x222222, 0.2);
+
+            const gridSize = 40; // Reducido de 100 a 40
+
+            // Líneas verticales
+            for (let x = 0; x <= worldWidth; x += gridSize) {
+                graphics.lineBetween(x, 0, x, worldHeight);
+            }
+
+            // Líneas horizontales
+            for (let y = 0; y <= worldHeight; y += gridSize) {
+                graphics.lineBetween(0, y, worldWidth, y);
+            }
+
+            graphics.setDepth(-100);
+
+            // Etiquetas de coordenadas cada 500px
+            const labelInterval = 500;
+            for (let x = 0; x <= worldWidth; x += labelInterval) {
+                for (let y = 0; y <= worldHeight; y += labelInterval) {
+                    scene.add.text(x, y, `(${x},${y})`, {
+                        fontSize: '10px',
+                        color: '#555555',
+                        backgroundColor: '#000000aa',
+                        padding: { x: 3, y: 2 }
+                    }).setOrigin(0.5).setDepth(-50);
+                }
+            }
+        }
+
+        function createBuildings(scene, worldWidth, worldHeight) {
+            const buildings = scene.physics.add.staticGroup();
+            const buildingData = [
+                // Centro - área residencial (CON INTERIOR)
+                { x: 1800, y: 1800, w: 200, h: 200, entrance: 'bottom', color: 0x4a4a4a, hasInterior: true, interiorId: 'house_1' },
+                { x: 2200, y: 1800, w: 200, h: 200, entrance: 'bottom', color: 0x4a4a4a, hasInterior: true, interiorId: 'house_2' },
+                { x: 2000, y: 1500, w: 250, h: 180, entrance: 'right', color: 0x5a5a5a },
+
+                // Norte - edificios comerciales
+                { x: 1900, y: 1200, w: 300, h: 250, entrance: 'bottom', color: 0x3d3d3d },
+                { x: 2300, y: 1200, w: 280, h: 250, entrance: 'bottom', color: 0x3d3d3d },
+
+                // Sur - casas pequeñas
+                { x: 1700, y: 2300, w: 150, h: 150, entrance: 'top', color: 0x555555 },
+                { x: 1900, y: 2300, w: 150, h: 150, entrance: 'top', color: 0x555555 },
+                { x: 2100, y: 2300, w: 150, h: 150, entrance: 'top', color: 0x555555 },
+                { x: 2300, y: 2300, w: 150, h: 150, entrance: 'top', color: 0x555555 },
+
+                // Este - almacenes
+                { x: 2600, y: 1900, w: 220, h: 300, entrance: 'left', color: 0x454545 },
+                { x: 2600, y: 2300, w: 220, h: 200, entrance: 'left', color: 0x454545 },
+
+                // Oeste - tiendas
+                { x: 1400, y: 1900, w: 180, h: 200, entrance: 'right', color: 0x505050 },
+                { x: 1400, y: 2200, w: 180, h: 180, entrance: 'right', color: 0x505050 },
+            ];
+
+            buildingData.forEach(data => {
+                // Dibujar edificio
+                const graphics = scene.add.graphics();
+                graphics.fillStyle(data.color, 1);
+                graphics.fillRect(data.x - data.w / 2, data.y - data.h / 2, data.w, data.h);
+
+                // Bordes más claros
+                graphics.lineStyle(2, 0x666666, 1);
+                graphics.strokeRect(data.x - data.w / 2, data.y - data.h / 2, data.w, data.h);
+
+                // Ventanas decorativas
+                const windowSize = 12;
+                const windowSpacing = 30;
+                graphics.fillStyle(0x222222, 0.8);
+
+                for (let wx = data.x - data.w / 2 + 20; wx < data.x + data.w / 2 - 20; wx += windowSpacing) {
+                    for (let wy = data.y - data.h / 2 + 20; wy < data.y + data.h / 2 - 20; wy += windowSpacing) {
+                        graphics.fillRect(wx, wy, windowSize, windowSize);
+                    }
+                }
+
+                graphics.setDepth(-10);
+
+                // Crear collider invisible (sin entrada)
+                const entranceSize = 60;
+
+                if (data.entrance === 'bottom') {
+                    // Edificio sin entrada abajo (puerta en el centro inferior)
+                    const c1 = buildings.create(data.x, data.y - data.h/4);
+                    c1.setSize(data.w, data.h/2);
+                    c1.setVisible(false);
+                    c1.refreshBody();
+
+                    const c2 = buildings.create(data.x - data.w/4, data.y + data.h/4);
+                    c2.setSize((data.w - entranceSize)/2, data.h/2);
+                    c2.setVisible(false);
+                    c2.refreshBody();
+
+                    const c3 = buildings.create(data.x + data.w/4, data.y + data.h/4);
+                    c3.setSize((data.w - entranceSize)/2, data.h/2);
+                    c3.setVisible(false);
+                    c3.refreshBody();
+                } else if (data.entrance === 'top') {
+                    const c1 = buildings.create(data.x, data.y + data.h/4);
+                    c1.setSize(data.w, data.h/2);
+                    c1.setVisible(false);
+                    c1.refreshBody();
+
+                    const c2 = buildings.create(data.x - data.w/4, data.y - data.h/4);
+                    c2.setSize((data.w - entranceSize)/2, data.h/2);
+                    c2.setVisible(false);
+                    c2.refreshBody();
+
+                    const c3 = buildings.create(data.x + data.w/4, data.y - data.h/4);
+                    c3.setSize((data.w - entranceSize)/2, data.h/2);
+                    c3.setVisible(false);
+                    c3.refreshBody();
+                } else if (data.entrance === 'left') {
+                    const c1 = buildings.create(data.x + data.w/4, data.y);
+                    c1.setSize(data.w/2, data.h);
+                    c1.setVisible(false);
+                    c1.refreshBody();
+
+                    const c2 = buildings.create(data.x - data.w/4, data.y - data.h/4);
+                    c2.setSize(data.w/2, (data.h - entranceSize)/2);
+                    c2.setVisible(false);
+                    c2.refreshBody();
+
+                    const c3 = buildings.create(data.x - data.w/4, data.y + data.h/4);
+                    c3.setSize(data.w/2, (data.h - entranceSize)/2);
+                    c3.setVisible(false);
+                    c3.refreshBody();
+                } else if (data.entrance === 'right') {
+                    const c1 = buildings.create(data.x - data.w/4, data.y);
+                    c1.setSize(data.w/2, data.h);
+                    c1.setVisible(false);
+                    c1.refreshBody();
+
+                    const c2 = buildings.create(data.x + data.w/4, data.y - data.h/4);
+                    c2.setSize(data.w/2, (data.h - entranceSize)/2);
+                    c2.setVisible(false);
+                    c2.refreshBody();
+
+                    const c3 = buildings.create(data.x + data.w/4, data.y + data.h/4);
+                    c3.setSize(data.w/2, (data.h - entranceSize)/2);
+                    c3.setVisible(false);
+                    c3.refreshBody();
+                }
+
+                // Dibujar indicador de entrada
+                const doorGraphics = scene.add.graphics();
+                doorGraphics.fillStyle(0x8b4513, 1);
+
+                if (data.entrance === 'bottom') {
+                    doorGraphics.fillRect(data.x - 20, data.y + data.h/2 - 5, 40, 10);
+                } else if (data.entrance === 'top') {
+                    doorGraphics.fillRect(data.x - 20, data.y - data.h/2 - 5, 40, 10);
+                } else if (data.entrance === 'left') {
+                    doorGraphics.fillRect(data.x - data.w/2 - 5, data.y - 20, 10, 40);
+                } else if (data.entrance === 'right') {
+                    doorGraphics.fillRect(data.x + data.w/2 - 5, data.y - 20, 10, 40);
+                }
+
+                doorGraphics.setDepth(-5);
+
+                // Crear zona de entrada si la casa tiene interior
+                if (data.hasInterior) {
+                    let entranceX, entranceY;
+
+                    if (data.entrance === 'bottom') {
+                        entranceX = data.x;
+                        entranceY = data.y + data.h/2 + 10;
+                    } else if (data.entrance === 'top') {
+                        entranceX = data.x;
+                        entranceY = data.y - data.h/2 - 10;
+                    } else if (data.entrance === 'left') {
+                        entranceX = data.x - data.w/2 - 10;
+                        entranceY = data.y;
+                    } else if (data.entrance === 'right') {
+                        entranceX = data.x + data.w/2 + 10;
+                        entranceY = data.y;
+                    }
+
+                    // Crear zona invisible de entrada
+                    const entranceZone = scene.add.zone(entranceX, entranceY, 80, 80);
+                    entranceZone.setDepth(1);
+                    entranceZone.setData('interiorId', data.interiorId);
+                    entranceZone.setData('houseName', `Casa en (${data.x}, ${data.y})`);
+
+                    // Guardar referencia para detección de proximidad
+                    if (!scene.entranceZones) scene.entranceZones = [];
+                    scene.entranceZones.push(entranceZone);
+
+                    // Indicador visual de entrada
+                    const entranceIndicator = scene.add.text(entranceX, entranceY - 30, '🚪', {
+                        fontSize: '24px'
+                    }).setOrigin(0.5).setDepth(10);
+
+                    scene.tweens.add({
+                        targets: entranceIndicator,
+                        y: entranceY - 35,
+                        duration: 800,
+                        yoyo: true,
+                        repeat: -1,
+                        ease: 'Sine.easeInOut'
+                    });
+                }
+            });
+
+            return buildings;
+        }
+
+        function createRoads(scene) {
+            const graphics = scene.add.graphics();
+            graphics.fillStyle(0x2a2a2a, 1);
+
+            // Camino principal horizontal (centro)
+            graphics.fillRect(1200, 1950, 1800, 100);
+
+            // Camino principal vertical (centro)
+            graphics.fillRect(1950, 1000, 100, 1500);
+
+            // Camino horizontal norte
+            graphics.fillRect(1200, 1350, 1800, 80);
+
+            // Camino horizontal sur
+            graphics.fillRect(1200, 2450, 1800, 80);
+
+            // Líneas de carril (decoración) - líneas discontinuas
+            graphics.lineStyle(2, 0x444444, 0.6);
+
+            // Líneas discontinuas en el centro de los caminos
+            for (let x = 1200; x < 3000; x += 40) {
+                graphics.lineBetween(x, 2000, x + 20, 2000);
+                graphics.lineBetween(x, 1390, x + 20, 1390);
+                graphics.lineBetween(x, 2490, x + 20, 2490);
+            }
+
+            for (let y = 1000; y < 2500; y += 40) {
+                graphics.lineBetween(2000, y, 2000, y + 20);
+            }
+
+            graphics.setDepth(-20);
+        }
+
+        function createVegetation(scene) {
+            const trees = [
+                // Árboles alrededor de edificios
+                { x: 1650, y: 1750, size: 25, color: 0x2d5016 },
+                { x: 1720, y: 1650, size: 20, color: 0x2d5016 },
+                { x: 2350, y: 1750, size: 30, color: 0x2d5016 },
+                { x: 2420, y: 1650, size: 25, color: 0x2d5016 },
+
+                // Parque pequeño al oeste
+                { x: 1300, y: 2050, size: 35, color: 0x1f3d0f },
+                { x: 1250, y: 2100, size: 30, color: 0x2d5016 },
+                { x: 1350, y: 2120, size: 28, color: 0x1f3d0f },
+
+                // Árboles decorativos norte
+                { x: 1750, y: 1100, size: 30, color: 0x2d5016 },
+                { x: 2500, y: 1100, size: 28, color: 0x2d5016 },
+
+                // Árboles decorativos sur
+                { x: 1600, y: 2550, size: 32, color: 0x1f3d0f },
+                { x: 2400, y: 2550, size: 30, color: 0x2d5016 },
+
+                // Árboles en esquinas de edificios
+                { x: 2750, y: 1750, size: 25, color: 0x2d5016 },
+                { x: 2750, y: 2100, size: 22, color: 0x1f3d0f },
+            ];
+
+            trees.forEach(tree => {
+                // Sombra del árbol
+                const shadow = scene.add.ellipse(tree.x, tree.y + tree.size/2 + 5, tree.size * 1.2, tree.size * 0.4, 0x000000, 0.3);
+                shadow.setDepth(-15);
+
+                // Copa del árbol
+                const foliage = scene.add.circle(tree.x, tree.y, tree.size, tree.color);
+                foliage.setDepth(-12);
+
+                // Tronco
+                const trunkWidth = tree.size * 0.3;
+                const trunkHeight = tree.size * 0.5;
+                const trunk = scene.add.rectangle(tree.x, tree.y + tree.size/2, trunkWidth, trunkHeight, 0x4a3322);
+                trunk.setDepth(-13);
+            });
+
+            // Arbustos pequeños
+            const bushes = [
+                { x: 1650, y: 2550, size: 15 },
+                { x: 1800, y: 2560, size: 12 },
+                { x: 2300, y: 2560, size: 14 },
+                { x: 1280, y: 1850, size: 13 },
+                { x: 2720, y: 1850, size: 15 },
+            ];
+
+            bushes.forEach(bush => {
+                scene.add.circle(bush.x, bush.y, bush.size, 0x3d6b27, 0.8).setDepth(-14);
+            });
+        }
+
+        function createReferenceMarkers(scene) {
+            const worldWidth = 4000;
+            const worldHeight = 4000;
+
+            // Marcador en el centro del mundo
+            const centerX = worldWidth / 2;
+            const centerY = worldHeight / 2;
+
+            scene.add.circle(centerX, centerY, 20, 0x00ff88, 0.5).setDepth(1);
+            scene.add.text(centerX, centerY - 40, '⭐ SPAWN POINT', {
+                fontSize: '16px',
+                fontStyle: 'bold',
+                color: '#00ff88',
+                backgroundColor: '#000000',
+                padding: { x: 8, y: 5 }
+            }).setOrigin(0.5).setDepth(2);
+
+            // Marcadores en las esquinas del mundo
+            const corners = [
+                { x: 100, y: 100, label: '↖ NW' },
+                { x: worldWidth - 100, y: 100, label: '↗ NE' },
+                { x: 100, y: worldHeight - 100, label: '↙ SW' },
+                { x: worldWidth - 100, y: worldHeight - 100, label: '↘ SE' }
+            ];
+
+            corners.forEach(corner => {
+                scene.add.circle(corner.x, corner.y, 15, 0xff6b6b, 0.5).setDepth(1);
+                scene.add.text(corner.x, corner.y - 25, corner.label, {
+                    fontSize: '12px',
+                    color: '#ff6b6b',
+                    backgroundColor: '#000000',
+                    padding: { x: 5, y: 3 }
+                }).setOrigin(0.5).setDepth(2);
+            });
+        }
+
+        // Funciones globales para minimizar ventanas
+        function toggleHUD() {
+            const hud = document.getElementById('hud');
+            const btn = document.getElementById('hud-minimize-btn');
+
+            hud.classList.toggle('minimized');
+
+            if (hud.classList.contains('minimized')) {
+                btn.textContent = '□';
+                btn.title = 'Maximizar HUD';
+            } else {
+                btn.textContent = '_';
+                btn.title = 'Minimizar HUD';
+            }
+        }
+
+        function toggleInfo() {
+            const info = document.getElementById('info-panel');
+            info.classList.toggle('minimized');
+        }
+
+        // Atajos de teclado para minimizar ventanas
+        document.addEventListener('keydown', (e) => {
+            // H para toggle HUD
+            if (e.key === 'h' || e.key === 'H') {
+                // Solo si no estamos escribiendo en un textarea
+                if (document.activeElement.tagName !== 'TEXTAREA') {
+                    toggleHUD();
+                }
+            }
+            // I para toggle Info
+            if (e.key === 'i' || e.key === 'I') {
+                if (document.activeElement.tagName !== 'TEXTAREA') {
+                    toggleInfo();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

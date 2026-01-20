@@ -1,0 +1,245 @@
+{
+  "version": "1.0.0",
+  "tilesetInfo": {
+    "file": "assets/tilesets/tileset1.png",
+    "tileSize": 32,
+    "gridSize": 16,
+    "emptySlots": {
+      "description": "Espacios vacíos en el tileset para edificios multi-bloque",
+      "ranges": [
+        {"start": 4, "end": 15, "reserved": "Edificios grandes tipo A"},
+        {"start": 18, "end": 31, "reserved": "Edificios grandes tipo B"},
+        {"start": 35, "end": 47, "reserved": "Edificios grandes tipo C"},
+        {"start": 51, "end": 63, "reserved": "Decoración y detalles"},
+        {"start": 67, "end": 79, "reserved": "Estructuras especiales"},
+        {"start": 84, "end": 95, "reserved": "NPCs y enemigos"},
+        {"start": 98, "end": 255, "reserved": "Expansión futura"}
+      ]
+    }
+  },
+
+  "worldSeeds": {
+    "description": "Semillas base para cada mundo - determinan generación procedimental",
+    "1": 12345,
+    "2": 67890,
+    "3": 24680,
+    "4": 13579,
+    "5": 98765,
+    "default": "worldNumber * 1000 + 42"
+  },
+
+  "buildings": {
+    "simple": {
+      "description": "Edificios simples del tileset base",
+      "house": {
+        "tiles": [64, 65, 66],
+        "width": 3,
+        "height": 4,
+        "interactive": false,
+        "collision": true
+      },
+      "temple": {
+        "tiles": [80, 81, 82, 83],
+        "width": 4,
+        "height": 3,
+        "interactive": false,
+        "collision": true
+      },
+      "shop": {
+        "tiles": [96, 97],
+        "width": 2,
+        "height": 3,
+        "interactive": false,
+        "collision": true
+      }
+    },
+    "multiBlock": {
+      "description": "Edificios grandes multi-bloque (para implementar)",
+      "largeHouse": {
+        "tileStartIndex": 4,
+        "width": 6,
+        "height": 8,
+        "interactive": true,
+        "interactionType": "enter",
+        "collision": true,
+        "interior": "house_1_interior.json"
+      },
+      "mansion": {
+        "tileStartIndex": 18,
+        "width": 8,
+        "height": 10,
+        "interactive": true,
+        "interactionType": "enter",
+        "collision": true,
+        "interior": "mansion_interior.json"
+      },
+      "castle": {
+        "tileStartIndex": 35,
+        "width": 10,
+        "height": 12,
+        "interactive": true,
+        "interactionType": "enter",
+        "collision": true,
+        "interior": "castle_interior.json"
+      }
+    }
+  },
+
+  "npcs": {
+    "description": "Configuración de NPCs por mundo",
+    "types": {
+      "merchant": {
+        "tileIndex": 84,
+        "interactive": true,
+        "dialogueFile": "data/dialogues/merchant.json",
+        "collision": true
+      },
+      "guard": {
+        "tileIndex": 85,
+        "interactive": true,
+        "dialogueFile": "data/dialogues/guard.json",
+        "collision": true
+      },
+      "elder": {
+        "tileIndex": 86,
+        "interactive": true,
+        "dialogueFile": "data/dialogues/elder.json",
+        "collision": true
+      },
+      "child": {
+        "tileIndex": 87,
+        "interactive": true,
+        "dialogueFile": "data/dialogues/child.json",
+        "collision": true
+      }
+    },
+    "spawnRules": {
+      "maxPerWorld": 10,
+      "minDistance": 5,
+      "preferNearBuildings": true
+    }
+  },
+
+  "enemies": {
+    "description": "Configuración de enemigos por mundo",
+    "types": {
+      "slime": {
+        "tileIndex": 88,
+        "health": 3,
+        "damage": 1,
+        "speed": 100,
+        "xp": 5,
+        "aggressive": true,
+        "wanderRadius": 5
+      },
+      "skeleton": {
+        "tileIndex": 89,
+        "health": 5,
+        "damage": 2,
+        "speed": 120,
+        "xp": 10,
+        "aggressive": true,
+        "wanderRadius": 8
+      },
+      "goblin": {
+        "tileIndex": 90,
+        "health": 7,
+        "damage": 3,
+        "speed": 150,
+        "xp": 15,
+        "aggressive": true,
+        "wanderRadius": 10
+      }
+    },
+    "spawnRules": {
+      "world1": {"maxEnemies": 5, "types": ["slime"]},
+      "world2": {"maxEnemies": 8, "types": ["slime", "skeleton"]},
+      "world3": {"maxEnemies": 10, "types": ["slime", "skeleton", "goblin"]},
+      "worldN": {"maxEnemies": "5 + worldNumber * 2", "types": ["all"]}
+    }
+  },
+
+  "interactiveElements": {
+    "description": "Elementos 100% interactivos en el mundo",
+    "chest": {
+      "tileIndex": 91,
+      "interactive": true,
+      "interactionType": "loot",
+      "collision": true,
+      "contents": "random"
+    },
+    "sign": {
+      "tileIndex": 92,
+      "interactive": true,
+      "interactionType": "read",
+      "collision": false,
+      "messageFile": "data/signs/messages.json"
+    },
+    "door": {
+      "tileIndex": 93,
+      "interactive": true,
+      "interactionType": "teleport",
+      "collision": true,
+      "destination": "interior"
+    },
+    "lever": {
+      "tileIndex": 94,
+      "interactive": true,
+      "interactionType": "switch",
+      "collision": false,
+      "effect": "toggleDoor"
+    }
+  },
+
+  "worldGeneration": {
+    "description": "Reglas de generación procedimental por mundo",
+    "terrain": {
+      "noiseScale": 0.1,
+      "grassVariation": 0.5
+    },
+    "buildings": {
+      "gridX": 4,
+      "gridY": 3,
+      "spawnChance": 0.7,
+      "minDistance": 2
+    },
+    "paths": {
+      "mainRoads": 3,
+      "connectionChance": 0.3
+    },
+    "nature": {
+      "elements": 300,
+      "mountainZones": 5,
+      "mountainSize": 6,
+      "forestDensity": 0.4
+    }
+  },
+
+  "worldSpecificConfig": {
+    "description": "Configuración específica por número de mundo",
+    "1": {
+      "name": "Mundo Inicio",
+      "theme": "peaceful",
+      "enemiesEnabled": false,
+      "npcsEnabled": true,
+      "npcTypes": ["merchant", "elder"],
+      "specialBuildings": []
+    },
+    "2": {
+      "name": "Mundo Aldea",
+      "theme": "village",
+      "enemiesEnabled": true,
+      "npcsEnabled": true,
+      "npcTypes": ["merchant", "guard", "child"],
+      "specialBuildings": ["largeHouse"]
+    },
+    "3": {
+      "name": "Mundo Peligroso",
+      "theme": "danger",
+      "enemiesEnabled": true,
+      "npcsEnabled": true,
+      "npcTypes": ["guard", "elder"],
+      "specialBuildings": ["mansion", "castle"]
+    }
+  }
+}

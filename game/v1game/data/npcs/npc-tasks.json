@@ -1,0 +1,162 @@
+{
+  "mentor_html": {
+    "tasks": [
+      {
+        "id": "task_html_semantic",
+        "title": "HTML Semántico",
+        "concept": "HTML Semántico y su importancia",
+        "question": "Explícame con tus propias palabras: ¿Qué es HTML semántico y por qué es importante usarlo?",
+        "difficulty": "beginner",
+        "min_score": 70,
+        "keywords": ["semántico", "estructura", "significado", "accesibilidad", "SEO"],
+        "evaluation_context": {
+          "topic": "HTML Semántico",
+          "key_points": [
+            "Etiquetas que describen el contenido (header, nav, main, article, footer)",
+            "Mejora la accesibilidad para lectores de pantalla",
+            "Ayuda al SEO (motores de búsqueda)",
+            "Facilita el mantenimiento del código"
+          ],
+          "common_mistakes": [
+            "Usar solo div para todo",
+            "Confundir semántico con estilos CSS"
+          ]
+        },
+        "reward": {
+          "xp": 50,
+          "friendship": 15,
+          "unlock_next": "task_html_forms"
+        }
+      },
+      {
+        "id": "task_html_forms",
+        "title": "Formularios HTML",
+        "concept": "Formularios y validación en HTML",
+        "question": "Explica cómo funcionan los formularios en HTML y qué tipos de validación existen.",
+        "difficulty": "intermediate",
+        "min_score": 75,
+        "keywords": ["form", "input", "validación", "required", "type"],
+        "evaluation_context": {
+          "topic": "Formularios HTML",
+          "key_points": [
+            "Etiqueta <form> con action y method",
+            "Diferentes tipos de input (text, email, password, etc.)",
+            "Atributos de validación (required, pattern, min, max)",
+            "Labels para accesibilidad"
+          ]
+        },
+        "reward": {
+          "xp": 75,
+          "friendship": 20,
+          "unlock_next": null
+        }
+      }
+    ]
+  },
+  "friend_css_1": {
+    "tasks": [
+      {
+        "id": "task_flexbox_basics",
+        "title": "Fundamentos de Flexbox",
+        "concept": "Flexbox y diseño de layouts",
+        "question": "Ey, tranqui. Explícame cómo funciona Flexbox y para qué sirve justify-content y align-items.",
+        "difficulty": "beginner",
+        "min_score": 70,
+        "keywords": ["flexbox", "justify-content", "align-items", "eje", "contenedor"],
+        "evaluation_context": {
+          "topic": "Flexbox CSS",
+          "key_points": [
+            "display: flex en el contenedor",
+            "justify-content alinea en el eje principal (horizontal por defecto)",
+            "align-items alinea en el eje secundario (vertical por defecto)",
+            "flex-direction cambia la dirección del eje"
+          ],
+          "common_mistakes": [
+            "Confundir los ejes",
+            "Aplicar flexbox al elemento hijo en vez del padre"
+          ]
+        },
+        "reward": {
+          "xp": 60,
+          "friendship": 18,
+          "unlock_next": "task_flexbox_advanced"
+        }
+      },
+      {
+        "id": "task_flexbox_advanced",
+        "title": "Flexbox Avanzado",
+        "concept": "Propiedades avanzadas de Flexbox",
+        "question": "Ahora sí, explícame flex-grow, flex-shrink y flex-basis. ¿Cómo trabajan juntos?",
+        "difficulty": "advanced",
+        "min_score": 80,
+        "keywords": ["flex-grow", "flex-shrink", "flex-basis", "espacio", "proporción"],
+        "evaluation_context": {
+          "topic": "Flexbox Avanzado",
+          "key_points": [
+            "flex-grow: cómo crece un item cuando hay espacio extra",
+            "flex-shrink: cómo se encoge cuando falta espacio",
+            "flex-basis: tamaño base antes de distribuir espacio",
+            "Shorthand: flex: grow shrink basis"
+          ]
+        },
+        "reward": {
+          "xp": 100,
+          "friendship": 25,
+          "unlock_next": null
+        }
+      }
+    ]
+  },
+  "friend_js_1": {
+    "tasks": [
+      {
+        "id": "task_promises",
+        "title": "Promesas en JavaScript",
+        "concept": "Promesas y programación asíncrona",
+        "question": "¡Vamos, vamos! Explícame rápido: ¿Qué es una Promesa en JavaScript y para qué sirve?",
+        "difficulty": "intermediate",
+        "min_score": 75,
+        "keywords": ["promesa", "asíncrono", "then", "catch", "resolve", "reject"],
+        "evaluation_context": {
+          "topic": "Promesas JavaScript",
+          "key_points": [
+            "Objeto que representa el resultado eventual de una operación asíncrona",
+            "Tres estados: pending, fulfilled, rejected",
+            ".then() para manejar el éxito",
+            ".catch() para manejar errores",
+            "Evita el callback hell"
+          ]
+        },
+        "reward": {
+          "xp": 80,
+          "friendship": 20,
+          "unlock_next": "task_async_await"
+        }
+      },
+      {
+        "id": "task_async_await",
+        "title": "Async/Await",
+        "concept": "Async/Await en JavaScript moderno",
+        "question": "Perfecto, ahora explícame async/await. ¿Cómo mejora el código asíncrono?",
+        "difficulty": "advanced",
+        "min_score": 80,
+        "keywords": ["async", "await", "asíncrono", "promesa", "try-catch"],
+        "evaluation_context": {
+          "topic": "Async/Await",
+          "key_points": [
+            "async convierte una función en asíncrona (retorna promesa)",
+            "await pausa la ejecución hasta que la promesa se resuelva",
+            "Solo funciona dentro de funciones async",
+            "try-catch para manejar errores",
+            "Hace el código más legible que .then()"
+          ]
+        },
+        "reward": {
+          "xp": 120,
+          "friendship": 30,
+          "unlock_next": null
+        }
+      }
+    ]
+  }
+}

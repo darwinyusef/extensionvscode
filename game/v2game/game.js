@@ -47,14 +47,49 @@ let map, tileset, player, cursors, buildings = [];
 let groundLayer, pathsLayer, natureLayer, buildingsLayer;
 let portalEntrance, portalExit, worldBorders;
 let worldNumber = 1;
+let canChangeWorld = false;
+let rng;
+let worldConfig;
+let currentWorldConfig;
+
+function seededRandom(seed) {
+    let state = seed;
+    return function() {
+        state = (state * 1664525 + 1013904223) % 4294967296;
+        return state / 4294967296;
+    };
+}
 
 function preload() {
     this.load.image('tileset', 'assets/tilesets/tileset1.png');
     this.load.json('collisions', 'data/tileset-collisions.json');
+    this.load.json('worldConfig', 'data/world-config.json');
 }
 
 function create() {
     buildings = [];
+
+    const savedData = localStorage.getItem('playerData');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        worldNumber = data.worldNumber || worldNumber;
+    }
+
+    worldConfig = this.cache.json.get('worldConfig');
+    currentWorldConfig = worldConfig.worldSpecificConfig[worldNumber] || {
+        name: `Mundo ${worldNumber}`,
+        theme: 'default',
+        enemiesEnabled: true,
+        npcsEnabled: true,
+        npcTypes: ['merchant', 'guard'],
+        specialBuildings: []
+    };
+
+    const seed = worldConfig.worldSeeds[worldNumber] || (worldNumber * 1000 + 42);
+    rng = seededRandom(seed);
+
+    console.log(`🎲 Semilla del mundo ${worldNumber}:`, seed);
+    console.log(`📋 Configuración:`, currentWorldConfig);
 
     map = this.make.tilemap({
         tileWidth: WORLD.tileSize,
@@ -76,16 +111,31 @@ function create() {
     placeNature();
 
     const gfx = this.add.graphics();
-    gfx.fillStyle(0xFF4444, 1);
+    gfx.fillStyle(0xFF0000, 1);
     gfx.fillRect(0, 0, 32, 32);
-    gfx.lineStyle(3, 0xFFFFFF, 1);
-    gfx.strokeRect(0, 0, 32, 32);
+    gfx.lineStyle(4, 0xFFFFFF, 1);
+    gfx.strokeRect(2, 2, 28, 28);
+    gfx.fillStyle(0xFFFF00, 1);
+    gfx.fillCircle(16, 16, 6);
     gfx.generateTexture('player', 32, 32);
     gfx.destroy();
 
-    player = this.physics.add.sprite(150, WORLD.screenHeight / 2, 'player');
+    let startX = WORLD.tileSize + 16;
+    let startY = WORLD.screenHeight / 2;
+
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        if (data.worldNumber === worldNumber) {
+            startX = data.x || startX;
+            startY = data.y || startY;
+        }
+    }
+
+    player = this.physics.add.sprite(startX, startY, 'player');
     player.setCollideWorldBounds(false);
-    player.setDepth(1000);
+    player.setDepth(10000);
+    player.displayWidth = 32;
+    player.displayHeight = 32;
 
     const collisionData = this.cache.json.get('collisions');
     if (collisionData && collisionData.collisions) {
@@ -107,7 +157,13 @@ function create() {
 
     cursors = this.input.keyboard.createCursorKeys();
 
-    this.add.text(16, 16, `🌍 MUNDO ${worldNumber} | Flechas: Mover`, {
+    canChangeWorld = false;
+    this.time.delayedCall(500, () => {
+        canChangeWorld = true;
+        console.log('✓ Portales activados - Puedes cambiar de mundo');
+    });
+
+    this.add.text(16, 16, `🌍 ${currentWorldConfig.name} (#${worldNumber}) | 🎨 ${currentWorldConfig.theme}`, {
         fontSize: '22px',
         fill: '#fff',
         backgroundColor: '#000',
@@ -139,9 +195,13 @@ function create() {
     }).setDepth(2000);
 
     console.log('========================================');
-    console.log(`🌍 MUNDO ${worldNumber} GENERADO`);
-    console.log('Mundo:', WORLD.tilesX, 'x', WORLD.tilesY, 'tiles');
-    console.log('Edificios:', buildings.length);
+    console.log(`🌍 ${currentWorldConfig.name} (#${worldNumber}) GENERADO`);
+    console.log('🎨 Tema:', currentWorldConfig.theme);
+    console.log('📐 Tamaño:', WORLD.tilesX, 'x', WORLD.tilesY, 'tiles');
+    console.log('🏠 Edificios simples:', buildings.length);
+    console.log('👥 NPCs habilitados:', currentWorldConfig.npcsEnabled);
+    console.log('⚔️ Enemigos habilitados:', currentWorldConfig.enemiesEnabled);
+    console.log('🏰 Edificios especiales:', currentWorldConfig.specialBuildings.join(', ') || 'Ninguno');
     console.log('========================================');
 }
 
@@ -160,6 +220,12 @@ function update() {
     } else if (cursors.down.isDown) {
         player.setVelocityY(speed);
     }
+
+    localStorage.setItem('playerData', JSON.stringify({
+        x: player.x,
+        y: player.y,
+        worldNumber: worldNumber
+    }));
 }
 
 function createWorldBorders(scene) {
@@ -240,13 +306,21 @@ function createPortals(scene) {
     portalExit.body.moves = false;
 
     scene.physics.add.overlap(player, portalEntrance, () => {
+        if (!canChangeWorld) return;
+        if (worldNumber <= 1) {
+            console.log('🚫 Ya estás en el Mundo 1 (no puedes retroceder más)');
+            return;
+        }
         console.log('🚪 PORTAL ENTRADA - Retrocediendo al mundo anterior');
-        worldNumber = Math.max(1, worldNumber - 1);
+        canChangeWorld = false;
+        worldNumber--;
         scene.scene.restart();
     });
 
     scene.physics.add.overlap(player, portalExit, () => {
+        if (!canChangeWorld) return;
         console.log('🚪 PORTAL SALIDA - Avanzando al siguiente mundo');
+        canChangeWorld = false;
         worldNumber++;
         scene.scene.restart();
     });
@@ -274,7 +348,7 @@ function generateTerrain() {
     console.log('FASE 1: Generando terreno base...');
     for (let y = 0; y < WORLD.tilesY; y++) {
         for (let x = 0; x < WORLD.tilesX; x++) {
-            const noise = (Math.sin(x * 0.1 + worldNumber) + Math.cos(y * 0.1 + worldNumber)) * 0.5 + Math.random() * 0.5;
+            const noise = (Math.sin(x * 0.1 + worldNumber) + Math.cos(y * 0.1 + worldNumber)) * 0.5 + rng() * 0.5;
             const grassTile = TILES.grass[Math.floor(Math.abs(noise) * TILES.grass.length) % TILES.grass.length];
             groundLayer.putTileAt(grassTile, x, y);
         }
@@ -285,26 +359,28 @@ function generateTerrain() {
 function placeBuildings() {
     console.log('FASE 2: Colocando edificios...');
 
+    const simpleBuildings = worldConfig.buildings.simple;
     const buildingTypes = [
-        { tiles: TILES.house, w: 3, h: 4, name: 'casa' },
-        { tiles: TILES.temple, w: 4, h: 3, name: 'templo' },
-        { tiles: TILES.shop, w: 2, h: 3, name: 'tienda' }
+        { tiles: simpleBuildings.house.tiles, w: simpleBuildings.house.width, h: simpleBuildings.house.height, name: 'casa' },
+        { tiles: simpleBuildings.temple.tiles, w: simpleBuildings.temple.width, h: simpleBuildings.temple.height, name: 'templo' },
+        { tiles: simpleBuildings.shop.tiles, w: simpleBuildings.shop.width, h: simpleBuildings.shop.height, name: 'tienda' }
     ];
 
-    const gridX = 4;
-    const gridY = 3;
+    const genRules = worldConfig.worldGeneration.buildings;
+    const gridX = genRules.gridX;
+    const gridY = genRules.gridY;
     const cellW = Math.floor(WORLD.tilesX / gridX);
     const cellH = Math.floor(WORLD.tilesY / gridY);
 
     for (let gy = 0; gy < gridY; gy++) {
         for (let gx = 0; gx < gridX; gx++) {
-            if (Math.random() > 0.3) {
-                const bType = buildingTypes[Math.floor(Math.random() * buildingTypes.length)];
+            if (rng() < genRules.spawnChance) {
+                const bType = buildingTypes[Math.floor(rng() * buildingTypes.length)];
                 const cellStartX = gx * cellW;
                 const cellStartY = gy * cellH;
 
-                const bx = cellStartX + Math.floor(Math.random() * (cellW - bType.w - 2)) + 1;
-                const by = cellStartY + Math.floor(Math.random() * (cellH - bType.h - 2)) + 1;
+                const bx = cellStartX + Math.floor(rng() * (cellW - bType.w - 2)) + 1;
+                const by = cellStartY + Math.floor(rng() * (cellH - bType.h - 2)) + 1;
 
                 let canPlace = true;
                 for (let dy = -1; dy <= bType.h; dy++) {
@@ -337,7 +413,7 @@ function generatePaths() {
 
     for (let i = 0; i < buildings.length; i++) {
         for (let j = i + 1; j < buildings.length; j++) {
-            if (Math.random() > 0.7) {
+            if (rng() > 0.7) {
                 connectBuildings(buildings[i], buildings[j]);
             }
         }
@@ -386,24 +462,24 @@ function placeNature() {
     let placed = 0;
 
     for (let i = 0; i < 300; i++) {
-        const x = Math.floor(Math.random() * WORLD.tilesX);
-        const y = Math.floor(Math.random() * WORLD.tilesY);
+        const x = Math.floor(rng() * WORLD.tilesX);
+        const y = Math.floor(rng() * WORLD.tilesY);
 
         if (!buildingsLayer.getTileAt(x, y) && !pathsLayer.getTileAt(x, y)) {
-            const tile = natureTiles[Math.floor(Math.random() * natureTiles.length)];
+            const tile = natureTiles[Math.floor(rng() * natureTiles.length)];
             natureLayer.putTileAt(tile, x, y);
             placed++;
         }
     }
 
     for (let i = 0; i < 5; i++) {
-        const mx = Math.floor(Math.random() * (WORLD.tilesX - 8));
-        const my = Math.floor(Math.random() * (WORLD.tilesY - 8));
+        const mx = Math.floor(rng() * (WORLD.tilesX - 8));
+        const my = Math.floor(rng() * (WORLD.tilesY - 8));
 
         for (let dy = 0; dy < 6; dy++) {
             for (let dx = 0; dx < 6; dx++) {
-                if (Math.random() > 0.4 && !buildingsLayer.getTileAt(mx + dx, my + dy)) {
-                    const mTile = TILES.mountain[Math.floor(Math.random() * TILES.mountain.length)];
+                if (rng() > 0.4 && !buildingsLayer.getTileAt(mx + dx, my + dy)) {
+                    const mTile = TILES.mountain[Math.floor(rng() * TILES.mountain.length)];
                     natureLayer.putTileAt(mTile, mx + dx, my + dy);
                 }
             }

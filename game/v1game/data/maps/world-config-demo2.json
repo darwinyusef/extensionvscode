@@ -1,0 +1,29 @@
+{
+  "id": "demo2_world",
+  "name": "Mundo Minimalista Demo 2",
+  "dimensions": {
+    "width": 4000,
+    "height": 4000,
+    "tileSize": 40
+  },
+  "background": {
+    "type": "color",
+    "color": "#cccccc",
+    "fallbackColor": "#cccccc"
+  },
+  "grid": {
+    "enabled": false,
+    "color": "#000000",
+    "opacity": 0
+  },
+  "spawnPoint": {
+    "x": 2000,
+    "y": 2000
+  },
+  "collisionMatrix": "data/maps/collision-matrix.json",
+  "roads": [],
+  "decorations": {
+    "trees": [],
+    "bushes": []
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "id": "house_3",
+  "name": "Guarida del Codificador Oscuro",
+  "interior": {
+    "wallColor": "#2d1b2e",
+    "floorColor": "#1a0f1b",
+    "width": 800,
+    "height": 600
+  },
+  "spawnPoint": {
+    "x": 400,
+    "y": 550
+  },
+  "exitZone": {
+    "x": 400,
+    "y": 580,
+    "width": 100,
+    "height": 40
+  },
+  "npcs": [
+    {
+      "id": "dark_coder",
+      "name": "Codificador Oscuro",
+      "role": "Enemigo",
+      "position": { "x": 400, "y": 250 },
+      "emoji": "⚔️",
+      "color": "#8B008B",
+      "dialogue": {
+        "greeting": "¿Así que quieres la Llave de JavaScript? Primero deberás derrotarme en batalla de código.",
+        "challenge": "Prepárate para el desafío de tu vida, programador.",
+        "defeated": "Has demostrado tu valía... La llave es tuya."
+      }
+    }
+  ],
+  "activities": [
+    {
+      "id": "doc_3",
+      "type": "document",
+      "position": { "x": 150, "y": 200 },
+      "icon": "📚",
+      "title": "El Lado Oscuro del Código",
+      "content": "<h2>JavaScript: El Lenguaje del Poder</h2><p>JavaScript es el lenguaje que da vida a la web. Con él puedes crear magia... o caos.</p><h3>Conceptos Avanzados:</h3><ul><li><strong>Promesas</strong>: Manejo de operaciones asíncronas</li><li><strong>Async/Await</strong>: Sintaxis moderna para código asíncrono</li><li><strong>Closures</strong>: Funciones que recuerdan su contexto</li></ul><p>El Codificador Oscuro domina estos conceptos. ¿Podrás tú?</p>",
+      "reward": {
+        "type": "xp",
+        "amount": 50
+      }
+    },
+    {
+      "id": "key_3",
+      "type": "key",
+      "position": { "x": 650, "y": 200 },
+      "icon": "🗝️",
+      "keyName": "Llave de JavaScript",
+      "description": "La llave más poderosa. Solo disponible después de derrotar al enemigo.",
+      "reward": {
+        "type": "item",
+        "item": "key_js",
+        "name": "Llave de JavaScript"
+      },
+      "requiresDefeat": "dark_coder"
+    },
+    {
+      "id": "fruit_3",
+      "type": "fruit",
+      "position": { "x": 150, "y": 400 },
+      "icon": "🍌",
+      "fruitName": "Banana de la Lógica",
+      "description": "Una banana que mejora tu pensamiento lógico",
+      "reward": {
+        "type": "item",
+        "item": "banana",
+        "name": "Banana de la Lógica",
+        "effect": "restore_hp",
+        "amount": 1
+      }
+    }
+  ]
+}

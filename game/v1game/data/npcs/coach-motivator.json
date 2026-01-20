@@ -1,0 +1,23 @@
+{
+  "id": "coach_motivator",
+  "name": "Coach Inspirador",
+  "type": "motivator",
+  "role": "Motivador del Reino",
+  "personality": "entusiasta",
+  "specialty": "Motivación y Ánimo",
+  "position": {
+    "x": 2600,
+    "y": 1200
+  },
+  "sprite": {
+    "type": "circle",
+    "color": "#FF6B6B",
+    "size": 40,
+    "emoji": "💪"
+  },
+  "dialogue": {
+    "greeting": "¡Hey amigo! ¿Necesitas un poco de ánimo? Estoy aquí para recordarte lo increíble que eres.",
+    "topic": "Motivación",
+    "firstMeeting": true
+  }
+}

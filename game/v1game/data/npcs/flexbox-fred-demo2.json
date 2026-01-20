@@ -1,0 +1,38 @@
+{
+  "id": "flexbox_fred",
+  "name": "Flexbox Fred",
+  "role": "Maestro de CSS",
+  "personality": "entusiasta",
+  "specialty": "CSS Flexbox",
+  "position": {
+    "x": 2800,
+    "y": 2600
+  },
+  "sprite": {
+    "type": "circle",
+    "color": "#e74c3c",
+    "size": 40,
+    "emoji": "🎨"
+  },
+  "dialogue": {
+    "greeting": "¡Hey! Soy Flexbox Fred. ¿Listo para dominar el diseño flexible?",
+    "topic": "CSS Flexbox",
+    "firstMeeting": true
+  },
+  "tasks": [
+    {
+      "id": "flexbox_basics",
+      "concept": "CSS Flexbox",
+      "difficulty": "intermediate",
+      "description": "Domina los fundamentos de Flexbox para layouts modernos",
+      "requiredLevel": 1
+    }
+  ],
+  "unlockedDialogues": ["first_meeting"],
+  "relationship": {
+    "friendship": 0,
+    "conversationCount": 0,
+    "questsGiven": [],
+    "questsCompleted": []
+  }
+}
