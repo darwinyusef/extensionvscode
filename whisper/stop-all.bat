@@ -7,9 +7,6 @@ docker-compose down
 cd n8n
 docker-compose down
 
-cd ..\caddy
-docker-compose down
-
 cd ..
 
 echo.

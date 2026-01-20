@@ -31,6 +31,8 @@ services:
     environment:
       - MODEL_SIZE=${MODEL_SIZE:-tiny}
       - NATS_URL=nats://nats:4222
+    env_file:
+      - /opt/whisper/.env
     depends_on:
       nats:
         condition: service_healthy
@@ -60,6 +62,8 @@ services:
       - GRPC_HOST=whisper_grpc
       - GRPC_PORT=50051
       - NATS_URL=nats://nats:4222
+    env_file:
+      - /opt/whisper/.env
     depends_on:
       whisper_grpc:
         condition: service_started

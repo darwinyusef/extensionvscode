@@ -14,10 +14,10 @@ Components:
    └── Workflow automation
        └── Connects to Whisper API
 
-3. Caddy (caddy/docker-compose.yml)
-   └── Reverse proxy + SSL
-       ├── n8n.darwinyusef.com → n8n:5678
-       └── whisper.darwinyusef.com → api_gateway:8000
+3. MinIO (External)
+   └── Object storage for audio files
+       ├── minio.darwinyusef.com (API)
+       └── console.darwinyusef.com (Console)
 
 Communication Flow:
 
@@ -39,8 +39,7 @@ Network:
   ├── nats:4222
   ├── whisper_grpc:50051
   ├── whisper_api:8000
-  ├── n8n:5678
-  └── caddy:80,443
+  └── n8n:5678
 
 Ports Mapping:
   External → Internal
@@ -49,7 +48,6 @@ Ports Mapping:
   4222 → nats:4222 (NATS client)
   8222 → nats:8222 (NATS monitoring)
   127.0.0.1:5678 → n8n:5678 (n8n, localhost only)
-  80/443 → caddy:80/443 (HTTP/HTTPS)
 
 Data Flow:
 
@@ -77,16 +75,17 @@ Data Flow:
 Services Independence:
 
 Whisper (standalone):
-  - Can run without n8n or Caddy
+  - Can run without n8n
   - Access via http://localhost:8001
 
 n8n (standalone):
   - Needs whisper_network
-  - Access via https://n8n.darwinyusef.com (with Caddy)
+  - Access via https://n8n.darwinyusef.com
 
-Caddy (standalone):
-  - Needs whisper_network
-  - Proxies to existing services
+MinIO (external):
+  - Object storage for audio files
+  - https://minio.darwinyusef.com
+  - https://console.darwinyusef.com
 
 Scaling Strategy:
 
@@ -94,7 +93,7 @@ Horizontal Scaling:
   docker-compose up -d --scale whisper_grpc=3
 
 Load Balancing:
-  Caddy automatically load balances
+  DNS round-robin or external load balancer
 
 High Availability:
   - NATS: Single instance (can cluster)
@@ -107,27 +106,27 @@ Storage:
 Volumes:
   - models_data: Whisper models (shared)
   - n8n_data: n8n workflows and state
-  - caddy_data: SSL certificates
-  - caddy_config: Caddy configuration
 
 Temporary:
   - Audio files: /tmp in containers (auto-cleanup)
+
+External Storage:
+  - MinIO: Persistent audio storage (optional)
 
 Security:
 
 1. Network Isolation:
    - Services only accessible via whisper_network
    - n8n only on 127.0.0.1:5678 (not public)
-   - Caddy exposes only HTTPS
 
 2. Authentication:
    - n8n: Basic Auth (N8N_USER/PASSWORD)
    - Whisper API: No auth (internal use)
-   - Add auth layer via Caddy if needed
+   - MinIO: Access key + Secret key
 
 3. SSL:
-   - Caddy auto-provisions Let's Encrypt
-   - Auto-renewal
+   - External reverse proxy handles HTTPS
+   - MinIO with TLS configured externally
 
 Monitoring:
 
@@ -154,10 +153,11 @@ Pattern 2 - Via n8n:
            → Whisper API
            → Callback to Your App
 
-Pattern 3 - Via Caddy (Public):
-  External → https://whisper.darwinyusef.com/transcribe
-          → Caddy
-          → whisper_api:8000
+Pattern 3 - With MinIO:
+  Upload → MinIO (minio.darwinyusef.com)
+        → Whisper API (reference by URL)
+        → Process audio
+        → Store result in MinIO
 
 Deployment Modes:
 
@@ -165,10 +165,11 @@ Development:
   docker-compose up -d
   Access: localhost:8001
 
-Production (Internal):
+Production:
   docker-compose up -d
-  Access: whisper_api:8000 (from other containers)
+  Access: whisper_api:8000 (internal)
+  External access via reverse proxy
 
-Production (Public):
-  make all
-  Access: https://whisper.darwinyusef.com
+Configuration:
+  - .env file location: /opt/whisper/.env
+  - All environment variables loaded from this path

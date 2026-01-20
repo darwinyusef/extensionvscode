@@ -50,27 +50,25 @@ status:
 health:
 	@curl -s http://localhost:8001/health | python -m json.tool
 
-# Start all services (Whisper + n8n + Caddy)
+# Start all services (Whisper + n8n)
 all: network
 	docker-compose up -d
 	cd n8n && docker-compose up -d
-	cd caddy && docker-compose up -d
 	@echo "All services started"
 	@echo "  Whisper: http://localhost:8001"
 	@echo "  n8n: https://n8n.darwinyusef.com"
-	@echo "  Whisper Public: https://whisper.darwinyusef.com"
+	@echo "  MinIO: https://minio.darwinyusef.com"
+	@echo "  MinIO Console: https://console.darwinyusef.com"
 
 # Stop all services
 stop-all:
 	docker-compose down
 	cd n8n && docker-compose down
-	cd caddy && docker-compose down
 
 # Logs for all services
 logs-all:
 	docker-compose logs -f &
-	cd n8n && docker-compose logs -f &
-	cd caddy && docker-compose logs -f
+	cd n8n && docker-compose logs -f
 
 # Individual service management
 n8n-up: network
@@ -82,13 +80,3 @@ n8n-down:
 
 n8n-logs:
 	cd n8n && docker-compose logs -f
-
-caddy-up: network
-	cd caddy && docker-compose up -d
-	@echo "Caddy started"
-
-caddy-down:
-	cd caddy && docker-compose down
-
-caddy-logs:
-	cd caddy && docker-compose logs -f

@@ -1,10 +1,9 @@
 Deployment Guide - Whisper Microservice
 
 Structure:
-  3 independent docker-compose files:
+  2 independent docker-compose files:
   1. docker-compose.yml       - Whisper (core)
   2. n8n/docker-compose.yml   - n8n workflow
-  3. caddy/docker-compose.yml - Reverse proxy
 
 Quick Start:
 
@@ -23,19 +22,24 @@ Production (Full Stack):
   2. Start all services:
      start-all.bat (Windows) or make all (Linux)
 
-  3. Configure DNS:
+  3. Configure DNS and reverse proxy:
      n8n.darwinyusef.com → Server IP
-     whisper.darwinyusef.com → Server IP
+     minio.darwinyusef.com → Server IP
+     console.darwinyusef.com → Server IP
 
   4. Access:
      https://n8n.darwinyusef.com
-     https://whisper.darwinyusef.com
+     http://localhost:8001 (Whisper API)
 
-Environment Variables:
+Environment Variables (.env at /opt/whisper/.env):
   MODEL_SIZE=tiny       # Whisper model size
   NATS_URL=nats://nats:4222
   GRPC_HOST=whisper_grpc
   GRPC_PORT=50051
+  MINIO_ENDPOINT=https://minio.darwinyusef.com
+  MINIO_CONSOLE=https://console.darwinyusef.com
+  MINIO_ACCESS_KEY=
+  MINIO_SECRET_KEY=
   N8N_USER=admin
   N8N_PASSWORD=secure_password
   N8N_HOST=n8n.darwinyusef.com
@@ -52,7 +56,6 @@ Ports:
   4222 - NATS Client
   8222 - NATS Monitoring
   5678 - n8n (internal)
-  80/443 - Caddy (HTTP/HTTPS)
 
 Health Checks:
   curl http://localhost:8001/health
@@ -66,16 +69,12 @@ Whisper only:
 n8n only:
   cd n8n && docker-compose up -d
 
-Caddy only:
-  cd caddy && docker-compose up -d
-
 All services:
   make all
   # or
   docker network create whisper_network
   docker-compose up -d
   cd n8n && docker-compose up -d
-  cd ../caddy && docker-compose up -d
 
 Stopping Services:
 
@@ -90,9 +89,6 @@ Stop Whisper:
 Stop n8n:
   cd n8n && docker-compose down
 
-Stop Caddy:
-  cd caddy && docker-compose down
-
 Logs:
 
 View Whisper logs:
@@ -100,9 +96,6 @@ View Whisper logs:
 
 View n8n logs:
   cd n8n && docker-compose logs -f
-
-View Caddy logs:
-  cd caddy && docker-compose logs -f
 
 Integration with Existing Project:
 
@@ -123,8 +116,9 @@ Testing:
 Security Notes:
   - Change N8N_PASSWORD in production
   - n8n only listens on 127.0.0.1:5678 (not exposed)
-  - Caddy handles HTTPS automatically
+  - Use external reverse proxy for HTTPS
   - Basic auth enabled on n8n
+  - MinIO access via access key + secret key
 
 Troubleshooting:
   make logs     # View logs
