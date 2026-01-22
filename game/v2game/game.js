@@ -43,6 +43,39 @@ const config = {
 
 const game = new Phaser.Game(config);
 
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const seedInput = document.getElementById('seed-input');
+        const worldNumberInput = document.getElementById('worldNumber-input');
+        const applyButton = document.getElementById('apply-seed-btn');
+
+        if (applyButton) {
+            applyButton.addEventListener('click', () => {
+                const customSeed = parseInt(seedInput.value);
+                const customWorldNumber = parseInt(worldNumberInput.value);
+
+                if (customWorldNumber && customWorldNumber > 0) {
+                    worldNumber = customWorldNumber;
+                }
+
+                const targetSeed = customSeed || (worldNumber * 1000 + 42);
+
+                localStorage.setItem('playerData', JSON.stringify({
+                    x: WORLD.tileSize + 16,
+                    y: WORLD.screenHeight / 2,
+                    worldNumber: worldNumber,
+                    seed: targetSeed,
+                    lastPortal: null,
+                    customSeed: customSeed || null
+                }));
+
+                console.log(`🎲 Recargando mundo ${worldNumber} con semilla ${targetSeed}`);
+                location.reload();
+            });
+        }
+    }, 100);
+});
+
 let map, tileset, player, cursors, buildings = [];
 let groundLayer, pathsLayer, natureLayer, buildingsLayer;
 let portalEntrance, portalExit, worldBorders;
@@ -51,6 +84,10 @@ let canChangeWorld = false;
 let rng;
 let worldConfig;
 let currentWorldConfig;
+let seedStructures;
+let doorTiles = [];
+let keyE;
+let doorPromptText;
 
 function seededRandom(seed) {
     let state = seed;
@@ -64,10 +101,12 @@ function preload() {
     this.load.image('tileset', 'assets/tilesets/tileset1.png');
     this.load.json('collisions', 'data/tileset-collisions.json');
     this.load.json('worldConfig', 'data/world-config.json');
+    this.load.json('seedStructures', 'data/seed-structures.json');
 }
 
 function create() {
     buildings = [];
+    doorTiles = [];
 
     const savedData = localStorage.getItem('playerData');
     if (savedData) {
@@ -76,6 +115,7 @@ function create() {
     }
 
     worldConfig = this.cache.json.get('worldConfig');
+    seedStructures = this.cache.json.get('seedStructures');
     currentWorldConfig = worldConfig.worldSpecificConfig[worldNumber] || {
         name: `Mundo ${worldNumber}`,
         theme: 'default',
@@ -86,6 +126,20 @@ function create() {
     };
 
     const seed = worldConfig.worldSeeds[worldNumber] || (worldNumber * 1000 + 42);
+
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        if (data.worldNumber === worldNumber && data.seed !== seed) {
+            console.log('🔄 Semilla cambió - Regenerando mundo');
+            localStorage.setItem('playerData', JSON.stringify({
+                x: WORLD.tileSize + 16,
+                y: WORLD.screenHeight / 2,
+                worldNumber: worldNumber,
+                seed: seed
+            }));
+        }
+    }
+
     rng = seededRandom(seed);
 
     console.log(`🎲 Semilla del mundo ${worldNumber}:`, seed);
@@ -126,13 +180,21 @@ function create() {
     if (savedData) {
         const data = JSON.parse(savedData);
         if (data.worldNumber === worldNumber) {
-            startX = data.x || startX;
-            startY = data.y || startY;
+            if (data.lastPortal === 'exit') {
+                startX = WORLD.tileSize + 16;
+                startY = WORLD.screenHeight / 2;
+            } else if (data.lastPortal === 'entrance') {
+                startX = WORLD.screenWidth - WORLD.tileSize - 16;
+                startY = WORLD.screenHeight / 2;
+            } else {
+                startX = data.x || startX;
+                startY = data.y || startY;
+            }
         }
     }
 
     player = this.physics.add.sprite(startX, startY, 'player');
-    player.setCollideWorldBounds(false);
+    player.setCollideWorldBounds(true);
     player.setDepth(10000);
     player.displayWidth = 32;
     player.displayHeight = 32;
@@ -146,7 +208,12 @@ function create() {
             }
         }
         natureLayer.setCollision(collidableTiles);
-        buildingsLayer.setCollision(collidableTiles);
+
+        const doorTileIndices = doorTiles.map(d => d.tileIndex);
+        console.log('🚪 Door tiles para excluir de colisión:', doorTileIndices);
+        const buildingCollisionTiles = collidableTiles.filter(t => !doorTileIndices.includes(t));
+        buildingsLayer.setCollision(buildingCollisionTiles);
+        console.log('✓ Colisiones configuradas. Tiles bloqueados:', buildingCollisionTiles.length, 'Puertas excluidas:', doorTileIndices.length);
     }
 
     this.physics.add.collider(player, natureLayer);
@@ -156,6 +223,7 @@ function create() {
     createPortals(this);
 
     cursors = this.input.keyboard.createCursorKeys();
+    keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
     canChangeWorld = false;
     this.time.delayedCall(500, () => {
@@ -194,11 +262,24 @@ function create() {
         padding: { x: 10, y: 6 }
     }).setDepth(2000);
 
+    doorPromptText = this.add.text(WORLD.screenWidth / 2, WORLD.screenHeight - 80, '', {
+        fontSize: '20px',
+        fill: '#00ff00',
+        backgroundColor: '#000',
+        padding: { x: 12, y: 8 },
+        align: 'center'
+    }).setOrigin(0.5).setDepth(2000).setVisible(false);
+
     console.log('========================================');
     console.log(`🌍 ${currentWorldConfig.name} (#${worldNumber}) GENERADO`);
     console.log('🎨 Tema:', currentWorldConfig.theme);
     console.log('📐 Tamaño:', WORLD.tilesX, 'x', WORLD.tilesY, 'tiles');
     console.log('🏠 Edificios simples:', buildings.length);
+    console.log('🚪 Puertas interactivas:', doorTiles.length);
+    if (doorTiles.length > 0) {
+        console.log('📍 Puertas detectadas:');
+        doorTiles.forEach(d => console.log(`  - Pos: (${d.x}, ${d.y}) Tile:${d.tileIndex} Link:${d.link}`));
+    }
     console.log('👥 NPCs habilitados:', currentWorldConfig.npcsEnabled);
     console.log('⚔️ Enemigos habilitados:', currentWorldConfig.enemiesEnabled);
     console.log('🏰 Edificios especiales:', currentWorldConfig.specialBuildings.join(', ') || 'Ninguno');
@@ -221,11 +302,77 @@ function update() {
         player.setVelocityY(speed);
     }
 
+    checkNearDoor();
+
+    if (Phaser.Input.Keyboard.JustDown(keyE)) {
+        checkDoorInteraction(this);
+    }
+
+    const currentSeed = worldConfig.worldSeeds[worldNumber] || (worldNumber * 1000 + 42);
     localStorage.setItem('playerData', JSON.stringify({
         x: player.x,
         y: player.y,
-        worldNumber: worldNumber
+        worldNumber: worldNumber,
+        seed: currentSeed,
+        lastPortal: null
     }));
+}
+
+function checkNearDoor() {
+    if (!player || doorTiles.length === 0) return;
+
+    const playerTileX = Math.floor(player.x / WORLD.tileSize);
+    const playerTileY = Math.floor(player.y / WORLD.tileSize);
+
+    for (const door of doorTiles) {
+        const distance = Phaser.Math.Distance.Between(
+            playerTileX, playerTileY,
+            door.x, door.y
+        );
+
+        if (distance <= 1.5) {
+            doorPromptText.setText(door.messageIn);
+            doorPromptText.setVisible(true);
+            return;
+        }
+    }
+
+    doorPromptText.setVisible(false);
+}
+
+function checkDoorInteraction(scene) {
+    if (!player || doorTiles.length === 0) {
+        console.log('⚠️ No hay puertas disponibles');
+        return;
+    }
+
+    const playerTileX = Math.floor(player.x / WORLD.tileSize);
+    const playerTileY = Math.floor(player.y / WORLD.tileSize);
+
+    console.log(`🔍 Buscando puertas cerca de (${playerTileX}, ${playerTileY})`);
+
+    for (const door of doorTiles) {
+        const distance = Phaser.Math.Distance.Between(
+            playerTileX, playerTileY,
+            door.x, door.y
+        );
+
+        console.log(`  - Puerta en (${door.x}, ${door.y}) distancia: ${distance.toFixed(2)}`);
+
+        if (distance <= 1.5) {
+            console.log('🚪 Interactuando con puerta:', door.messageIn);
+            if (door.link) {
+                console.log('🔗 Redirigiendo a:', door.link);
+                console.log('💬', door.messageOut);
+                window.location.href = door.link;
+            } else {
+                console.log('⚠️ Esta puerta no tiene link configurado');
+            }
+            return;
+        }
+    }
+
+    console.log('⚠️ No hay puertas cerca');
 }
 
 function createWorldBorders(scene) {
@@ -314,6 +461,14 @@ function createPortals(scene) {
         console.log('🚪 PORTAL ENTRADA - Retrocediendo al mundo anterior');
         canChangeWorld = false;
         worldNumber--;
+        const previousSeed = worldConfig.worldSeeds[worldNumber] || (worldNumber * 1000 + 42);
+        localStorage.setItem('playerData', JSON.stringify({
+            x: WORLD.screenWidth - WORLD.tileSize - 16,
+            y: WORLD.screenHeight / 2,
+            worldNumber: worldNumber,
+            seed: previousSeed,
+            lastPortal: 'entrance'
+        }));
         scene.scene.restart();
     });
 
@@ -322,6 +477,14 @@ function createPortals(scene) {
         console.log('🚪 PORTAL SALIDA - Avanzando al siguiente mundo');
         canChangeWorld = false;
         worldNumber++;
+        const nextSeed = worldConfig.worldSeeds[worldNumber] || (worldNumber * 1000 + 42);
+        localStorage.setItem('playerData', JSON.stringify({
+            x: WORLD.tileSize + 16,
+            y: WORLD.screenHeight / 2,
+            worldNumber: worldNumber,
+            seed: nextSeed,
+            lastPortal: 'exit'
+        }));
         scene.scene.restart();
     });
 
@@ -366,6 +529,22 @@ function placeBuildings() {
         { tiles: simpleBuildings.shop.tiles, w: simpleBuildings.shop.width, h: simpleBuildings.shop.height, name: 'tienda' }
     ];
 
+    const customStructuresArray = [];
+    const customWorldStructures = seedStructures.customStructures[worldNumber];
+    if (customWorldStructures && customWorldStructures.structures) {
+        console.log(`📦 Estructuras custom encontradas para mundo ${worldNumber}`);
+        for (const [key, structure] of Object.entries(customWorldStructures.structures)) {
+            customStructuresArray.push({
+                tiles: structure.tiles,
+                w: structure.width,
+                h: structure.height,
+                name: structure.name,
+                spawnCount: structure.spawnCount || 1,
+                restrictions: structure.restrictions || null
+            });
+        }
+    }
+
     const genRules = worldConfig.worldGeneration.buildings;
     const gridX = genRules.gridX;
     const gridY = genRules.gridY;
@@ -405,6 +584,82 @@ function placeBuildings() {
             }
         }
     }
+
+    for (const customStructure of customStructuresArray) {
+        let placed = 0;
+        let attempts = 0;
+        const maxAttempts = 100;
+
+        while (placed < customStructure.spawnCount && attempts < maxAttempts) {
+            attempts++;
+            const bx = Math.floor(rng() * (WORLD.tilesX - customStructure.w - 2)) + 1;
+            const by = Math.floor(rng() * (WORLD.tilesY - customStructure.h - 2)) + 1;
+
+            let canPlace = true;
+
+            for (let dy = -1; dy <= customStructure.h; dy++) {
+                for (let dx = -1; dx <= customStructure.w; dx++) {
+                    if (buildingsLayer.getTileAt(bx + dx, by + dy)) {
+                        canPlace = false;
+                        break;
+                    }
+                }
+                if (!canPlace) break;
+            }
+
+            if (canPlace && customStructure.restrictions) {
+                if (customStructure.restrictions.minDistanceFromOtherStructures) {
+                    const minDist = customStructure.restrictions.minDistanceFromOtherStructures;
+                    for (const building of buildings) {
+                        const dist = Phaser.Math.Distance.Between(
+                            bx + Math.floor(customStructure.w / 2),
+                            by + Math.floor(customStructure.h / 2),
+                            building.x, building.y
+                        );
+                        if (dist < minDist) {
+                            canPlace = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (canPlace) {
+                let tileIndex = 0;
+                for (let dy = 0; dy < customStructure.h; dy++) {
+                    for (let dx = 0; dx < customStructure.w; dx++) {
+                        const currentTile = customStructure.tiles[tileIndex];
+                        buildingsLayer.putTileAt(currentTile, bx + dx, by + dy);
+
+                        if (customStructure.restrictions && customStructure.restrictions.door_link) {
+                            if (customStructure.restrictions.door_link.includes(currentTile)) {
+                                doorTiles.push({
+                                    x: bx + dx,
+                                    y: by + dy,
+                                    tileIndex: currentTile,
+                                    messageIn: customStructure.restrictions.messajein || 'Presiona E para entrar',
+                                    messageOut: customStructure.restrictions.messajeout || 'Saliendo...',
+                                    link: customStructure.restrictions.link || null
+                                });
+                                console.log(`🚪 Puerta detectada en (${bx + dx}, ${by + dy}) tile:${currentTile} link:${customStructure.restrictions.link}`);
+                            }
+                        }
+
+                        tileIndex++;
+                    }
+                }
+                buildings.push({ x: bx + Math.floor(customStructure.w / 2), y: by + Math.floor(customStructure.h / 2), type: customStructure.name });
+                placed++;
+            }
+        }
+
+        if (placed < customStructure.spawnCount) {
+            console.log(`⚠️ Solo se colocaron ${placed}/${customStructure.spawnCount} de ${customStructure.name}`);
+        } else {
+            console.log(`✓ ${customStructure.name}: ${placed} colocados`);
+        }
+    }
+
     console.log('✓ Edificios colocados:', buildings.length);
 }
 

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casa Interior - Mundo Meiji</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #2c1810;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .interior-container {
+            max-width: 800px;
+            background: #3d2817;
+            border: 4px solid #8b4513;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        h1 {
+            color: #f4a460;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .welcome-text {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+        .interior-content {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #daa520;
+        }
+        .exit-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #8b4513;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .exit-button:hover {
+            background: #a0522d;
+        }
+    </style>
+</head>
+<body>
+    <div class="interior-container">
+        <h1>🏠 Interior de la Casa</h1>
+        <div class="welcome-text">
+            Bienvenido accede con la letra E
+        </div>
+        <div class="interior-content">
+            <p>Has entrado en una acogedora casa del Mundo Meiji.</p>
+            <p>Esta es una estructura personalizada generada por semilla.</p>
+            <p>Aquí puedes descansar, guardar tu progreso, o interactuar con objetos.</p>
+        </div>
+        <button class="exit-button" onclick="exitHouse()">🚪 Salir de la Casa</button>
+    </div>
+
+    <script>
+        function exitHouse() {
+            console.log('💬 Adiós gracias por participar');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
