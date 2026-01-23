@@ -34,6 +34,155 @@ function getLanguageFromURL() {
 
 let editor;
 let pyodide = null;
+let treeSitterParsers = {};
+let currentWorkshop = null;
+let currentExerciseIndex = 0;
+
+async function loadWorkshop(workshopId) {
+    try {
+        const response = await fetch(`${workshopId}.json`);
+        currentWorkshop = await response.json();
+        loadExercise(0);
+        console.log('✅ Taller cargado:', currentWorkshop.workshop.title);
+    } catch (error) {
+        console.warn('⚠️ No se pudo cargar el taller:', error);
+    }
+}
+
+function loadExercise(index) {
+    if (!currentWorkshop) return;
+
+    const exercise = currentWorkshop.workshop.exercises[index];
+    if (!exercise) return;
+
+    currentExerciseIndex = index;
+
+    document.getElementById('exercise-number').textContent =
+        `Ejercicio ${exercise.id}/${currentWorkshop.workshop.exercises.length}`;
+
+    const instructionsTab = document.getElementById('instructions');
+    instructionsTab.innerHTML = `
+        <div class="npc-container">
+            <img src="${currentWorkshop.workshop.npc.avatar}" alt="NPC" class="npc-avatar">
+            <div class="npc-info">
+                <h2 class="npc-name">${currentWorkshop.workshop.npc.name}</h2>
+                <p class="npc-title">${currentWorkshop.workshop.npc.role}</p>
+            </div>
+        </div>
+
+        <h1>${exercise.instructions.title}</h1>
+        <p>${exercise.instructions.description}</p>
+
+        <h3>Requisitos:</h3>
+        <ul>
+            ${exercise.instructions.requirements.map(req => `<li>${req}</li>`).join('')}
+        </ul>
+
+        <h3>Ejemplo:</h3>
+        <pre><code>${exercise.example || exercise.instructions.example}</code></pre>
+    `;
+
+    const docTab = document.getElementById('documentation');
+    docTab.innerHTML = `
+        <h1>${exercise.documentation.title}</h1>
+        ${exercise.documentation.sections.map(section => `
+            <h2>${section.heading}</h2>
+            <p>${section.content.replace(/```python/g, '<pre><code>').replace(/```/g, '</code></pre>')}</p>
+        `).join('')}
+
+        ${exercise.documentation.references.length > 0 ? `
+            <h3>Referencias:</h3>
+            <ul>
+                ${exercise.documentation.references.map(ref =>
+                    `<li><a href="${ref.url}" class="doc-link" target="_blank">${ref.title}</a></li>`
+                ).join('')}
+            </ul>
+        ` : ''}
+    `;
+
+    const goalsTab = document.getElementById('goals');
+    goalsTab.innerHTML = `
+        <h1>Metas del Ejercicio ${exercise.id}</h1>
+
+        <div class="goals-list">
+            ${exercise.goals.map((goal, idx) => `
+                <div class="goal-item ${goal.bonus ? 'bonus' : ''}">
+                    <input type="checkbox" id="goal_${exercise.id}_${idx}" class="goal-checkbox" data-points="${goal.points}">
+                    <label for="goal_${exercise.id}_${idx}">
+                        <span class="goal-title">${goal.title}</span>
+                        <span class="goal-points">${goal.bonus ? '+' : ''}${goal.points} pts${goal.bonus ? ' (Bonus)' : ''}</span>
+                    </label>
+                </div>
+            `).join('')}
+        </div>
+
+        <div class="progress-summary">
+            <h3>Progreso del Ejercicio</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p class="progress-text">
+                <span id="current-points">0</span> / <span id="total-points">${exercise.points}</span> pts
+            </p>
+        </div>
+
+        <div class="main-goal-summary">
+            <h3>🎯 Meta Principal del Taller</h3>
+            <p>${currentWorkshop.workshop.mainGoal.description}</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="main-progress-fill" style="width: ${(index / currentWorkshop.workshop.exercises.length) * 100}%"></div>
+            </div>
+            <p class="progress-text">
+                Ejercicio ${index + 1} / ${currentWorkshop.workshop.exercises.length}
+            </p>
+        </div>
+    `;
+
+    if (editor) {
+        editor.setValue(exercise.starterCode || languageTemplates[currentWorkshop.workshop.language]);
+    }
+
+    updateNavigationButtons();
+    attachGoalListeners();
+}
+
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prev-exercise');
+    const nextBtn = document.getElementById('next-exercise');
+
+    if (currentWorkshop) {
+        prevBtn.style.display = currentExerciseIndex > 0 ? 'inline-block' : 'none';
+        nextBtn.style.display = currentExerciseIndex < currentWorkshop.workshop.exercises.length - 1 ? 'inline-block' : 'none';
+    }
+}
+
+function attachGoalListeners() {
+    const goalCheckboxes = document.querySelectorAll('.goal-checkbox');
+    const progressFill = document.getElementById('progress-fill');
+    const currentPointsEl = document.getElementById('current-points');
+    const totalPointsEl = document.getElementById('total-points');
+
+    function updateProgress() {
+        let totalPoints = 0;
+        let maxPoints = 0;
+
+        goalCheckboxes.forEach(checkbox => {
+            const points = parseInt(checkbox.dataset.points);
+            maxPoints += points;
+            if (checkbox.checked) {
+                totalPoints += points;
+            }
+        });
+
+        const percentage = maxPoints > 0 ? (totalPoints / maxPoints) * 100 : 0;
+        progressFill.style.width = percentage + '%';
+        currentPointsEl.textContent = totalPoints;
+    }
+
+    goalCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateProgress);
+    });
+}
 
 async function initPyodide() {
     try {
@@ -44,8 +193,44 @@ async function initPyodide() {
     }
 }
 
+async function initTreeSitter() {
+    try {
+        await TreeSitter.init();
+
+        const languages = {
+            go: 'https://cdn.jsdelivr.net/npm/tree-sitter-go@0.20.0/tree-sitter-go.wasm',
+            php: 'https://cdn.jsdelivr.net/npm/tree-sitter-php@0.21.1/tree-sitter-php.wasm',
+            cpp: 'https://cdn.jsdelivr.net/npm/tree-sitter-cpp@0.20.0/tree-sitter-cpp.wasm',
+            swift: 'https://cdn.jsdelivr.net/npm/tree-sitter-swift@0.6.0/tree-sitter-swift.wasm'
+        };
+
+        for (const [lang, url] of Object.entries(languages)) {
+            try {
+                const parser = new TreeSitter();
+                const langModule = await TreeSitter.Language.load(url);
+                parser.setLanguage(langModule);
+                treeSitterParsers[lang] = parser;
+                console.log(`✅ Tree-sitter ${lang} cargado`);
+            } catch (err) {
+                console.warn(`⚠️ No se pudo cargar tree-sitter ${lang}:`, err);
+            }
+        }
+    } catch (error) {
+        console.warn('⚠️ Tree-sitter no disponible:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initPyodide();
+    initTreeSitter();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const workshopId = urlParams.get('workshop');
+
+    if (workshopId) {
+        loadWorkshop(workshopId);
+    }
+
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -61,34 +246,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const goalCheckboxes = document.querySelectorAll('.goal-checkbox');
-    const progressFill = document.getElementById('progress-fill');
-    const currentPointsEl = document.getElementById('current-points');
+    document.getElementById('prev-exercise')?.addEventListener('click', () => {
+        if (currentExerciseIndex > 0) {
+            loadExercise(currentExerciseIndex - 1);
+        }
+    });
 
-    const goalPoints = {
-        goal1: 10,
-        goal2: 20,
-        goal3: 15,
-        goal4: 25,
-        goal5: 15,
-        goal6: 20
-    };
-
-    function updateProgress() {
-        let totalPoints = 0;
-        goalCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                totalPoints += goalPoints[checkbox.id];
-            }
-        });
-
-        const percentage = (totalPoints / 70) * 100;
-        progressFill.style.width = percentage + '%';
-        currentPointsEl.textContent = totalPoints;
-    }
-
-    goalCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateProgress);
+    document.getElementById('next-exercise')?.addEventListener('click', () => {
+        if (currentWorkshop && currentExerciseIndex < currentWorkshop.workshop.exercises.length - 1) {
+            loadExercise(currentExerciseIndex + 1);
+        }
     });
 });
 
@@ -389,6 +556,47 @@ errors
     }
 
     function validateGo(code) {
+        if (treeSitterParsers.go) {
+            const tree = treeSitterParsers.go.parse(code);
+            const errors = [];
+
+            function findErrors(node) {
+                if (node.hasError() || node.type === 'ERROR') {
+                    errors.push({
+                        line: node.startPosition.row + 1,
+                        column: node.startPosition.column + 1,
+                        msg: 'Error de sintaxis'
+                    });
+                }
+                for (const child of node.children) {
+                    findErrors(child);
+                }
+            }
+
+            findErrors(tree.rootNode);
+
+            if (errors.length > 0) {
+                console.log('🐹 Go - Errores de sintaxis (Tree-sitter):');
+                errors.forEach(err => console.log(`  Línea ${err.line}, Col ${err.column}: ${err.msg}`));
+
+                const monacoMarkers = errors.map(err => ({
+                    severity: monaco.MarkerSeverity.Error,
+                    startLineNumber: err.line,
+                    startColumn: err.column,
+                    endLineNumber: err.line,
+                    endColumn: editor.getModel().getLineMaxColumn(err.line),
+                    message: err.msg
+                }));
+                monaco.editor.setModelMarkers(editor.getModel(), 'go-validator', monacoMarkers);
+            } else {
+                monaco.editor.setModelMarkers(editor.getModel(), 'go-validator', []);
+            }
+        } else {
+            validateGoBasic(code);
+        }
+    }
+
+    function validateGoBasic(code) {
         const lines = code.split('\n');
         const errors = [];
 
@@ -451,6 +659,47 @@ errors
     }
 
     function validateSwift(code) {
+        if (treeSitterParsers.swift) {
+            const tree = treeSitterParsers.swift.parse(code);
+            const errors = [];
+
+            function findErrors(node) {
+                if (node.hasError() || node.type === 'ERROR') {
+                    errors.push({
+                        line: node.startPosition.row + 1,
+                        column: node.startPosition.column + 1,
+                        msg: 'Error de sintaxis'
+                    });
+                }
+                for (const child of node.children) {
+                    findErrors(child);
+                }
+            }
+
+            findErrors(tree.rootNode);
+
+            if (errors.length > 0) {
+                console.log('🍎 Swift - Errores de sintaxis (Tree-sitter):');
+                errors.forEach(err => console.log(`  Línea ${err.line}, Col ${err.column}: ${err.msg}`));
+
+                const monacoMarkers = errors.map(err => ({
+                    severity: monaco.MarkerSeverity.Error,
+                    startLineNumber: err.line,
+                    startColumn: err.column,
+                    endLineNumber: err.line,
+                    endColumn: editor.getModel().getLineMaxColumn(err.line),
+                    message: err.msg
+                }));
+                monaco.editor.setModelMarkers(editor.getModel(), 'swift-validator', monacoMarkers);
+            } else {
+                monaco.editor.setModelMarkers(editor.getModel(), 'swift-validator', []);
+            }
+        } else {
+            validateSwiftBasic(code);
+        }
+    }
+
+    function validateSwiftBasic(code) {
         const lines = code.split('\n');
         const errors = [];
 
@@ -482,6 +731,47 @@ errors
     }
 
     function validatePHP(code) {
+        if (treeSitterParsers.php) {
+            const tree = treeSitterParsers.php.parse(code);
+            const errors = [];
+
+            function findErrors(node) {
+                if (node.hasError() || node.type === 'ERROR') {
+                    errors.push({
+                        line: node.startPosition.row + 1,
+                        column: node.startPosition.column + 1,
+                        msg: 'Error de sintaxis'
+                    });
+                }
+                for (const child of node.children) {
+                    findErrors(child);
+                }
+            }
+
+            findErrors(tree.rootNode);
+
+            if (errors.length > 0) {
+                console.log('🐘 PHP - Errores de sintaxis (Tree-sitter):');
+                errors.forEach(err => console.log(`  Línea ${err.line}, Col ${err.column}: ${err.msg}`));
+
+                const monacoMarkers = errors.map(err => ({
+                    severity: monaco.MarkerSeverity.Error,
+                    startLineNumber: err.line,
+                    startColumn: err.column,
+                    endLineNumber: err.line,
+                    endColumn: editor.getModel().getLineMaxColumn(err.line),
+                    message: err.msg
+                }));
+                monaco.editor.setModelMarkers(editor.getModel(), 'php-validator', monacoMarkers);
+            } else {
+                monaco.editor.setModelMarkers(editor.getModel(), 'php-validator', []);
+            }
+        } else {
+            validatePHPBasic(code);
+        }
+    }
+
+    function validatePHPBasic(code) {
         const lines = code.split('\n');
         const errors = [];
 
@@ -491,11 +781,6 @@ errors
             }
             if (line.includes('(') && !line.includes(')') && !line.trim().endsWith('\\')) {
                 errors.push({ line: index + 1, msg: 'Paréntesis sin cerrar' });
-            }
-            if (!line.trim().startsWith('//') && line.trim() && !line.includes(';') &&
-                !line.includes('{') && !line.includes('}') && !line.trim().startsWith('<?') &&
-                !line.trim().startsWith('*') && line.trim() !== '') {
-                errors.push({ line: index + 1, msg: 'Posible falta de ";" al final de la línea' });
             }
         });
 
@@ -518,6 +803,47 @@ errors
     }
 
     function validateCpp(code) {
+        if (treeSitterParsers.cpp) {
+            const tree = treeSitterParsers.cpp.parse(code);
+            const errors = [];
+
+            function findErrors(node) {
+                if (node.hasError() || node.type === 'ERROR') {
+                    errors.push({
+                        line: node.startPosition.row + 1,
+                        column: node.startPosition.column + 1,
+                        msg: 'Error de sintaxis'
+                    });
+                }
+                for (const child of node.children) {
+                    findErrors(child);
+                }
+            }
+
+            findErrors(tree.rootNode);
+
+            if (errors.length > 0) {
+                console.log('⚙️ C++ - Errores de sintaxis (Tree-sitter):');
+                errors.forEach(err => console.log(`  Línea ${err.line}, Col ${err.column}: ${err.msg}`));
+
+                const monacoMarkers = errors.map(err => ({
+                    severity: monaco.MarkerSeverity.Error,
+                    startLineNumber: err.line,
+                    startColumn: err.column,
+                    endLineNumber: err.line,
+                    endColumn: editor.getModel().getLineMaxColumn(err.line),
+                    message: err.msg
+                }));
+                monaco.editor.setModelMarkers(editor.getModel(), 'cpp-validator', monacoMarkers);
+            } else {
+                monaco.editor.setModelMarkers(editor.getModel(), 'cpp-validator', []);
+            }
+        } else {
+            validateCppBasic(code);
+        }
+    }
+
+    function validateCppBasic(code) {
         const lines = code.split('\n');
         const errors = [];
 

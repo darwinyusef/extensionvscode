@@ -1,0 +1,174 @@
+{
+  "workshop": {
+    "id": "python-poo-basico",
+    "title": "Python POO Básico",
+    "description": "Aprende los fundamentos de Programación Orientada a Objetos en Python",
+    "language": "python",
+    "npc": {
+      "name": "Flexbox Fred",
+      "avatar": "../assets/characters/flexbox_fred.svg",
+      "role": "Maestro de POO"
+    },
+    "mainGoal": {
+      "title": "Dominar POO en Python",
+      "description": "Completar los 10 ejercicios de programación orientada a objetos",
+      "totalPoints": 500,
+      "rewards": {
+        "xp": 1000,
+        "items": ["key_python_oop", "certificate_poo"]
+      }
+    },
+    "exercises": [
+      {
+        "id": 1,
+        "title": "Crear tu primera clase",
+        "difficulty": "easy",
+        "points": 30,
+        "instructions": {
+          "title": "Ejercicio 1: Crear una clase simple",
+          "description": "Crea una clase `Persona` con atributos básicos.",
+          "requirements": [
+            "La clase debe llamarse `Persona`",
+            "Debe tener un constructor `__init__`",
+            "Debe tener atributos: `nombre`, `edad`",
+            "Debe tener un método `saludar()` que retorne un string"
+          ],
+          "example": "persona = Persona('Juan', 25)\npersona.saludar()  # 'Hola, soy Juan y tengo 25 años'"
+        },
+        "documentation": {
+          "title": "¿Qué es una Clase?",
+          "sections": [
+            {
+              "heading": "Conceptos Básicos",
+              "content": "Una clase es un modelo o plantilla para crear objetos. Define las propiedades (atributos) y comportamientos (métodos) que tendrán los objetos."
+            },
+            {
+              "heading": "Sintaxis",
+              "content": "```python\nclass NombreClase:\n    def __init__(self, parametros):\n        self.atributo = parametros\n    \n    def metodo(self):\n        return self.atributo\n```"
+            },
+            {
+              "heading": "El Constructor __init__",
+              "content": "Es un método especial que se ejecuta automáticamente al crear un objeto. Se usa para inicializar los atributos."
+            },
+            {
+              "heading": "self",
+              "content": "`self` es una referencia al objeto actual. Siempre debe ser el primer parámetro de los métodos de instancia."
+            }
+          ],
+          "references": [
+            {
+              "title": "Python Official Docs - Classes",
+              "url": "https://docs.python.org/3/tutorial/classes.html"
+            }
+          ]
+        },
+        "goals": [
+          {
+            "id": "goal1_1",
+            "title": "Definir la clase Persona",
+            "points": 5,
+            "bonus": false
+          },
+          {
+            "id": "goal1_2",
+            "title": "Implementar el constructor __init__",
+            "points": 10,
+            "bonus": false
+          },
+          {
+            "id": "goal1_3",
+            "title": "Agregar atributos nombre y edad",
+            "points": 5,
+            "bonus": false
+          },
+          {
+            "id": "goal1_4",
+            "title": "Implementar método saludar()",
+            "points": 10,
+            "bonus": false
+          },
+          {
+            "id": "goal1_bonus",
+            "title": "Agregar validación de edad (>0)",
+            "points": 10,
+            "bonus": true
+          }
+        ],
+        "starterCode": "class Persona:\n    # Escribe tu código aquí\n    pass\n",
+        "tests": [
+          {
+            "input": "persona = Persona('Ana', 30)",
+            "expected": "persona.nombre == 'Ana' and persona.edad == 30"
+          },
+          {
+            "input": "persona.saludar()",
+            "expected": "'Hola' in resultado and 'Ana' in resultado"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Atributos y Métodos",
+        "difficulty": "easy",
+        "points": 40,
+        "instructions": {
+          "title": "Ejercicio 2: Trabajando con atributos y métodos",
+          "description": "Amplía la clase Persona con más atributos y métodos.",
+          "requirements": [
+            "Agregar atributo `email`",
+            "Crear método `cumplir_años()` que incremente la edad",
+            "Crear método `cambiar_email(nuevo_email)`",
+            "Crear método `info()` que retorne toda la información"
+          ],
+          "example": "persona = Persona('María', 28, 'maria@example.com')\npersona.cumplir_años()\nprint(persona.edad)  # 29"
+        },
+        "documentation": {
+          "title": "Atributos y Métodos",
+          "sections": [
+            {
+              "heading": "Atributos de Instancia",
+              "content": "Son variables que pertenecen a cada objeto individual. Se definen con `self.nombre_atributo`."
+            },
+            {
+              "heading": "Métodos de Instancia",
+              "content": "Son funciones definidas dentro de una clase que operan sobre los atributos del objeto."
+            },
+            {
+              "heading": "Modificar Atributos",
+              "content": "Los métodos pueden modificar los atributos del objeto usando `self`:\n```python\ndef cumplir_años(self):\n    self.edad += 1\n```"
+            }
+          ],
+          "references": []
+        },
+        "goals": [
+          {
+            "id": "goal2_1",
+            "title": "Agregar atributo email",
+            "points": 5,
+            "bonus": false
+          },
+          {
+            "id": "goal2_2",
+            "title": "Implementar cumplir_años()",
+            "points": 10,
+            "bonus": false
+          },
+          {
+            "id": "goal2_3",
+            "title": "Implementar cambiar_email()",
+            "points": 10,
+            "bonus": false
+          },
+          {
+            "id": "goal2_4",
+            "title": "Implementar info()",
+            "points": 15,
+            "bonus": false
+          }
+        ],
+        "starterCode": "class Persona:\n    def __init__(self, nombre, edad, email):\n        # Tu código aquí\n        pass\n    \n    def cumplir_años(self):\n        # Tu código aquí\n        pass\n",
+        "tests": []
+      }
+    ]
+  }
+}

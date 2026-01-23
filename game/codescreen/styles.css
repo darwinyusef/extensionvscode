@@ -335,6 +335,57 @@ body {
     border-bottom: 1px solid #3c3c3c;
 }
 
+.header-left,
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.exercise-number {
+    color: #9cdcfe;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    background: #1e1e1e;
+    border-radius: 4px;
+    border: 1px solid #007acc;
+}
+
+.nav-btn {
+    background: #0e639c;
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-btn:hover {
+    background: #1177bb;
+}
+
+.nav-btn:active {
+    background: #0d5a8f;
+    transform: scale(0.98);
+}
+
+.main-goal-summary {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #1e1e1e 0%, #2a2a0a 100%);
+    border-radius: 8px;
+    border: 2px solid #ffd700;
+}
+
+.main-goal-summary h3 {
+    color: #ffd700;
+    margin-bottom: 1rem;
+}
+
 .language-display {
     color: #4ec9b0;
     font-size: 1rem;

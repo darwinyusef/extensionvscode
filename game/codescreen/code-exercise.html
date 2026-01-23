@@ -138,8 +138,15 @@ Casos especiales:
 
         <div class="editor-panel">
             <div class="editor-header">
-                <span id="language-display" class="language-display"></span>
-                <button id="run-code" class="run-btn">▶ Ejecutar</button>
+                <div class="header-left">
+                    <span id="language-display" class="language-display"></span>
+                    <span id="exercise-number" class="exercise-number"></span>
+                </div>
+                <div class="header-right">
+                    <button id="prev-exercise" class="nav-btn" style="display:none;">← Anterior</button>
+                    <button id="next-exercise" class="nav-btn" style="display:none;">Siguiente →</button>
+                    <button id="run-code" class="run-btn">▶ Ejecutar</button>
+                </div>
             </div>
             <div id="editor" class="code-editor"></div>
         </div>
@@ -148,12 +155,11 @@ Casos especiales:
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script src="https://unpkg.com/java-parser@2.0.4/dist/java-parser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/prettier@3.1.0/standalone.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/prettier@3.1.0/plugins/babel.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/prettier@3.1.0/plugins/estree.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/prettier@3.1.0/plugins/typescript.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/prettier@3.1.0/plugins/php.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/acorn@8.11.2/dist/acorn.min.js"></script>
+
+    <!-- Tree-sitter WASM -->
+    <script src="https://cdn.jsdelivr.net/npm/web-tree-sitter@0.20.8/tree-sitter.js"></script>
+
     <script src="editor.js"></script>
 </body>
 </html>
