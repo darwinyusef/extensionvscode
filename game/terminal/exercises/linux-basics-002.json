@@ -1,0 +1,132 @@
+{
+  "exercise": {
+    "id": "linux-basics-002",
+    "title": "Linux Basics - File Operations",
+    "category": "Linux",
+    "difficulty": "beginner",
+    "description": "Learn to manipulate files and directories",
+    "initial_state": {
+      "current_directory": "/home/student",
+      "env": {
+        "USER": "student",
+        "HOME": "/home/student"
+      }
+    },
+    "steps": [
+      {
+        "step_id": 1,
+        "instruction": "Create a directory structure 'workspace/src' using mkdir with -p flag",
+        "validation": {
+          "type": "command_with_fs_check",
+          "expected_command": "mkdir -p workspace/src",
+          "alternative_commands": ["mkdir -p ./workspace/src"],
+          "fs_checks": [
+            {
+              "type": "directory_exists",
+              "path": "/home/student/workspace/src"
+            }
+          ]
+        },
+        "on_correct": "Great! The -p flag creates parent directories automatically.",
+        "on_wrong": "Use: mkdir -p workspace/src",
+        "points": 15
+      },
+      {
+        "step_id": 2,
+        "instruction": "Navigate to workspace/src directory",
+        "validation": {
+          "type": "state_check",
+          "checks": [
+            {
+              "type": "current_directory",
+              "value": "/home/student/workspace/src"
+            }
+          ]
+        },
+        "on_correct": "Perfect! You're now in the src directory.",
+        "on_wrong": "Use: cd workspace/src",
+        "points": 10
+      },
+      {
+        "step_id": 3,
+        "instruction": "Create three files: main.js, utils.js, and config.js",
+        "validation": {
+          "type": "command_with_fs_check",
+          "expected_command": "touch main.js utils.js config.js",
+          "alternative_commands": ["touch main.js && touch utils.js && touch config.js"],
+          "fs_checks": [
+            {
+              "type": "file_exists",
+              "path": "/home/student/workspace/src/main.js"
+            },
+            {
+              "type": "file_exists",
+              "path": "/home/student/workspace/src/utils.js"
+            },
+            {
+              "type": "file_exists",
+              "path": "/home/student/workspace/src/config.js"
+            }
+          ]
+        },
+        "on_correct": "Excellent! All three files created.",
+        "on_wrong": "Use: touch main.js utils.js config.js",
+        "points": 15
+      },
+      {
+        "step_id": 4,
+        "instruction": "List files in long format to verify creation",
+        "validation": {
+          "type": "command_pattern",
+          "pattern": "^ls\\s+-[al]+"
+        },
+        "on_correct": "Perfect! You can see all the files with detailed information.",
+        "on_wrong": "Use: ls -l",
+        "points": 10
+      },
+      {
+        "step_id": 5,
+        "instruction": "Use pwd to display the current working directory",
+        "validation": {
+          "type": "command_exact",
+          "expected_command": "pwd"
+        },
+        "on_correct": "Great! pwd shows your current location in the filesystem.",
+        "on_wrong": "Use: pwd",
+        "points": 10
+      },
+      {
+        "step_id": 6,
+        "instruction": "Navigate back to home directory using cd without arguments",
+        "validation": {
+          "type": "state_check",
+          "checks": [
+            {
+              "type": "current_directory",
+              "value": "/home/student"
+            }
+          ]
+        },
+        "on_correct": "Perfect! cd without arguments always takes you home.",
+        "on_wrong": "Just type: cd",
+        "points": 10
+      },
+      {
+        "step_id": 7,
+        "instruction": "Use echo to display your username with $USER variable",
+        "validation": {
+          "type": "command_pattern",
+          "pattern": "^echo\\s+.*\\$USER"
+        },
+        "on_correct": "Awesome! You completed the file operations exercise!",
+        "on_wrong": "Use: echo $USER",
+        "points": 10
+      }
+    ],
+    "rewards": {
+      "xp": 80,
+      "badge": "file-master",
+      "unlocks": ["bash-scripting-001"]
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "exercise": {
+    "id": "docker-fundamentals-001",
+    "title": "Docker Fundamentals - Introduction",
+    "category": "Docker",
+    "difficulty": "intermediate",
+    "description": "Learn basic Docker commands and concepts",
+    "initial_state": {
+      "current_directory": "/home/student",
+      "env": {
+        "USER": "student",
+        "HOME": "/home/student"
+      },
+      "docker": {
+        "images": [],
+        "containers": []
+      }
+    },
+    "steps": [
+      {
+        "step_id": 1,
+        "instruction": "Create a simple Dockerfile for a Node.js application",
+        "validation": {
+          "type": "file_content_check",
+          "file_path": "/home/student/Dockerfile",
+          "contains": "FROM node"
+        },
+        "on_correct": "Great! You created a Dockerfile with a Node.js base image.",
+        "on_wrong": "Create a file named Dockerfile with 'FROM node:alpine' as the first line",
+        "points": 20
+      },
+      {
+        "step_id": 2,
+        "instruction": "Add a WORKDIR instruction to set /app as working directory",
+        "validation": {
+          "type": "file_content_check",
+          "file_path": "/home/student/Dockerfile",
+          "contains": "WORKDIR /app"
+        },
+        "on_correct": "Perfect! WORKDIR sets the working directory inside the container.",
+        "on_wrong": "Add 'WORKDIR /app' to your Dockerfile",
+        "points": 15
+      },
+      {
+        "step_id": 3,
+        "instruction": "Add CMD instruction to run node server.js",
+        "validation": {
+          "type": "file_content_check",
+          "file_path": "/home/student/Dockerfile",
+          "pattern": "CMD.*node.*server"
+        },
+        "on_correct": "Excellent! CMD defines the default command when container starts.",
+        "on_wrong": "Add 'CMD [\"node\", \"server.js\"]' to your Dockerfile",
+        "points": 15
+      }
+    ],
+    "rewards": {
+      "xp": 50,
+      "badge": "docker-beginner",
+      "unlocks": ["docker-fundamentals-002"]
+    }
+  }
+}

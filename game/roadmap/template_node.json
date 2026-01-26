@@ -1,0 +1,46 @@
+{
+  "id": "node-id",
+  "title": "Nombre de la Tecnología",
+  "icon": "https://svgl.app/library/technology.svg",
+  "x": 0,
+  "y": 0,
+  "level": 1,
+  "color": "0x000000",
+  "description": "Descripción breve de una línea",
+  "what_is": "Explicación detallada de qué es esta tecnología. Incluye su propósito principal y características distintivas.",
+  "why_learn": "Razones convincentes para aprender esta tecnología. Habla de demanda laboral, utilidad práctica, y relevancia en el mercado.",
+  "use_cases": [
+    "Caso de uso 1: Descripción específica",
+    "Caso de uso 2: Descripción específica",
+    "Caso de uso 3: Descripción específica"
+  ],
+  "key_concepts": [
+    "Concepto fundamental 1",
+    "Concepto fundamental 2",
+    "Concepto fundamental 3",
+    "Concepto fundamental 4"
+  ],
+  "relation_with_nodes": {
+    "node-id-1": "Explicación de cómo se relaciona con el nodo 1",
+    "node-id-2": "Explicación de cómo se relaciona con el nodo 2"
+  },
+  "difficulty": "Principiante | Principiante-Intermedio | Intermedio | Intermedio-Avanzado | Avanzado",
+  "estimated_time": "X semanas/meses",
+  "prerequisites": "Tecnologías que debes conocer antes",
+  "resources": [
+    {
+      "name": "Nombre del recurso 1",
+      "url": "https://ejemplo.com"
+    },
+    {
+      "name": "Nombre del recurso 2",
+      "url": "https://ejemplo.com"
+    }
+  ],
+  "url": "https://url-principal-aprendizaje.com",
+  "rating": 5,
+  "active": false,
+  "locked": false,
+  "requires": [],
+  "connections": []
+}

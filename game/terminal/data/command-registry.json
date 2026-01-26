@@ -1,0 +1,90 @@
+{
+  "commands": {
+    "ls": {
+      "description": "List directory contents",
+      "category": "file-system",
+      "difficulty": "beginner",
+      "examples": [
+        "ls",
+        "ls -l",
+        "ls -la",
+        "ls /home"
+      ]
+    },
+    "cd": {
+      "description": "Change directory",
+      "category": "navigation",
+      "difficulty": "beginner",
+      "examples": [
+        "cd /home",
+        "cd ..",
+        "cd ~"
+      ]
+    },
+    "pwd": {
+      "description": "Print working directory",
+      "category": "navigation",
+      "difficulty": "beginner",
+      "examples": ["pwd"]
+    },
+    "mkdir": {
+      "description": "Create directory",
+      "category": "file-system",
+      "difficulty": "beginner",
+      "examples": [
+        "mkdir mydir",
+        "mkdir -p path/to/dir"
+      ]
+    },
+    "touch": {
+      "description": "Create empty file",
+      "category": "file-system",
+      "difficulty": "beginner",
+      "examples": [
+        "touch file.txt",
+        "touch file1.txt file2.txt"
+      ]
+    },
+    "cat": {
+      "description": "Display file contents",
+      "category": "file-system",
+      "difficulty": "beginner",
+      "examples": [
+        "cat file.txt",
+        "cat file1.txt file2.txt"
+      ]
+    },
+    "nano": {
+      "description": "Text editor",
+      "category": "editor",
+      "difficulty": "beginner",
+      "examples": ["nano file.txt"]
+    },
+    "rm": {
+      "description": "Remove files or directories",
+      "category": "file-system",
+      "difficulty": "beginner",
+      "examples": [
+        "rm file.txt",
+        "rm -r directory",
+        "rm -rf directory"
+      ]
+    },
+    "echo": {
+      "description": "Display text or variables",
+      "category": "utility",
+      "difficulty": "beginner",
+      "examples": [
+        "echo Hello",
+        "echo $USER",
+        "echo 'Hello World'"
+      ]
+    },
+    "clear": {
+      "description": "Clear terminal screen",
+      "category": "utility",
+      "difficulty": "beginner",
+      "examples": ["clear"]
+    }
+  }
+}

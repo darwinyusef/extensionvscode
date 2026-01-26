@@ -1,0 +1,19 @@
+{
+  "name": "terminal-simulator",
+  "version": "1.0.0",
+  "description": "Interactive Linux terminal simulator with Docker, Kubernetes, Terraform and Bash exercises",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["terminal", "linux", "docker", "kubernetes", "terraform", "learning"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.4.1",
+    "cors": "^2.8.5"
+  }
+}

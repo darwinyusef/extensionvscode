@@ -1,0 +1,178 @@
+{
+  "exercise": {
+    "id": "linux-basics-001",
+    "title": "Linux Basics - File Navigation",
+    "category": "Linux",
+    "difficulty": "beginner",
+    "description": "Learn basic Linux commands for navigating the filesystem",
+    "initial_state": {
+      "filesystem": {
+        "type": "directory",
+        "name": "/",
+        "permissions": "drwxr-xr-x",
+        "owner": "root",
+        "group": "root",
+        "children": {
+          "home": {
+            "type": "directory",
+            "name": "home",
+            "permissions": "drwxr-xr-x",
+            "owner": "root",
+            "group": "root",
+            "children": {
+              "student": {
+                "type": "directory",
+                "name": "student",
+                "permissions": "drwxr-xr-x",
+                "owner": "student",
+                "group": "student",
+                "children": {
+                  "documents": {
+                    "type": "directory",
+                    "name": "documents",
+                    "permissions": "drwxr-xr-x",
+                    "owner": "student",
+                    "group": "student",
+                    "children": {
+                      "readme.txt": {
+                        "type": "file",
+                        "name": "readme.txt",
+                        "permissions": "-rw-r--r--",
+                        "owner": "student",
+                        "group": "student",
+                        "content": "Welcome to Linux!\nThis is a test file."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tmp": {
+            "type": "directory",
+            "name": "tmp",
+            "permissions": "drwxrwxrwx",
+            "owner": "root",
+            "group": "root",
+            "children": {}
+          }
+        }
+      },
+      "current_directory": "/home/student",
+      "env": {
+        "USER": "student",
+        "HOME": "/home/student"
+      }
+    },
+    "steps": [
+      {
+        "step_id": 1,
+        "instruction": "List the files in the current directory using 'ls'",
+        "validation": {
+          "type": "command_exact",
+          "expected_command": "ls",
+          "alternative_commands": ["ls -a", "ls -l", "ls -la"]
+        },
+        "on_correct": "Great! You can see the 'documents' directory.",
+        "on_wrong": "Try typing: ls",
+        "points": 10
+      },
+      {
+        "step_id": 2,
+        "instruction": "Change to the 'documents' directory using 'cd'",
+        "validation": {
+          "type": "state_check",
+          "checks": [
+            {
+              "type": "current_directory",
+              "value": "/home/student/documents"
+            }
+          ]
+        },
+        "on_correct": "Perfect! You're now in the documents directory.",
+        "on_wrong": "Use: cd documents",
+        "points": 10
+      },
+      {
+        "step_id": 3,
+        "instruction": "Display the content of 'readme.txt' using 'cat'",
+        "validation": {
+          "type": "command_exact",
+          "expected_command": "cat readme.txt",
+          "alternative_commands": ["cat ./readme.txt"]
+        },
+        "on_correct": "Excellent! You can read file contents now.",
+        "on_wrong": "Try: cat readme.txt",
+        "points": 10
+      },
+      {
+        "step_id": 4,
+        "instruction": "Go back to the parent directory using 'cd ..'",
+        "validation": {
+          "type": "state_check",
+          "checks": [
+            {
+              "type": "current_directory",
+              "value": "/home/student"
+            }
+          ]
+        },
+        "on_correct": "Good! '..' takes you to the parent directory.",
+        "on_wrong": "Use: cd ..",
+        "points": 10
+      },
+      {
+        "step_id": 5,
+        "instruction": "Create a new directory called 'projects' using 'mkdir'",
+        "validation": {
+          "type": "command_with_fs_check",
+          "expected_command": "mkdir projects",
+          "alternative_commands": ["mkdir ./projects"],
+          "fs_checks": [
+            {
+              "type": "directory_exists",
+              "path": "/home/student/projects"
+            }
+          ]
+        },
+        "on_correct": "Awesome! Directory created successfully.",
+        "on_wrong": "Use: mkdir projects",
+        "points": 15
+      },
+      {
+        "step_id": 6,
+        "instruction": "Create an empty file called 'todo.txt' in the projects directory",
+        "validation": {
+          "type": "command_with_fs_check",
+          "expected_command": "touch projects/todo.txt",
+          "alternative_commands": ["touch ./projects/todo.txt"],
+          "fs_checks": [
+            {
+              "type": "file_exists",
+              "path": "/home/student/projects/todo.txt"
+            }
+          ]
+        },
+        "on_correct": "Perfect! File created successfully.",
+        "on_wrong": "Use: touch projects/todo.txt",
+        "points": 15
+      },
+      {
+        "step_id": 7,
+        "instruction": "List all files in long format using 'ls -l' to see your new files",
+        "validation": {
+          "type": "command_pattern",
+          "pattern": "^ls\\s+-[al]+"
+        },
+        "on_correct": "Great job! You completed the basic Linux navigation exercise!",
+        "on_wrong": "Use: ls -l",
+        "points": 10
+      }
+    ],
+    "rewards": {
+      "xp": 80,
+      "badge": "linux-navigator",
+      "unlocks": ["linux-basics-002"]
+    }
+  }
+}

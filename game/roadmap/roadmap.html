@@ -20,26 +20,13 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-
-            background-color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
-            min-height: 100vh;
-            margin: 0;
-            background-color: white;
-            /* El orden de los gradientes es importante: los primeros aparecen "encima" */
+            background: #ffffff;
             background-image:
-                /* La Cuadrícula */
-                linear-gradient(to right, rgba(229, 231, 235, 0.8) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(229, 231, 235, 0.8) 1px, transparent 1px),
-                /* Los degradados de color */
-                radial-gradient(circle 500px at 20% 20%, rgba(139, 92, 246, 0.3), transparent),
-                radial-gradient(circle 500px at 80% 80%, rgba(59, 130, 246, 0.3), transparent);
-
-            /* Definimos el tamaño para cada capa de fondo */
-            background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%;
-            background-attachment: fixed;
-            /* Mantiene el fondo estático al hacer scroll */
+                radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15), transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.12), transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.08), transparent 60%);
         }
 
 
@@ -47,24 +34,59 @@
         .title {
             position: absolute;
             z-index: 1000;
-            top: 13%;
+            top: 30px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 42px;
-            font-weight: bold;
-            color: rgba(0, 0, 0, 0.7);
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.85);
             text-align: center;
+            letter-spacing: 1px;
         }
 
         .subtitle {
             position: absolute;
             z-index: 1000;
-            top: 20%;
+            top: 75px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 18px;
-            color: rgba(0, 0, 0, 0.7);
+            transform: translateX(-50%);
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.6);
             text-align: center;
+            max-width: 600px;
+        }
+
+        .controls-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 200px;
+        }
+
+        .controls-info h4 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.85);
+        }
+
+        .controls-info p {
+            margin: 4px 0;
+            line-height: 1.4;
+        }
+
+        .controls-info kbd {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 11px;
         }
 
 
@@ -72,71 +94,35 @@
             position: relative;
             overflow: hidden;
             cursor: default;
+            background: transparent !important;
         }
 
         #game-container canvas {
             cursor: default;
+            background: transparent !important;
         }
 
-        /* Asegurar que elementos DOM no interfieran con drag */
         #game-container img {
             pointer-events: none !important;
+            user-select: none !important;
         }
 
-        /* Asegurar que todos los elementos DOM de Phaser no bloqueen eventos */
         #game-container .domelement {
             pointer-events: none !important;
+            user-select: none !important;
         }
 
         #game-container .domelement * {
             pointer-events: none !important;
+            user-select: none !important;
         }
 
-        #game-container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            border-radius: 18px;
-            z-index: -1;
-            animation: borderGlow 3s linear infinite;
-            background-size: 300% 300%;
+        #game-container canvas {
+            touch-action: none;
+            user-select: none;
         }
 
-        @keyframes borderGlow {
-            0% {
-                background-position: 0% 50%;
-            }
 
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* Estrellas de fondo */
-        .stars {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -2;
-        }
-
-        .star {
-            position: relative;
-            width: 2px;
-            height: 2px;
-            border-radius: 50%;
-            animation: twinkle 3s infinite;
-        }
 
         .modal {
             display: none;
@@ -159,7 +145,7 @@
             right: 0;
             top: 0;
             height: 100%;
-            width: 450px;
+            width: 500px;
             max-width: 90vw;
             color: white;
             overflow-y: auto;
@@ -167,6 +153,22 @@
             transform: translateX(100%);
             transition: transform 0.25s ease-out;
             border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-content.modal-locked {
+            background: rgba(45, 45, 45, 0.98);
+            filter: grayscale(0.7);
+        }
+
+        .modal-content.modal-locked .modal-header h2,
+        .modal-content.modal-locked .modal-description {
+            opacity: 0.7;
+        }
+
+        .modal-content.modal-locked .btn-primary,
+        .modal-content.modal-locked .btn-secondary {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .modal-content::-webkit-scrollbar {
@@ -244,7 +246,6 @@
             padding: 30px 25px;
         }
 
-
         .modal-description {
             line-height: 1.8;
             color: #cbd5e1;
@@ -252,30 +253,122 @@
             font-size: 15px;
         }
 
-        .modal-detail {
-            background: rgba(0, 0, 0, 0.2);
-            border-left: 2px solid rgba(255, 255, 255, 0.1);
+        .modal-locked-warning {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 3px solid #ef4444;
             padding: 15px;
-            margin: 15px 0;
+            margin-bottom: 20px;
             border-radius: 4px;
-            line-height: 1.6;
-            color: #94a3b8;
+            color: #fca5a5;
             font-size: 14px;
         }
 
-        .modal-detail h3 {
+        .modal-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-section h3 {
             color: #ffffff;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .modal-section p {
+            line-height: 1.7;
+            color: #cbd5e1;
             font-size: 14px;
         }
 
-        .modal-detail ul {
+        .modal-section ul {
             padding-left: 20px;
             margin: 10px 0;
         }
 
-        .modal-detail li {
+        .modal-section li {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .modal-difficulty {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .modal-relations {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-relation-item {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            border-left: 3px solid rgba(59, 130, 246, 0.5);
+            font-size: 13px;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .modal-relation-item strong {
+            color: #60a5fa;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-meta {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .modal-meta-item {
             margin: 8px 0;
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .modal-meta-item strong {
+            color: #ffffff;
+        }
+
+        .modal-resources {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .modal-resource-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .modal-resource-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(4px);
         }
 
         .modal-footer {
@@ -353,17 +446,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        @keyframes twinkle {
-
-            0%,
-            100% {
-                opacity: 0.3;
-            }
-
-            50% {
-                opacity: 1;
-            }
-        }
     </style>
 </head>
 
@@ -374,51 +456,28 @@
         desarrollo de software.
     </p>
     <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="modal-header">
-                <span id="modal-status-icon" class="status-icon"></span>
-                <img id="modal-icon" class="modal-icon" src="" alt="icon">
-                <h2 id="modal-title">Título</h2>
-                <div id="modal-rating" class="modal-rating"></div>
-            </div>
-            <div class="modal-body">
-                <p id="modal-description" class="modal-description"></p>
-                <div id="modal-detail" class="modal-detail" style="display: none;"></div>
-            </div>
-            <div class="modal-footer">
-                <div class="modal-actions">
-                    <a id="modal-link-resource" href="#" target="_blank" class="btn-secondary" style="display: none;">
-                        <span>📄</span>
-                        <span>Ver recurso</span>
-                    </a>
-                    <a id="modal-link-learn" href="#" target="_blank" class="btn-primary">
-                        <span>→</span>
-                        <span>Empezar aprendizaje</span>
-                    </a>
-                </div>
-            </div>
-        </div>
+        <div class="modal-content"></div>
     </div>
-    <!-- Efecto de estrellas de fondo -->
-    <div class="stars" id="stars"></div>
-
     <div id="game-container"></div>
 
-    <script>
-        // Crear estrellas de fondo
-        const starsContainer = document.getElementById('stars');
-        for (let i = 0; i < 100; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
-            star.style.animationDelay = Math.random() * 3 + 's';
-            starsContainer.appendChild(star);
-        }
-    </script>
+    <div class="controls-info">
+        <h4>Controles</h4>
+        <p><kbd>←↑↓→</kbd> <kbd>WASD</kbd> Mover</p>
+        <p><kbd>SPACE</kbd> Info actual</p>
+        <p><kbd>Click izq.</kbd> Saltar/Info</p>
+        <p><kbd>Click der.</kbd> Ver info</p>
+        <p><kbd>Rueda</kbd> <kbd>±</kbd> Zoom</p>
+        <p><kbd>Arrastrar</kbd> Cámara</p>
+        <p style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,0,0,0.1); font-size:11px; opacity:0.8;">Círculos verdes = conexiones</p>
+    </div>
 
-    <script src="game.js"></script>
+    <script src="js/ModalManager.js"></script>
+    <script src="js/NodeManager.js"></script>
+    <script src="js/PlayerController.js"></script>
+    <script src="js/CameraController.js"></script>
+    <script src="js/RoadmapScene.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
 </body>
 
 </html>

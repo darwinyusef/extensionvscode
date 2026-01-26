@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal Simulator</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
+  <link rel="stylesheet" href="/css/terminal.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <h2>Exercises</h2>
+      <div id="exercise-list"></div>
+    </aside>
+
+    <main class="terminal-container">
+      <div class="terminal-header">
+        <div id="exercise-title">Terminal Simulator</div>
+        <div id="progress-bar"></div>
+      </div>
+
+      <div id="terminal"></div>
+
+      <div class="instruction-panel">
+        <div id="current-instruction"></div>
+        <button id="hint-btn" style="display: none;">Show Hint</button>
+      </div>
+    </main>
+  </div>
+
+  <div id="editor-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span id="editor-filename"></span>
+        <button id="editor-close">×</button>
+      </div>
+      <textarea id="editor-content"></textarea>
+      <div class="modal-footer">
+        <span>Ctrl+O to save, Ctrl+X to exit</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+  <script type="module" src="/js/terminal-client.js"></script>
+</body>
+</html>
