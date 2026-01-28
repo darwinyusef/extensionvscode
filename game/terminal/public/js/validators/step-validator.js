@@ -6,6 +6,7 @@ export class StepValidator {
       'command_with_fs_check': this.validateCommandWithFsCheck.bind(this),
       'state_check': this.validateStateCheck.bind(this),
       'file_content_check': this.validateFileContentCheck.bind(this),
+      'ai_validation': this.validateAI.bind(this),
       'complex_ai': this.validateComplexAI.bind(this)
     };
   }
@@ -134,6 +135,52 @@ export class StepValidator {
       return {
         correct: false,
         feedback: error.message
+      };
+    }
+  }
+
+  async validateAI(command, validation, fs, env) {
+    try {
+      let content = '';
+
+      if (validation.file_path) {
+        try {
+          content = fs.readFile(validation.file_path);
+        } catch (error) {
+          return {
+            correct: false,
+            feedback: `File ${validation.file_path} not found. Please create the file first.`
+          };
+        }
+      } else {
+        content = command;
+      }
+
+      const response = await fetch('/api/ai/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: content,
+          expected: validation.ai_prompt || 'Validate this content',
+          context: {
+            type: 'dockerfile',
+            exercise: 'Docker Fundamentals',
+            file_path: validation.file_path
+          }
+        })
+      });
+
+      const result = await response.json();
+
+      return {
+        correct: result.correct,
+        feedback: result.feedback,
+        score: result.score || 0
+      };
+    } catch (error) {
+      return {
+        correct: false,
+        feedback: `AI validation failed: ${error.message}`
       };
     }
   }

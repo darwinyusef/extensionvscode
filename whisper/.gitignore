@@ -8,3 +8,6 @@ grpc_service/models/*
 /tmp/
 temp/
 *.log
+docs
+dev-files/
+./dev-files/

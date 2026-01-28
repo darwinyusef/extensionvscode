@@ -1,0 +1,60 @@
+OPCIONES PARA EXPONER NATS
+
+OPCIÓN 1: Exponer puerto directo (Más simple)
+==============================================
+Abre puerto 4222 en firewall:
+- ufw allow 4222/tcp
+- Conecta: nats://tuserver.com:4222
+
+PRO: Simple, protocolo nativo
+CONTRA: Puerto extra abierto
+
+OPCIÓN 2: NATS con WebSocket
+==============================
+Modifica docker-compose.yml:
+
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+      - "8080:8080"
+    command:
+      - "-js"
+      - "-m=8222"
+      - "--websocket_port=8080"
+      - "--websocket_no_tls"
+
+Caddy:
+nats.darwinyusef.com {
+    reverse_proxy localhost:8080 {
+        header_up Upgrade {>Upgrade}
+        header_up Connection {>Connection}
+    }
+}
+
+Conecta: ws://nats.darwinyusef.com
+
+PRO: Usa HTTPS/443
+CONTRA: Requiere cliente WebSocket
+
+OPCIÓN 3: nginx stream (TCP Proxy)
+===================================
+Instala nginx-extras
+/etc/nginx/nginx.conf:
+
+stream {
+    upstream nats {
+        server localhost:4222;
+    }
+    server {
+        listen 4222;
+        proxy_pass nats;
+    }
+}
+
+PRO: Proxy TCP real
+CONTRA: Requiere nginx adicional
+
+RECOMENDACIÓN: Opción 1 (puerto directo)
+Es la más estándar para NATS en producción

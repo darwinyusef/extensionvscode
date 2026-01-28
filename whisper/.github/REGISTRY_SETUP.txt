@@ -1,0 +1,68 @@
+CONFIGURACIÓN DE REGISTRY
+
+OPCIÓN 1: GitHub Container Registry (GHCR) - GRATIS
+====================================================
+Archivo: .github/workflows/build-push.yml
+
+1. Ya configurado automáticamente
+2. No requiere secrets adicionales
+3. Usa GITHUB_TOKEN automático
+
+Resultado:
+- ghcr.io/tuusuario/whisper/whisper-grpc:latest
+- ghcr.io/tuusuario/whisper/whisper-api:latest
+
+Para usar en producción:
+docker pull ghcr.io/tuusuario/whisper/whisper-grpc:latest
+
+
+OPCIÓN 2: Docker Hub
+====================
+Archivo: .github/workflows/docker-hub.yml
+
+1. Crear cuenta en hub.docker.com
+2. Crear Access Token:
+   Account Settings → Security → New Access Token
+
+3. Agregar secrets en GitHub:
+   Repo → Settings → Secrets and variables → Actions → New secret
+
+   DOCKERHUB_USERNAME: tu_usuario
+   DOCKERHUB_TOKEN: tu_token
+
+4. Activar workflow renombrando:
+   mv .github/workflows/docker-hub.yml.disabled docker-hub.yml
+
+Resultado:
+- tuusuario/whisper-grpc:latest
+- tuusuario/whisper-api:latest
+
+Para usar en producción:
+docker pull tuusuario/whisper-grpc:latest
+
+
+RECOMENDACIÓN: GHCR (Opción 1)
+- Gratis ilimitado para repos públicos
+- Integrado con GitHub
+- Sin configuración extra
+
+
+VERSIONADO:
+Git tag para release:
+git tag v1.0.0
+git push origin v1.0.0
+
+Genera:
+- :v1.0.0
+- :1.0
+- :1
+- :latest
+- :sha-abc123
+
+
+USAR EN DOCKER-COMPOSE (producción):
+services:
+  whisper_grpc:
+    image: ghcr.io/tuusuario/whisper/whisper-grpc:latest
+  api_gateway:
+    image: ghcr.io/tuusuario/whisper/whisper-api:latest

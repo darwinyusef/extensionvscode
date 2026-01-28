@@ -43,9 +43,48 @@ async function loadWorkshop(workshopId) {
         const response = await fetch(`${workshopId}.json`);
         currentWorkshop = await response.json();
         loadExercise(0);
+        showInstructionsPanel();
         console.log('✅ Taller cargado:', currentWorkshop.workshop.title);
     } catch (error) {
         console.warn('⚠️ No se pudo cargar el taller:', error);
+    }
+}
+
+function showInstructionsPanel() {
+    const panel = document.getElementById('instructions-panel');
+    const toggleBtn = document.getElementById('toggle-panel-btn');
+
+    if (panel) {
+        panel.classList.remove('hidden');
+    }
+
+    if (toggleBtn) {
+        toggleBtn.classList.add('visible');
+        toggleBtn.classList.add('active');
+    }
+}
+
+function hideInstructionsPanel() {
+    const panel = document.getElementById('instructions-panel');
+    const toggleBtn = document.getElementById('toggle-panel-btn');
+
+    if (panel) {
+        panel.classList.add('hidden');
+    }
+
+    if (toggleBtn) {
+        toggleBtn.classList.remove('active');
+    }
+}
+
+function toggleInstructionsPanel() {
+    const panel = document.getElementById('instructions-panel');
+    const isHidden = panel.classList.contains('hidden');
+
+    if (isHidden) {
+        showInstructionsPanel();
+    } else {
+        hideInstructionsPanel();
     }
 }
 
@@ -256,6 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentWorkshop && currentExerciseIndex < currentWorkshop.workshop.exercises.length - 1) {
             loadExercise(currentExerciseIndex + 1);
         }
+    });
+
+    document.getElementById('toggle-panel-btn')?.addEventListener('click', () => {
+        toggleInstructionsPanel();
     });
 });
 

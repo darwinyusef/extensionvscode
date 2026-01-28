@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd //c 'del \"\"\\\\\\\\?\\\\G:\\\\extensionvscode\\\\game\\\\terminal\\\\nul\"\"')",
+      "Bash(powershell -Command \"Remove-Item ''\\\\.\\\\G:\\\\extensionvscode\\\\game\\\\terminal\\\\nul'' -Force\")",
+      "Bash(docker ps:*)"
+    ]
+  }
+}

@@ -44,14 +44,25 @@ body {
     display: flex;
     height: 100vh;
     width: 100vw;
+    position: relative;
 }
 
 .instructions-panel {
     width: 40%;
+    min-width: 40%;
     background: #252526;
     display: flex;
     flex-direction: column;
     border-right: 1px solid #3c3c3c;
+    transition: width 0.3s ease, min-width 0.3s ease, border-right 0.3s ease;
+    flex-shrink: 0;
+}
+
+.instructions-panel.hidden {
+    width: 0;
+    min-width: 0;
+    border-right: none;
+    overflow: hidden;
 }
 
 .tabs {
@@ -324,6 +335,76 @@ body {
     display: flex;
     flex-direction: column;
     background: #1e1e1e;
+    position: relative;
+    flex: 1;
+}
+
+.toggle-panel-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 44px;
+    height: 44px;
+    background: #252526;
+    border: 1px solid #3e3e42;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.toggle-panel-btn.visible {
+    display: flex;
+}
+
+.toggle-panel-btn:hover {
+    background: #2d2d30;
+    border-color: #007acc;
+    box-shadow: 0 2px 8px rgba(0, 122, 204, 0.3);
+}
+
+.toggle-icon {
+    width: 20px;
+    height: 2px;
+    background: #d4d4d4;
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+.toggle-icon::before,
+.toggle-icon::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: #d4d4d4;
+    transition: transform 0.3s ease;
+    left: 0;
+}
+
+.toggle-icon::before {
+    top: -7px;
+}
+
+.toggle-icon::after {
+    bottom: -7px;
+}
+
+.toggle-panel-btn.active .toggle-icon {
+    background: transparent;
+}
+
+.toggle-panel-btn.active .toggle-icon::before {
+    transform: rotate(45deg);
+    top: 0;
+}
+
+.toggle-panel-btn.active .toggle-icon::after {
+    transform: rotate(-45deg);
+    bottom: 0;
 }
 
 .editor-header {

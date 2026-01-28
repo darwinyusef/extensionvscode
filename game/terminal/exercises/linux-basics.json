@@ -5,6 +5,79 @@
     "category": "Linux",
     "difficulty": "beginner",
     "description": "Learn basic Linux commands for navigating the filesystem",
+    "documentation": {
+      "title": "Linux File Navigation",
+      "sections": [
+        {
+          "heading": "Sistema de Archivos Linux",
+          "content": "Linux organiza los archivos en una estructura jerárquica de directorios que comienza en la raíz (`/`).\n\nTodo en Linux es un archivo:\n- Archivos regulares (documentos, código)\n- Directorios (carpetas)\n- Dispositivos (discos, terminales)\n- Enlaces simbólicos (accesos directos)"
+        },
+        {
+          "heading": "Comandos Básicos de Navegación",
+          "content": "Estos son los comandos fundamentales para navegar y explorar el sistema de archivos en Linux.",
+          "code": "# pwd - Muestra el directorio actual\npwd\n\n# ls - Lista archivos y directorios\nls\nls -l    # formato largo con detalles\nls -la   # incluye archivos ocultos\n\n# cd - Cambia de directorio\ncd /home/user\ncd ..\ncd ~"
+        },
+        {
+          "heading": "Manipulación de Archivos",
+          "content": "Comandos para crear, ver y modificar archivos y directorios.",
+          "code": "# mkdir - Crea un directorio\nmkdir proyectos\nmkdir -p proyectos/subdir  # crea subdirectorios\n\n# touch - Crea un archivo vacío\ntouch archivo.txt\n\n# cat - Muestra contenido de archivos\ncat archivo.txt\n\n# cp - Copia archivos\ncp origen.txt destino.txt\n\n# mv - Mueve o renombra archivos\nmv viejo.txt nuevo.txt\n\n# rm - Elimina archivos\nrm archivo.txt\nrm -r directorio  # elimina directorio"
+        },
+        {
+          "heading": "Tipos de Rutas",
+          "content": "En Linux existen dos tipos de rutas para referenciar archivos y directorios.",
+          "code": "# Ruta absoluta - Desde la raíz\n/home/user/documents/file.txt\n\n# Ruta relativa - Desde directorio actual\n./file.txt\n../parent-folder/file.txt\n\n# Símbolos especiales\n..   # Directorio padre\n.    # Directorio actual\n~    # Directorio home del usuario\n-    # Directorio anterior"
+        },
+        {
+          "heading": "Ejemplos Prácticos",
+          "content": "Casos de uso comunes combinando múltiples comandos.",
+          "code": "# Navegar a home y crear proyecto\ncd ~\nmkdir -p proyecto/src\ncd proyecto/src\ntouch app.js\n\n# Listar archivos con detalles\nls -lh\n\n# Ver estructura de directorios\npwd\nls -R"
+        }
+      ],
+      "references": [
+        {
+          "title": "Linux Command Line Basics",
+          "url": "https://ubuntu.com/tutorials/command-line-for-beginners"
+        }
+      ]
+    },
+    "goals": [
+      {
+        "id": "goal_1",
+        "title": "Navegar entre directorios con cd",
+        "points": 10,
+        "bonus": false
+      },
+      {
+        "id": "goal_2",
+        "title": "Listar archivos con ls",
+        "points": 10,
+        "bonus": false
+      },
+      {
+        "id": "goal_3",
+        "title": "Crear directorios con mkdir",
+        "points": 10,
+        "bonus": false
+      },
+      {
+        "id": "goal_4",
+        "title": "Crear archivos con touch",
+        "points": 10,
+        "bonus": false
+      },
+      {
+        "id": "goal_5",
+        "title": "Ver contenido con cat",
+        "points": 10,
+        "bonus": false
+      },
+      {
+        "id": "goal_bonus",
+        "title": "Usar rutas relativas y absolutas",
+        "points": 15,
+        "bonus": true
+      }
+    ],
     "initial_state": {
       "filesystem": {
         "type": "directory",

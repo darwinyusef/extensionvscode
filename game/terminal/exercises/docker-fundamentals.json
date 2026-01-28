@@ -5,6 +5,123 @@
     "category": "Docker",
     "difficulty": "intermediate",
     "description": "Learn basic Docker commands and concepts",
+    "documentation": {
+      "title": "Guía Completa de Dockerfile",
+      "sections": [
+        {
+          "heading": "¿Qué es un Dockerfile?",
+          "content": "Un Dockerfile es un archivo de texto que contiene todas las instrucciones necesarias para construir una imagen de Docker de forma automatizada. Cada instrucción en el Dockerfile crea una capa en la imagen, permitiendo un sistema de cacheo eficiente."
+        },
+        {
+          "heading": "Estructura Básica",
+          "content": "Un Dockerfile típico sigue esta estructura:\n\n1. FROM - Imagen base\n2. WORKDIR - Directorio de trabajo\n3. COPY/ADD - Copiar archivos\n4. RUN - Ejecutar comandos\n5. EXPOSE - Exponer puertos\n6. CMD/ENTRYPOINT - Comando de inicio"
+        },
+        {
+          "heading": "FROM - Imagen Base",
+          "content": "FROM especifica la imagen base sobre la cual construir tu aplicación.\n\nBuenas prácticas:\n- Usar versiones específicas (node:18 en lugar de node:latest)\n- Preferir imágenes slim o alpine para menor tamaño\n- Verificar imágenes oficiales en Docker Hub",
+          "code": "# Node.js 18 con Alpine Linux\nFROM node:18-alpine\n\n# Python 3.11 versión slim\nFROM python:3.11-slim\n\n# Ubuntu 22.04\nFROM ubuntu:22.04"
+        },
+        {
+          "heading": "WORKDIR - Directorio de Trabajo",
+          "content": "WORKDIR establece el directorio de trabajo para las instrucciones subsecuentes.\n\nEsto crea el directorio si no existe y cambia a él. Todos los comandos siguientes se ejecutarán en el directorio especificado.\n\nBuenas prácticas:\n- Usar rutas absolutas\n- Establecer WORKDIR temprano en el Dockerfile\n- No usar `cd`, usar WORKDIR en su lugar",
+          "code": "# Establecer directorio de trabajo\nWORKDIR /app\n\n# Todos los comandos siguientes se ejecutan en /app\nCOPY . .\nRUN npm install"
+        },
+        {
+          "heading": "COPY vs ADD",
+          "content": "COPY copia archivos del host al contenedor de forma simple y transparente.\n\nADD tiene funcionalidades adicionales como extraer archivos tar y descargar desde URLs.\n\nBuenas prácticas:\n- Preferir COPY sobre ADD para mayor transparencia\n- Copiar archivos de dependencias primero para aprovechar caché\n- Usar .dockerignore para excluir archivos innecesarios",
+          "code": "# COPY - Uso recomendado\nCOPY package.json /app/\nCOPY . /app/\n\n# ADD - Solo cuando se necesita extracción automática\nADD archive.tar.gz /app/"
+        },
+        {
+          "heading": "RUN - Ejecutar Comandos",
+          "content": "RUN ejecuta comandos durante la construcción de la imagen. Existen dos formatos: shell y exec.\n\nBuenas prácticas:\n- Combinar comandos relacionados con && para reducir capas\n- Limpiar caché después de instalar paquetes\n- Usar \\ para dividir comandos largos en múltiples líneas",
+          "code": "# Formato shell\nRUN npm install\nRUN apt-get update && apt-get install -y curl\n\n# Formato exec\nRUN [\"npm\", \"install\"]\n\n# Combinar comandos para reducir capas\nRUN apt-get update && \\\n    apt-get install -y curl && \\\n    apt-get clean && \\\n    rm -rf /var/lib/apt/lists/*"
+        },
+        {
+          "heading": "CMD - Comando por Defecto",
+          "content": "CMD especifica el comando que se ejecuta cuando se inicia el contenedor.\n\nCaracterísticas:\n- Solo puede haber un CMD en el Dockerfile\n- CMD puede ser sobrescrito al ejecutar `docker run`\n- Usar formato exec para mejor manejo de señales",
+          "code": "# Formato exec (recomendado)\nCMD [\"node\", \"server.js\"]\nCMD [\"python\", \"app.py\"]\n\n# Formato shell\nCMD node server.js"
+        },
+        {
+          "heading": "EXPOSE - Documentar Puertos",
+          "content": "EXPOSE documenta qué puertos usa la aplicación.\n\nNota importante: EXPOSE es solo documentación, no publica puertos automáticamente. Para mapear puertos, usar `-p` al ejecutar `docker run`.",
+          "code": "# Exponer un puerto\nEXPOSE 3000\n\n# Exponer múltiples puertos\nEXPOSE 8080 8443\n\n# Mapear puerto al ejecutar contenedor\n# docker run -p 3000:3000 mi-imagen"
+        },
+        {
+          "heading": "ENV - Variables de Entorno",
+          "content": "ENV establece variables de entorno que estarán disponibles durante la construcción y ejecución del contenedor.\n\nAcceso desde código:\n- Node.js: `process.env.NODE_ENV`\n- Python: `os.environ['NODE_ENV']`",
+          "code": "# Establecer variables de entorno\nENV NODE_ENV=production\nENV PORT=3000\nENV DATABASE_URL=postgres://localhost:5432/db\n\n# Múltiples variables en una línea\nENV APP_NAME=myapp \\\n    APP_VERSION=1.0.0 \\\n    LOG_LEVEL=info"
+        },
+        {
+          "heading": "Ejemplo Completo - Node.js",
+          "content": "Este es un Dockerfile completo para una aplicación Node.js siguiendo las mejores prácticas:\n\n- Usa imagen Alpine para menor tamaño\n- Copia dependencias primero para aprovechar caché\n- Instala solo dependencias de producción\n- Expone puerto y define variables de entorno\n- Usa formato exec para CMD",
+          "code": "# Usar imagen base de Node.js\nFROM node:18-alpine\n\n# Establecer directorio de trabajo\nWORKDIR /app\n\n# Copiar archivos de dependencias\nCOPY package*.json ./\n\n# Instalar dependencias\nRUN npm ci --only=production\n\n# Copiar código fuente\nCOPY . .\n\n# Exponer puerto\nEXPOSE 3000\n\n# Variable de entorno\nENV NODE_ENV=production\n\n# Comando de inicio\nCMD [\"node\", \"server.js\"]"
+        },
+        {
+          "heading": "Optimización de Imágenes",
+          "content": "Multi-stage builds permiten usar una imagen para construir y otra más ligera para producción.\n\nBeneficios:\n- Imagen final más pequeña (hasta 10x menor)\n- Sin herramientas de desarrollo en producción\n- Mejor seguridad y rendimiento\n- Separación clara entre build y runtime",
+          "code": "# Etapa 1: Construcción\nFROM node:18 AS builder\nWORKDIR /app\nCOPY . .\nRUN npm install && npm run build\n\n# Etapa 2: Producción\nFROM node:18-alpine\nWORKDIR /app\nCOPY --from=builder /app/dist ./dist\nCOPY package*.json ./\nRUN npm ci --only=production\nCMD [\"node\", \"dist/server.js\"]"
+        },
+        {
+          "heading": "Buenas Prácticas",
+          "content": "1. Usar .dockerignore para excluir archivos\n2. Minimizar número de capas\n3. Aprovechar caché de capas\n4. No instalar paquetes innecesarios\n5. Usar imágenes oficiales\n6. Especificar versiones de imágenes base\n7. Ejecutar como usuario no-root\n8. Escanear imágenes por vulnerabilidades\n9. Mantener imágenes pequeñas\n10. Documentar el Dockerfile con comentarios"
+        },
+        {
+          "heading": ".dockerignore",
+          "content": "El archivo .dockerignore excluye archivos y directorios del contexto de construcción de Docker.\n\nBeneficios:\n- Construcciones más rápidas (menos archivos que transferir)\n- Imágenes más pequeñas (sin archivos innecesarios)\n- Mayor seguridad (no copiar archivos sensibles como .env)\n- Mejor organización del proyecto",
+          "code": "# Dependencias\nnode_modules\nnpm-debug.log\n\n# Control de versiones\n.git\n.gitignore\n\n# Archivos sensibles\n.env\n.env.local\n*.pem\n*.key\n\n# Documentación\n*.md\nREADME.md\n\n# IDEs\n.vscode\n.idea\n*.swp\n\n# Builds previos\ndist\nbuild\ntarget"
+        }
+      ],
+      "references": [
+        {
+          "title": "Docker Official Documentation",
+          "url": "https://docs.docker.com"
+        },
+        {
+          "title": "Dockerfile Best Practices",
+          "url": "https://docs.docker.com/develop/dev-best-practices/"
+        },
+        {
+          "title": "Dockerfile Reference",
+          "url": "https://docs.docker.com/engine/reference/builder/"
+        },
+        {
+          "title": "Docker Hub - Official Images",
+          "url": "https://hub.docker.com/search?q=&type=image&image_filter=official"
+        }
+      ]
+    },
+    "goals": [
+      {
+        "id": "goal_1",
+        "title": "Crear un Dockerfile válido",
+        "points": 10,
+        "bonus": false
+      },
+      {
+        "id": "goal_2",
+        "title": "Usar imagen base Node.js",
+        "points": 10,
+        "bonus": false
+      },
+      {
+        "id": "goal_3",
+        "title": "Configurar WORKDIR correctamente",
+        "points": 10,
+        "bonus": false
+      },
+      {
+        "id": "goal_4",
+        "title": "Agregar comando CMD",
+        "points": 10,
+        "bonus": false
+      },
+      {
+        "id": "goal_bonus",
+        "title": "Optimizar tamaño de imagen con alpine",
+        "points": 10,
+        "bonus": true
+      }
+    ],
     "initial_state": {
       "current_directory": "/home/student",
       "env": {
@@ -19,39 +136,15 @@
     "steps": [
       {
         "step_id": 1,
-        "instruction": "Create a simple Dockerfile for a Node.js application",
+        "instruction": "Create a complete Dockerfile for a Node.js application with FROM, WORKDIR, and CMD instructions",
         "validation": {
-          "type": "file_content_check",
+          "type": "ai_validation",
           "file_path": "/home/student/Dockerfile",
-          "contains": "FROM node"
+          "ai_prompt": "Validate this Dockerfile for a Node.js application. Check: 1) Has FROM instruction with Node.js image, 2) Has WORKDIR set to /app, 3) Has CMD to run the application. Provide specific feedback on what's correct and what needs improvement."
         },
-        "on_correct": "Great! You created a Dockerfile with a Node.js base image.",
-        "on_wrong": "Create a file named Dockerfile with 'FROM node:alpine' as the first line",
-        "points": 20
-      },
-      {
-        "step_id": 2,
-        "instruction": "Add a WORKDIR instruction to set /app as working directory",
-        "validation": {
-          "type": "file_content_check",
-          "file_path": "/home/student/Dockerfile",
-          "contains": "WORKDIR /app"
-        },
-        "on_correct": "Perfect! WORKDIR sets the working directory inside the container.",
-        "on_wrong": "Add 'WORKDIR /app' to your Dockerfile",
-        "points": 15
-      },
-      {
-        "step_id": 3,
-        "instruction": "Add CMD instruction to run node server.js",
-        "validation": {
-          "type": "file_content_check",
-          "file_path": "/home/student/Dockerfile",
-          "pattern": "CMD.*node.*server"
-        },
-        "on_correct": "Excellent! CMD defines the default command when container starts.",
-        "on_wrong": "Add 'CMD [\"node\", \"server.js\"]' to your Dockerfile",
-        "points": 15
+        "on_correct": "Excellent! Your Dockerfile follows best practices.",
+        "on_wrong": "Review the AI feedback and improve your Dockerfile",
+        "points": 50
       }
     ],
     "rewards": {

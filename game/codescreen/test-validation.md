@@ -1,5 +1,5 @@
 # Pruebas de Validación de Sintaxis - Monaco Editor
-
+?workshop=workshop-structure&lang=python
 ## JavaScript (`?lang=javascript`)
 
 ### ✅ Errores que SÍ detecta:

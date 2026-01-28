@@ -1,0 +1,73 @@
+PLAN DE ACTIVACIÓN WHISPER MICROSERVICIO
+=========================================
+
+ALCANCE:
+- Microservicio Whisper independiente
+- Modelo: tiny (liviano, rápido)
+- Expuesto vía NATS para futura integración
+- Usuario conectará con otros microservicios después
+
+ESTADO ACTUAL:
+- Código: Correcto
+- Docker: Configurado
+- Modelos: FALTANTES
+- Servicios: NO INICIADOS
+
+PASOS DE ACTIVACIÓN:
+
+1. VERIFICAR DOCKER
+   cd G:\extensionvscode\whisper
+   docker --version
+   docker-compose --version
+
+2. VERIFICAR .env
+   Configuración lista
+   - MODEL_SIZE=tiny
+   - NATS_URL=nats://nats.darwinyusef.com:4222
+
+3. INICIAR SERVICIOS
+   docker-compose up -d
+
+4. VERIFICAR LOGS
+   docker-compose logs -f whisper_grpc
+   Buscar: "Whisper model 'tiny' loaded successfully"
+
+5. VERIFICAR SALUD
+   docker ps
+   curl http://localhost:8002/health
+
+PRUEBAS INICIALES:
+
+1. PRUEBA LOCAL (desarrollo)
+   curl -X POST http://localhost:8002/transcribe \
+     -F "file=@audio_test.mp3"
+
+2. PRUEBA PRODUCCIÓN (Caddy)
+   curl -X POST https://whisper.darwinyusef.com/transcribe \
+     -F "file=@audio_test.mp3"
+
+3. PRUEBA ASYNC + SSE
+   curl -X POST http://localhost:8002/transcribe/async \
+     -F "file=@audio_test.mp3"
+
+   Captura el task_id y:
+   curl http://localhost:8002/stream/{task_id}
+
+4. VERIFICAR NATS MONITOR
+   curl https://nats.darwinyusef.com/healthz
+
+ARQUITECTURA MICROSERVICIO:
+- nats: Broker de mensajería (conexión entre microservicios)
+- whisper_grpc: Procesador Whisper
+- whisper_api: API Gateway (entrada HTTP)
+
+PUERTOS:
+- 4222: NATS cliente
+- 8222: NATS Monitor
+- 50051: gRPC Whisper (interno)
+- 8002: API Gateway (local)
+- 443: whisper.darwinyusef.com (producción)
+
+SIGUIENTE FASE (Usuario):
+- Conectar otros microservicios vía NATS
+- Publicar/suscribir a topics whisper.task.*

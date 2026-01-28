@@ -1,0 +1,35 @@
+# Configuración Caddy para Whisper Services
+
+# API Gateway (FastAPI)
+whisper.darwinyusef.com {
+    reverse_proxy localhost:8002
+    encode gzip
+}
+
+# NATS Monitoring Dashboard
+nats.darwinyusef.com {
+    reverse_proxy localhost:8222
+    encode gzip
+}
+
+# n8n (ya existente - referencia)
+n8n.darwinyusef.com {
+    reverse_proxy localhost:5678
+    encode gzip
+}
+
+# NOTA: NATS Cliente (puerto 4222) usa protocolo TCP nativo
+# Caddy NO puede proxear NATS directamente
+# Opciones:
+# 1. Exponer 4222 directamente en el firewall
+# 2. Usar NATS con WebSocket (puerto 443)
+# 3. Usar túnel TCP externo (nginx stream, haproxy)
+
+# Si necesitas NATS por WebSocket:
+# nats.darwinyusef.com {
+#     reverse_proxy localhost:8080 {
+#         header_up Upgrade {>Upgrade}
+#         header_up Connection {>Connection}
+#     }
+# }
+# (Requiere NATS con websocket habilitado)

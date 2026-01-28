@@ -19,7 +19,7 @@
         "validation": {
           "type": "command_with_fs_check",
           "expected_command": "mkdir -p workspace/src",
-          "alternative_commands": ["mkdir -p ./workspace/src"],
+          "alternative_commands": ["mkdir -p ./workspace/src", "mkdir workspace/src"],
           "fs_checks": [
             {
               "type": "directory_exists",

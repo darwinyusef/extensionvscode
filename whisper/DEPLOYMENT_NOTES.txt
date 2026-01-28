@@ -1,0 +1,39 @@
+NOTAS DE DEPLOYMENT
+
+1. COPIAR CADDYFILE
+   Copia Caddyfile a tu servidor Caddy
+   Si tienes Caddyfile principal, agrega estos bloques
+
+2. RED DOCKER
+   Usa red portfolio-network (externa)
+
+   Crear red si no existe:
+   docker network create portfolio-network
+
+   Todos los servicios (Caddy, n8n, Whisper) deben estar en portfolio-network
+
+3. FIREWALL
+   ufw allow 4222/tcp    # NATS cliente (conexión directa)
+
+   Caddy ya expone:
+   - 443 (whisper.darwinyusef.com)
+   - 443 (nats.darwinyusef.com)
+   - 443 (n8n.darwinyusef.com)
+
+4. DNS
+   whisper.darwinyusef.com → IP_SERVIDOR
+   nats.darwinyusef.com → IP_SERVIDOR
+   n8n.darwinyusef.com → IP_SERVIDOR
+
+5. CONECTAR A NATS
+   Desde fuera del servidor: nats://tuserver.com:4222
+   Desde dentro de Docker: nats://whisper_nats:4222
+
+6. VERIFICAR
+   curl https://whisper.darwinyusef.com/health
+   curl https://nats.darwinyusef.com/healthz
+   curl https://n8n.darwinyusef.com/
+
+7. LOGS
+   docker-compose logs -f
+   tail -f /var/log/caddy/whisper.log

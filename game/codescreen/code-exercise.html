@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="instructions-panel">
+        <div class="instructions-panel hidden" id="instructions-panel">
             <div class="tabs">
                 <button class="tab-btn active" data-tab="instructions">Instrucciones</button>
                 <button class="tab-btn" data-tab="documentation">Documentación</button>
@@ -16,127 +16,28 @@
             </div>
 
             <div class="tab-content active" id="instructions">
-                <div class="npc-container">
-                    <img src="../assets/characters/flexbox_fred.svg" alt="NPC" class="npc-avatar">
-                    <div class="npc-info">
-                        <h2 class="npc-name">Flexbox Fred</h2>
-                        <p class="npc-title">Maestro de Algoritmos</p>
-                    </div>
-                </div>
-
-                <h1>Ejercicio: Factorial</h1>
-                <p>Escribe una función que calcule el factorial de un número.</p>
-
-                <h3>Requisitos:</h3>
-                <ul>
-                    <li>La función debe llamarse <code>factorial</code></li>
-                    <li>Debe recibir un número entero positivo</li>
-                    <li>Debe retornar el factorial del número</li>
-                    <li>Si el número es 0, debe retornar 1</li>
-                </ul>
-
-                <h3>Ejemplo:</h3>
-                <pre><code>factorial(5) // 120
-factorial(0) // 1
-factorial(3) // 6</code></pre>
+                <p style="color: #858585; text-align: center; padding: 3rem;">
+                    Carga un workshop con <code>?workshop=nombre-archivo</code>
+                </p>
             </div>
 
             <div class="tab-content" id="documentation">
-                <h1>Documentación Técnica</h1>
-
-                <h2>¿Qué es un Factorial?</h2>
-                <p>El factorial de un número entero positivo <code>n</code> se define como el producto de todos los números enteros positivos desde 1 hasta <code>n</code>.</p>
-
-                <h3>Fórmula Matemática:</h3>
-                <pre><code>n! = n × (n-1) × (n-2) × ... × 2 × 1
-
-Casos especiales:
-0! = 1
-1! = 1</code></pre>
-
-                <h3>Complejidad:</h3>
-                <ul>
-                    <li><strong>Temporal:</strong> O(n) - iterativa</li>
-                    <li><strong>Temporal:</strong> O(n) - recursiva</li>
-                    <li><strong>Espacial:</strong> O(1) - iterativa</li>
-                    <li><strong>Espacial:</strong> O(n) - recursiva (stack)</li>
-                </ul>
-
-                <h3>Enfoques de Solución:</h3>
-                <p><strong>1. Iterativo:</strong> Usar un bucle para multiplicar números consecutivos.</p>
-                <p><strong>2. Recursivo:</strong> Llamar a la función con n-1 hasta llegar al caso base.</p>
-
-                <h3>Referencias:</h3>
-                <ul>
-                    <li><a href="#" class="doc-link">MDN: Functions</a></li>
-                    <li><a href="#" class="doc-link">Wikipedia: Factorial</a></li>
-                </ul>
+                <p style="color: #858585; text-align: center; padding: 3rem;">
+                    Documentación se cargará con el workshop
+                </p>
             </div>
 
             <div class="tab-content" id="goals">
-                <h1>Metas del Ejercicio</h1>
-
-                <div class="goals-list">
-                    <div class="goal-item">
-                        <input type="checkbox" id="goal1" class="goal-checkbox">
-                        <label for="goal1">
-                            <span class="goal-title">Entender el concepto de factorial</span>
-                            <span class="goal-points">10 pts</span>
-                        </label>
-                    </div>
-
-                    <div class="goal-item">
-                        <input type="checkbox" id="goal2" class="goal-checkbox">
-                        <label for="goal2">
-                            <span class="goal-title">Implementar la función factorial básica</span>
-                            <span class="goal-points">20 pts</span>
-                        </label>
-                    </div>
-
-                    <div class="goal-item">
-                        <input type="checkbox" id="goal3" class="goal-checkbox">
-                        <label for="goal3">
-                            <span class="goal-title">Manejar el caso base (n = 0)</span>
-                            <span class="goal-points">15 pts</span>
-                        </label>
-                    </div>
-
-                    <div class="goal-item">
-                        <input type="checkbox" id="goal4" class="goal-checkbox">
-                        <label for="goal4">
-                            <span class="goal-title">Pasar todos los casos de prueba</span>
-                            <span class="goal-points">25 pts</span>
-                        </label>
-                    </div>
-
-                    <div class="goal-item bonus">
-                        <input type="checkbox" id="goal5" class="goal-checkbox">
-                        <label for="goal5">
-                            <span class="goal-title">Implementar validación de entrada</span>
-                            <span class="goal-points">+15 pts (Bonus)</span>
-                        </label>
-                    </div>
-
-                    <div class="goal-item bonus">
-                        <input type="checkbox" id="goal6" class="goal-checkbox">
-                        <label for="goal6">
-                            <span class="goal-title">Implementar versión recursiva</span>
-                            <span class="goal-points">+20 pts (Bonus)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="progress-summary">
-                    <h3>Progreso Total</h3>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
-                    </div>
-                    <p class="progress-text"><span id="current-points">0</span> / <span id="total-points">70</span> pts</p>
-                </div>
+                <p style="color: #858585; text-align: center; padding: 3rem;">
+                    Goals se cargarán con el workshop
+                </p>
             </div>
         </div>
 
         <div class="editor-panel">
+            <button id="toggle-panel-btn" class="toggle-panel-btn" title="Toggle Instructions">
+                <span class="toggle-icon"></span>
+            </button>
             <div class="editor-header">
                 <div class="header-left">
                     <span id="language-display" class="language-display"></span>
