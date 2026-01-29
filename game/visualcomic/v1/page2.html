@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comic Interactivo - Intermedio</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/@dotlottie/player-component/dist/dotlottie-player.min.js"></script>
+</head>
+<body>
+  <div class="comic-container">
+    <div class="panels-grid format-b">
+      <div class="panel wide" data-panel="1" data-duration="45">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg7.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char7.png')"></div>
+        <div class="lottie-overlay">
+          <dotlottie-player src="lottie/frame.lottie" background="transparent" style="width: 200px; height: 200px;"></dotlottie-player>
+        </div>
+        <div class="panel-content">
+          <div class="dialogue">Había oído sobre la piedra líquida.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="2" data-duration="30">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg8.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char8.png')"></div>
+        <div class="panel-content">
+          <div class="dialogue">Tersa como el agua pero dura como el acero.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="3" data-duration="35">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg9.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char9.png')"></div>
+        <div class="panel-content">
+          <div class="dialogue">Solo así existiría una ciudad tan inmensa.</div>
+        </div>
+      </div>
+
+      <div class="panel tall" data-panel="4" data-duration="40">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg10.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char10.png')"></div>
+        <div class="lottie-overlay">
+          <dotlottie-player src="lottie/frame2.lottie" background="transparent" style="width: 150px; height: 150px;"></dotlottie-player>
+        </div>
+        <div class="panel-content">
+          <div class="dialogue">Es maravillosa, pero extraña.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <a href="index.html" class="nav-btn">← Anterior</a>
+      <a href="page3.html" class="nav-btn">Siguiente →</a>
+    </div>
+  </div>
+
+  <div class="timeline-container">
+    <div class="timeline-controls">
+      <button id="playPause" class="control-btn">▶</button>
+      <button id="prev" class="control-btn">◀</button>
+      <button id="next" class="control-btn">▶▶</button>
+    </div>
+    <div class="timeline-bar">
+      <div class="timeline-progress"></div>
+      <div class="timeline-markers"></div>
+    </div>
+    <div class="timeline-info">
+      <span id="currentTime">00:00</span> / <span id="totalTime">00:00</span>
+    </div>
+  </div>
+
+  <div class="audio-panel">
+    <button class="audio-toggle" id="audioToggle">🎵</button>
+    <div class="audio-controls" id="audioControls">
+      <div class="audio-control">
+        <label>Volumen maestro</label>
+        <input type="range" id="masterVolume" min="0" max="100" value="100">
+        <span class="volume-value">100</span>
+      </div>
+      <div class="audio-control">
+        <label>Banda sonora</label>
+        <input type="range" id="soundtrackVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+      <div class="audio-control">
+        <label>Ambiente</label>
+        <input type="range" id="ambientVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+      <div class="audio-control">
+        <label>Efectos</label>
+        <input type="range" id="effectsVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+      <div class="audio-control">
+        <label>Diálogos</label>
+        <input type="range" id="dialoguesVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+    </div>
+  </div>
+
+  <audio id="soundtrack" src="assets/audio/banda-sonora.mp3" loop></audio>
+  <audio id="ambient" src="assets/audio/ambiente.mp3" loop></audio>
+  <audio id="effects" src="assets/audio/efectos.mp3"></audio>
+  <audio id="dialogues" src="assets/audio/dialogos.mp3"></audio>
+
+  <script src="config.js"></script>
+  <script src="keyboard-controls.js"></script>
+  <script src="comic.js"></script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comic Layout 03 - Fondo + 2 Paneles Verticales</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0a;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .comic-page {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .background-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .panel-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.3s ease;
+    }
+
+    .background-panel:hover .panel-layer {
+      transform: scale(1.03);
+    }
+
+    .dialogue-boxes {
+      position: absolute;
+      top: 5%;
+      left: 5%;
+      z-index: 2;
+      max-width: 400px;
+    }
+
+    .dialogue {
+      background: rgba(240, 235, 220, 0.95);
+      color: #2a2416;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      font-size: 16px;
+      line-height: 1.5;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+      border: 2px solid rgba(0,0,0,0.1);
+    }
+
+    .floating-panel {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 70vh;
+      z-index: 10;
+      border: none;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      overflow: hidden;
+      transition: all 0.5s ease;
+      cursor: pointer;
+    }
+
+    .floating-panel:hover {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 15px 60px rgba(0,0,0,0.8);
+      z-index: 20;
+    }
+
+    .center-left-panel {
+      left: 35%;
+      width: 20vw;
+    }
+
+    .right-panel {
+      right: 8%;
+      width: 25vw;
+    }
+
+    .floating-panel .panel-layer {
+      background-size: cover;
+      background-position: center;
+    }
+
+    .floating-panel .dialogue {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 90%;
+      margin: 0;
+    }
+
+    .dialogue-top-right {
+      position: absolute;
+      top: 5%;
+      right: 5%;
+      z-index: 2;
+      max-width: 300px;
+    }
+
+    .sound-effect {
+      position: absolute;
+      top: 20%;
+      right: 30%;
+      font-size: 48px;
+      font-weight: bold;
+      color: #ff6b35;
+      text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+      font-style: italic;
+      transform: rotate(-10deg);
+      z-index: 5;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: rotate(-10deg) scale(1); }
+      50% { transform: rotate(-10deg) scale(1.1); }
+    }
+
+    .timeline-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(20, 20, 30, 0.95);
+      padding: 15px 20px;
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: rgba(102, 126, 234, 0.5);
+      z-index: 101;
+    }
+
+    .demo-bg-city {
+      background: linear-gradient(135deg, #3a7ca5 0%, #81b3d0 50%, #c4dfe6 100%);
+    }
+
+    .demo-bg-char1 {
+      background: linear-gradient(180deg, #f5d1e6 0%, #c69ec3 50%, #8b7098 100%);
+    }
+
+    .demo-bg-char2 {
+      background: linear-gradient(180deg, #e8dcc4 0%, #c9a96e 50%, #8b7355 100%);
+    }
+
+    @media (max-width: 768px) {
+      .center-left-panel {
+        left: 10%;
+        width: 35vw;
+      }
+
+      .right-panel {
+        right: 5%;
+        width: 35vw;
+      }
+
+      .dialogue-boxes,
+      .dialogue-top-right {
+        max-width: 200px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="comic-page">
+    <!-- Fondo completo 100% -->
+    <div class="background-panel">
+      <div class="panel-layer demo-bg-city"></div>
+      <div class="dialogue-boxes">
+        <div class="dialogue">Había oído sobre la piedra líquida.</div>
+        <div class="dialogue">Tersa como el agua pero dura como el acero.</div>
+        <div class="dialogue">Solo así existiría una ciudad tan inmensa...</div>
+      </div>
+
+      <div class="dialogue-top-right">
+        <div class="dialogue">Es maravillosa, pero extraña.</div>
+      </div>
+
+      <div class="sound-effect">SCRIII</div>
+    </div>
+
+    <!-- Panel central-izquierda vertical flotante -->
+    <div class="floating-panel center-left-panel">
+      <div class="panel-layer demo-bg-char1"></div>
+      <div class="dialogue">Tan... brillante.</div>
+    </div>
+
+    <!-- Panel derecha vertical flotante -->
+    <div class="floating-panel right-panel">
+      <div class="panel-layer demo-bg-char2"></div>
+      <div class="dialogue">Este lugar, estas personas.</div>
+    </div>
+  </div>
+
+  <div class="progress-bar"></div>
+
+  <div class="timeline-container">
+    <button class="control-btn" onclick="alert('Layout 03: Fondo + 2 Paneles Flotantes')">ℹ️</button>
+    <div style="flex: 1; color: #fff; text-align: center;">
+      Layout 03: Fondo completo con 2 paneles verticales flotantes + efectos de sonido
+    </div>
+  </div>
+</body>
+</html>

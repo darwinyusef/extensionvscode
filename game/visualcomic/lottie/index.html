@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Controles</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script type="module" src="https://unpkg.com/@dotlottie/player-component/dist/dotlottie-player.min.js"></script>
+  <!-- lottie-web as fallback -->
+  <script src="https://unpkg.com/lottie-web/build/player/lottie.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 20px; }
+    .card { border: 1px solid #e6e6e6; padding: 16px; border-radius: 8px; max-width: 560px; margin-bottom: 20px; }
+    .stage { width: 200px; height: 200px; margin: 12px 0; }
+    pre { white-space: pre-wrap; background:#f7f7f7; padding:12px; border-radius:6px; overflow:auto; }
+  </style>
+</head>
+<body>
+  <h1>Lottie demo — .lottie + animation.json</h1>
+  <p>Este ejemplo incluye dos métodos:</p>
+  <ol>
+    <li><strong>dotLottie Player</strong> — carga el archivo <code>frame.lottie</code> directamente.</li>
+    <li><strong>lottie-web</strong> — carga <code>animation.json</code> (extraído) y muestra cómo controlar la animación desde JavaScript.</li>
+  </ol>
+
+  <div class="card">
+    <!-- dotlottie web component -->
+    <dotlottie-player id="dotPlayer"
+      src="/frame.lottie"
+      autoplay
+      loop
+      background="transparent"
+      class="stage"
+      style="display:block;">
+    </dotlottie-player>
+    <p>Controles: <button id="dotPlay">Play</button> <button id="dotPause">Pause</button></p>
+  </div>
+
+  <div class="card">
+    <h3>2) lottie-web (animation.json)</h3>
+    <div id="lottie-root" class="stage"></div>
+    <p>Controles: 
+      <button id="playBtn">Play</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="stopBtn">Stop</button>
+      <button id="speedBtn">Speed x1.5</button>
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Archivos incluidos</h3>
+    <ul>
+      <li><a href="frame.lottie" download>Frame.lottie</a></li>
+      <li><a href="animation.json" download>animation.json</a></li>
+    </ul>
+  </div>
+
+  <script>
+    // dotLottie player controls (web component API)
+    const dot = document.getElementById('dotPlayer');
+    document.getElementById('dotPlay').addEventListener('click', () => dot.play());
+    document.getElementById('dotPause').addEventListener('click', () => dot.pause());
+
+    // lottie-web example loading animation.json
+    const anim = lottie.loadAnimation({
+      container: document.getElementById('lottie-root'),
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: 'animation.json'
+    });
+
+    document.getElementById('playBtn').addEventListener('click', () => anim.play());
+    document.getElementById('pauseBtn').addEventListener('click', () => anim.pause());
+    document.getElementById('stopBtn').addEventListener('click', () => anim.stop());
+    document.getElementById('speedBtn').addEventListener('click', () => anim.setSpeed(1.5));
+  </script>
+</body>
+</html>

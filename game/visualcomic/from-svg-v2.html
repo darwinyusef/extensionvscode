@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Del SVG v2 - HTML Polígonos</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .comic-layout {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    .panel {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.5s ease;
+    }
+
+    .panel-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.5s ease;
+    }
+
+    .panel:hover .panel-bg {
+      transform: scale(1.05);
+    }
+
+    .panel-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      transition: opacity 0.5s ease;
+      z-index: 1;
+    }
+
+    .panel:hover .panel-overlay,
+    .panel.active .panel-overlay {
+      opacity: 0;
+    }
+
+    .panel-number {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .panel:hover .panel-number {
+      transform: scale(1.2);
+      background: #667eea;
+      color: #fff;
+    }
+
+    .panel-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 30px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+      z-index: 5;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
+    }
+
+    .panel:hover .panel-content,
+    .panel.active .panel-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dialogue {
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      line-height: 1.5;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* Convertidos desde poligonsv2.svg - ViewBox: 1200 x 759.5 */
+
+    /* Panel 1 - Superior completo (rect 913.1x322.4) */
+    .panel-1 {
+      clip-path: polygon(0% 0%, 76.09% 0%, 76.09% 42.44%, 0% 42.44%);
+    }
+
+    /* Panel 2 - Inferior izquierdo (rect 264x437.1 at y=322.4) */
+    .panel-2 {
+      clip-path: polygon(0% 42.44%, 22% 42.44%, 22% 100%, 0% 100%);
+    }
+
+    /* Panel 3 - Inferior centro-izq (rect 243.9x437.1 at x=264, y=322.4) */
+    .panel-3 {
+      clip-path: polygon(22% 42.44%, 42.33% 42.44%, 42.33% 100%, 22% 100%);
+    }
+
+    /* Panel 4 - Inferior centro-derecha (rect 405.3x437.1 at x=507.8, y=322.4) */
+    .panel-4 {
+      clip-path: polygon(42.32% 42.44%, 76.09% 42.44%, 76.09% 100%, 42.32% 100%);
+    }
+
+    /* Panel 5 - Derecha diagonal (path) */
+    .panel-5 {
+      clip-path: polygon(75.51% 0%, 100% 0%, 100% 100%, 68.54% 100%);
+    }
+
+    .gradient-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .gradient-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .gradient-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .gradient-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .gradient-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+    .panel.active {
+      z-index: 100;
+    }
+
+    .panel.active .panel-bg {
+      transform: scale(1.1);
+    }
+
+    .info {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.9);
+      padding: 15px;
+      border: 2px solid #667eea;
+      color: #fff;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 1000;
+      max-width: 300px;
+    }
+
+    .info h3 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="comic-layout">
+    <div class="panel panel-1 active" data-panel="1">
+      <div class="panel-bg gradient-1"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">1</div>
+      <div class="panel-content">
+        <div class="dialogue">Panel Superior Completo</div>
+      </div>
+    </div>
+
+    <div class="panel panel-2" data-panel="2">
+      <div class="panel-bg gradient-2"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">2</div>
+      <div class="panel-content">
+        <div class="dialogue">Panel Inferior Izquierdo</div>
+      </div>
+    </div>
+
+    <div class="panel panel-3" data-panel="3">
+      <div class="panel-bg gradient-3"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">3</div>
+      <div class="panel-content">
+        <div class="dialogue">Panel Inferior Centro-Izq</div>
+      </div>
+    </div>
+
+    <div class="panel panel-4" data-panel="4">
+      <div class="panel-bg gradient-4"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">4</div>
+      <div class="panel-content">
+        <div class="dialogue">Panel Inferior Centro-Derecha</div>
+      </div>
+    </div>
+
+    <div class="panel panel-5" data-panel="5">
+      <div class="panel-bg gradient-5"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">5</div>
+      <div class="panel-content">
+        <div class="dialogue">Panel Derecha Diagonal</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info">
+    <h3>SVG v2 → HTML</h3>
+    <p><strong>Origen:</strong> poligonsv2.svg</p>
+    <p><strong>ViewBox:</strong> 1200 x 759.5</p>
+    <p><strong>Paneles:</strong> 5</p>
+    <p><strong>Layout:</strong></p>
+    <p>- Superior: 1 panel grande</p>
+    <p>- Inferior: 3 paneles</p>
+    <p>- Derecha: 1 diagonal</p>
+    <br>
+    <p><strong>Interacción:</strong></p>
+    <p>Click o ← → o 1-5</p>
+  </div>
+
+  <script>
+    // Interacciones
+    document.querySelectorAll('.panel').forEach(panel => {
+      panel.addEventListener('click', () => {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        panel.classList.add('active');
+      });
+    });
+
+    // Navegación con teclado
+    document.addEventListener('keydown', (e) => {
+      const panels = Array.from(document.querySelectorAll('.panel'));
+      const activePanel = document.querySelector('.panel.active');
+      const currentIndex = activePanel ? panels.indexOf(activePanel) : -1;
+
+      if (e.key === 'ArrowRight' && currentIndex < panels.length - 1) {
+        panels[currentIndex + 1].click();
+      } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        panels[currentIndex - 1].click();
+      } else if (e.key >= '1' && e.key <= '5') {
+        const index = parseInt(e.key) - 1;
+        if (panels[index]) panels[index].click();
+      }
+    });
+
+    // Función para cambiar imagen de fondo
+    function setPanelImage(panelNumber, imageUrl) {
+      const panel = document.querySelector(`.panel-${panelNumber} .panel-bg`);
+      if (panel) {
+        panel.style.backgroundImage = `url('${imageUrl}')`;
+        panel.classList.remove('gradient-1', 'gradient-2', 'gradient-3', 'gradient-4', 'gradient-5');
+      }
+    }
+
+    // Ejemplo de uso:
+    // setPanelImage(1, 'comic/01.JPG');
+    // setPanelImage(5, 'assets/img/background.jpg');
+  </script>
+</body>
+</html>

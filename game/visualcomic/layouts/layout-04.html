@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comic Layout 04 - Grid Complejo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .comic-page {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 25fr 25fr 25fr 25fr;
+      grid-template-rows: 40fr 30fr 30fr;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      border: none;
+      transition: all 0.5s ease;
+      filter: grayscale(1) brightness(0.5);
+      opacity: 0.7;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .panel.active {
+      filter: grayscale(0) brightness(1);
+      opacity: 1;
+      z-index: 10;
+      box-shadow: inset 0 0 0 3px rgba(102, 126, 234, 0.8);
+    }
+
+    /* Panel 1: Izquierda, ocupa 2 filas superiores */
+    .panel-1 {
+      grid-column: 1 / 2;
+      grid-row: 1 / 3;
+    }
+
+    /* Panel 2: Centro-top, panel pequeño */
+    .panel-2 {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+    }
+
+    /* Panel 3: Centro-superior-derecha */
+    .panel-3 {
+      grid-column: 3 / 4;
+      grid-row: 1 / 2;
+    }
+
+    /* Panel 4: Top-derecha, ocupa 2 filas */
+    .panel-4 {
+      grid-column: 4 / 5;
+      grid-row: 1 / 3;
+    }
+
+    /* Panel 5: Centro-medio izquierda */
+    .panel-5 {
+      grid-column: 2 / 3;
+      grid-row: 2 / 3;
+    }
+
+    /* Panel 6: Centro-medio derecha */
+    .panel-6 {
+      grid-column: 3 / 4;
+      grid-row: 2 / 3;
+    }
+
+    /* Panel 7: Abajo izquierda */
+    .panel-7 {
+      grid-column: 1 / 2;
+      grid-row: 3 / 4;
+    }
+
+    /* Panel 8: Abajo centro, ocupa 2 columnas */
+    .panel-8 {
+      grid-column: 2 / 4;
+      grid-row: 3 / 4;
+    }
+
+    /* Panel 9: Abajo derecha */
+    .panel-9 {
+      grid-column: 4 / 5;
+      grid-row: 3 / 4;
+    }
+
+    .panel-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: transform 0.3s ease;
+    }
+
+    .panel:hover .panel-layer {
+      transform: scale(1.05);
+    }
+
+    .panel-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 15px;
+      z-index: 3;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+    }
+
+    .dialogue {
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.4;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      border: 2px solid rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+    }
+
+    .dialogue:last-child {
+      margin-bottom: 0;
+    }
+
+    .sound-effect {
+      position: absolute;
+      font-size: 36px;
+      font-weight: bold;
+      font-style: italic;
+      text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+      z-index: 5;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .panel-1 .sound-effect {
+      bottom: 20%;
+      left: 10%;
+      color: #4ecdc4;
+      font-size: 42px;
+    }
+
+    .panel-8 .sound-effect {
+      top: 30%;
+      right: 20%;
+      color: #ff6b6b;
+      font-size: 32px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .panel-number {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(102, 126, 234, 0.9);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .demo-bg-1 { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+    .demo-bg-2 { background: linear-gradient(135deg, #0f4c75 0%, #3282b8 100%); }
+    .demo-bg-3 { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); }
+    .demo-bg-4 { background: linear-gradient(135deg, #dfe4ea 0%, #ced6e0 100%); }
+    .demo-bg-5 { background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); }
+    .demo-bg-6 { background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); }
+    .demo-bg-7 { background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); }
+    .demo-bg-8 { background: linear-gradient(135deg, #fab1a0 0%, #ff7675 100%); }
+    .demo-bg-9 { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); }
+
+    .timeline-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(20, 20, 30, 0.95);
+      padding: 15px 20px;
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .comic-page {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+      }
+
+      .panel {
+        min-height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="comic-page">
+    <div class="panel panel-1" data-panel="1">
+      <div class="panel-number">1</div>
+      <div class="panel-layer demo-bg-1"></div>
+      <div class="sound-effect">PUMMMM</div>
+      <div class="panel-content">
+        <div class="dialogue">Las tierras originarias nunca están quietas.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-2" data-panel="2">
+      <div class="panel-number">2</div>
+      <div class="panel-layer demo-bg-2"></div>
+      <div class="panel-content">
+        <div class="dialogue">Oigo un murmullo... volteó y, por un momento... lo veo.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-3" data-panel="3">
+      <div class="panel-number">3</div>
+      <div class="panel-layer demo-bg-3"></div>
+      <div class="panel-content">
+        <div class="dialogue">Pero aquí... hasta la rosa parece reposar en silencio.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-4 active" data-panel="4">
+      <div class="panel-number">4</div>
+      <div class="panel-layer demo-bg-4"></div>
+      <div class="panel-content">
+        <div class="dialogue">Mi padre querrá hablar contigo.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-5" data-panel="5">
+      <div class="panel-number">5</div>
+      <div class="panel-layer demo-bg-5"></div>
+      <div class="panel-content">
+        <div class="dialogue">Aquel que se marchó.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-6" data-panel="6">
+      <div class="panel-number">6</div>
+      <div class="panel-layer demo-bg-6"></div>
+      <div class="panel-content">
+        <div class="dialogue">Cuidado, mi señora. Son muy dedicados.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-7" data-panel="7">
+      <div class="panel-number">7</div>
+      <div class="panel-layer demo-bg-7"></div>
+      <div class="panel-content">
+        <div class="dialogue">Mi príncipe, el rey lo espera.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-8" data-panel="8">
+      <div class="panel-number">8</div>
+      <div class="panel-layer demo-bg-8"></div>
+      <div class="sound-effect">HAHHARRRHH</div>
+      <div class="panel-content">
+        <div class="dialogue">Con justa razón.</div>
+        <div class="dialogue">La confianza se toma tiempo, pero se pierde tan fácilmente.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-9" data-panel="9">
+      <div class="panel-number">9</div>
+      <div class="panel-layer demo-bg-9"></div>
+    </div>
+  </div>
+
+  <div class="timeline-container">
+    <button class="control-btn" onclick="alert('Layout 04: Grid Complejo')">ℹ️</button>
+    <div style="flex: 1; color: #fff; text-align: center;">
+      Layout 04: Grid complejo con 9 paneles de diferentes tamaños + efectos sonoros
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.panel').forEach(panel => {
+      panel.addEventListener('click', () => {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        panel.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

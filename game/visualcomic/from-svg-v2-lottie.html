@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Del SVG v2 - HTML Polígonos + Lottie</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .comic-layout {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    .panel {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.5s ease;
+      filter: grayscale(1) brightness(0.5);
+      opacity: 0.7;
+    }
+
+    .panel.active {
+      filter: grayscale(0) brightness(1);
+      opacity: 1;
+      z-index: 100;
+    }
+
+    .panel-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.5s ease;
+    }
+
+    .panel:hover .panel-bg {
+      transform: scale(1.05);
+    }
+
+    .panel-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      transition: opacity 0.5s ease;
+      z-index: 1;
+    }
+
+    .panel:hover .panel-overlay,
+    .panel.active .panel-overlay {
+      opacity: 0;
+    }
+
+    .panel-number {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .panel:hover .panel-number {
+      transform: scale(1.2);
+      background: #667eea;
+      color: #fff;
+    }
+
+    .panel-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 30px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+      z-index: 5;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
+      pointer-events: none;
+    }
+
+    .panel:hover .panel-content,
+    .panel.active .panel-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dialogue {
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      line-height: 1.5;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .comic-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.98);
+      color: #000;
+      padding: 18px 24px;
+      border-radius: 20px;
+      font-size: 15px;
+      line-height: 1.6;
+      font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+                  inset 0 0 0 3px rgba(0, 0, 0, 0.1);
+      z-index: 50;
+      max-width: 280px;
+      opacity: 0;
+      transform: scale(0);
+      pointer-events: none;
+      border: 3px solid #000;
+    }
+
+    .comic-bubble.visible {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .comic-bubble::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+
+    .comic-bubble.tail-bottom-left::after {
+      bottom: -20px;
+      left: 30px;
+      border-width: 20px 20px 0 0;
+      border-color: #fff transparent transparent transparent;
+    }
+
+    .comic-bubble.tail-bottom-right::after {
+      bottom: -20px;
+      right: 30px;
+      border-width: 20px 0 0 20px;
+      border-color: #fff transparent transparent transparent;
+    }
+
+    .comic-bubble.tail-top-left::after {
+      top: -20px;
+      left: 30px;
+      border-width: 0 20px 20px 0;
+      border-color: transparent #fff transparent transparent;
+    }
+
+    .comic-bubble.tail-top-right::after {
+      top: -20px;
+      right: 30px;
+      border-width: 0 0 20px 20px;
+      border-color: transparent transparent #fff transparent;
+    }
+
+    .comic-bubble.thought {
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      border-style: dashed;
+    }
+
+    /* Convertidos desde poligonsv2.svg - ViewBox: 1200 x 759.5 */
+
+    /* Panel 1 - Superior completo (rect 913.1x322.4) */
+    .panel-1 {
+      clip-path: polygon(0% 0%, 76.09% 0%, 76.09% 42.44%, 0% 42.44%);
+    }
+
+    /* Panel 2 - Inferior izquierdo (rect 264x437.1 at y=322.4) */
+    .panel-2 {
+      clip-path: polygon(0% 42.44%, 22% 42.44%, 22% 100%, 0% 100%);
+    }
+
+    /* Panel 3 - Inferior centro-izq (rect 243.9x437.1 at x=264, y=322.4) */
+    .panel-3 {
+      clip-path: polygon(22% 42.44%, 42.33% 42.44%, 42.33% 100%, 22% 100%);
+    }
+
+    /* Panel 4 - Inferior centro-derecha (rect 405.3x437.1 at x=507.8, y=322.4) */
+    .panel-4 {
+      clip-path: polygon(42.32% 42.44%, 76.09% 42.44%, 76.09% 100%, 42.32% 100%);
+    }
+
+    /* Panel 5 - Derecha diagonal (path) */
+    .panel-5 {
+      clip-path: polygon(75.51% 0%, 100% 0%, 100% 100%, 68.54% 100%);
+    }
+
+    .gradient-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .gradient-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .gradient-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .gradient-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .gradient-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+
+    .info {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.9);
+      padding: 15px;
+      border: 2px solid #667eea;
+      color: #fff;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 1000;
+      max-width: 300px;
+    }
+
+    .info h3 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .timeline-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(20, 20, 30, 0.95);
+      padding: 15px 20px;
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .timeline-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .control-btn.playing {
+      background: #667eea;
+      border-color: #667eea;
+    }
+
+    .timeline-bar {
+      flex: 1;
+      position: relative;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .timeline-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .timeline-info {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      min-width: 100px;
+      text-align: right;
+    }
+
+    /* Lottie Container */
+    .lottie-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      width: 400px;
+      height: 400px;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      cursor: pointer;
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .lottie-container.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+
+    .lottie-container.hide {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.8);
+    }
+
+    dotlottie-player {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+</head>
+<body>
+  <div class="comic-layout">
+    <div class="panel panel-1" data-panel="1" data-duration="30">
+      <div class="panel-bg gradient-1"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">1</div>
+
+      <div class="comic-bubble tail-bottom-left" data-time="2" data-animation="bounceIn" style="top: 8%; left: 5%;">
+        ¡El viaje ha comenzado!
+      </div>
+      <div class="comic-bubble tail-top-right" data-time="8" data-animation="fadeInDown" style="top: 15%; left: 45%;">
+        Mis habilidades están a prueba...
+      </div>
+      <div class="comic-bubble thought tail-bottom-right" data-time="15" data-animation="zoomIn" style="top: 25%; left: 15%;">
+        ¿Estaré preparado para lo que viene?
+      </div>
+      <div class="comic-bubble tail-bottom-left" data-time="22" data-animation="slideInLeft" style="top: 32%; left: 50%;">
+        La orden me ha enseñado bien.
+      </div>
+    </div>
+
+    <div class="panel panel-2" data-panel="2" data-duration="25">
+      <div class="panel-bg gradient-2"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">2</div>
+
+      <div class="comic-bubble tail-top-left" data-time="3" data-animation="bounceInDown" style="top: 50%; left: 2%;">
+        Demacia... por fin.
+      </div>
+      <div class="comic-bubble tail-bottom-right" data-time="10" data-animation="fadeInUp" style="top: 70%; left: 5%;">
+        Las calles brillan con honor.
+      </div>
+      <div class="comic-bubble thought" data-time="18" data-animation="pulse" style="top: 85%; left: 8%;">
+        Este lugar es majestuoso...
+      </div>
+    </div>
+
+    <div class="panel panel-3" data-panel="3" data-duration="25">
+      <div class="panel-bg gradient-3"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">3</div>
+
+      <div class="comic-bubble tail-bottom-left" data-time="4" data-animation="slideInRight" style="top: 48%; left: 23%;">
+        Pero hay algo oscuro aquí...
+      </div>
+      <div class="comic-bubble tail-top-right" data-time="12" data-animation="zoomInDown" style="top: 65%; left: 28%;">
+        Sombras que no debería ver.
+      </div>
+      <div class="comic-bubble thought tail-bottom-right" data-time="20" data-animation="fadeIn" style="top: 82%; left: 25%;">
+        ¿Qué ocultan?
+      </div>
+    </div>
+
+    <div class="panel panel-4" data-panel="4" data-duration="30">
+      <div class="panel-bg gradient-4"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">4</div>
+
+      <div class="comic-bubble tail-bottom-left" data-time="2" data-animation="bounceInLeft" style="top: 50%; left: 44%;">
+        Xin Zhao fue un héroe legendario.
+      </div>
+      <div class="comic-bubble tail-top-left" data-time="9" data-animation="fadeInDownBig" style="top: 68%; left: 58%;">
+        Pero Zaahen... el Darkin...
+      </div>
+      <div class="comic-bubble tail-bottom-right" data-time="16" data-animation="rotateIn" style="top: 80%; left: 48%;">
+        ¿Confió en él realmente?
+      </div>
+      <div class="comic-bubble thought" data-time="24" data-animation="jackInTheBox" style="top: 60%; left: 65%;">
+        La verdad debe ser revelada.
+      </div>
+    </div>
+
+    <div class="panel panel-5" data-panel="5" data-duration="20">
+      <div class="panel-bg gradient-5"></div>
+      <div class="panel-overlay"></div>
+      <div class="panel-number">5</div>
+
+      <div class="comic-bubble tail-bottom-left" data-time="3" data-animation="slideInDown" style="top: 12%; left: 78%;">
+        Mi mundo de espías quedó atrás.
+      </div>
+      <div class="comic-bubble tail-top-right" data-time="8" data-animation="bounceInRight" style="top: 35%; left: 70%;">
+        Ahora estoy en el suyo.
+      </div>
+      <div class="comic-bubble tail-bottom-right" data-time="14" data-animation="flipInX" style="top: 65%; left: 82%;">
+        En el reino que él tanto amó.
+      </div>
+    </div>
+  </div>
+
+  <div class="lottie-container">
+    <dotlottie-player
+      src="lottie/animation.json"
+      background="transparent"
+      speed="1"
+      loop
+      autoplay>
+    </dotlottie-player>
+  </div>
+
+  <div class="info">
+    <h3>SVG v2 → HTML + Lottie</h3>
+    <p><strong>Origen:</strong> poligonsv2.svg</p>
+    <p><strong>ViewBox:</strong> 1200 x 759.5</p>
+    <p><strong>Paneles:</strong> 5</p>
+    <p><strong>Layout:</strong></p>
+    <p>- Superior: 1 panel grande</p>
+    <p>- Inferior: 3 paneles</p>
+    <p>- Derecha: 1 diagonal</p>
+    <br>
+    <p><strong>Lottie:</strong> Aparece al final</p>
+    <br>
+    <p><strong>Interacción:</strong></p>
+    <p>Timeline auto / ▶ ⏸</p>
+  </div>
+
+  <div class="timeline-container">
+    <div class="timeline-controls">
+      <button id="playPause" class="control-btn">▶</button>
+      <button id="prev" class="control-btn">◀</button>
+      <button id="next" class="control-btn">▶▶</button>
+    </div>
+    <div class="timeline-bar" id="timelineBar">
+      <div class="timeline-progress" id="timelineProgress"></div>
+    </div>
+    <div class="timeline-info">
+      <span id="currentTime">00:00</span> / <span id="totalTime">00:00</span>
+    </div>
+  </div>
+
+  <script>
+    class ComicTimeline {
+      constructor() {
+        this.panels = Array.from(document.querySelectorAll('.panel[data-panel]'));
+        this.currentIndex = 0;
+        this.isPlaying = false;
+        this.timeElapsed = 0;
+        this.totalDuration = 0;
+        this.interval = null;
+        this.lottieContainer = document.querySelector('.lottie-container');
+        this.lottieShown = false;
+
+        this.calculateTotalDuration();
+        this.init();
+      }
+
+      calculateTotalDuration() {
+        this.totalDuration = this.panels.reduce((sum, panel) => {
+          return sum + parseInt(panel.dataset.duration || 30);
+        }, 0);
+      }
+
+      init() {
+        this.setupControls();
+        this.setupPanelClicks();
+        this.updateDisplay();
+        this.activatePanel(0);
+        this.loadImages();
+        this.setupLottieClick();
+      }
+
+      loadImages() {
+        const setPanelImage = (panelNumber, imageUrl) => {
+          const panel = document.querySelector(`.panel-${panelNumber} .panel-bg`);
+          if (panel) {
+            panel.style.backgroundImage = `url('${imageUrl}')`;
+            panel.classList.remove('gradient-1', 'gradient-2', 'gradient-3', 'gradient-4', 'gradient-5');
+          }
+        };
+
+        setPanelImage(1, 'assets/img/01.gif');
+        setPanelImage(2, 'assets/img/02.gif');
+        setPanelImage(3, 'assets/img/03.gif');
+        setPanelImage(4, 'assets/img/04.gif');
+        setPanelImage(5, 'assets/img/05.gif');
+      }
+
+      setupControls() {
+        document.getElementById('playPause').addEventListener('click', () => this.togglePlay());
+        document.getElementById('prev').addEventListener('click', () => this.previousPanel());
+        document.getElementById('next').addEventListener('click', () => this.nextPanel());
+
+        document.getElementById('timelineBar').addEventListener('click', (e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const percentage = clickX / rect.width;
+          const targetTime = percentage * this.totalDuration;
+          this.jumpToTime(targetTime);
+        });
+      }
+
+      setupPanelClicks() {
+        this.panels.forEach((panel, index) => {
+          panel.addEventListener('click', () => this.jumpToPanel(index, true));
+        });
+      }
+
+      setupLottieClick() {
+        this.lottieContainer.addEventListener('click', () => {
+          this.lottieContainer.classList.remove('visible');
+          this.lottieContainer.classList.add('hide');
+        });
+      }
+
+      togglePlay() {
+        const btn = document.getElementById('playPause');
+        if (this.isPlaying) {
+          this.pause();
+          btn.textContent = '▶';
+          btn.classList.remove('playing');
+        } else {
+          this.play();
+          btn.textContent = '⏸';
+          btn.classList.add('playing');
+        }
+      }
+
+      play() {
+        this.isPlaying = true;
+        this.interval = setInterval(() => {
+          this.timeElapsed++;
+          this.updateDisplay();
+          this.updateBubbles();
+
+          let accumulatedTime = 0;
+          let foundPanel = false;
+          for (let i = 0; i < this.panels.length; i++) {
+            const duration = parseInt(this.panels[i].dataset.duration || 30);
+            if (this.timeElapsed <= accumulatedTime + duration) {
+              if (this.currentIndex !== i) {
+                this.activatePanel(i);
+              }
+              foundPanel = true;
+              break;
+            }
+            accumulatedTime += duration;
+          }
+
+          if (this.timeElapsed > this.totalDuration) {
+            this.showLottie();
+          }
+        }, 1000);
+      }
+
+      pause() {
+        this.isPlaying = false;
+        clearInterval(this.interval);
+      }
+
+      reset() {
+        this.pause();
+        this.timeElapsed = 0;
+        this.currentIndex = 0;
+        this.activatePanel(0);
+        this.updateDisplay();
+        this.lottieContainer.classList.remove('visible');
+        this.lottieContainer.classList.add('hide');
+        this.lottieShown = false;
+        document.getElementById('playPause').textContent = '▶';
+        document.getElementById('playPause').classList.remove('playing');
+      }
+
+      showLottie() {
+        if (!this.lottieShown) {
+          this.lottieShown = true;
+          this.lottieContainer.classList.add('visible');
+          this.lottieContainer.classList.remove('hide');
+          this.pause();
+          document.getElementById('playPause').textContent = '▶';
+          document.getElementById('playPause').classList.remove('playing');
+        }
+      }
+
+      previousPanel() {
+        const newIndex = Math.max(0, this.currentIndex - 1);
+        this.jumpToPanel(newIndex, true);
+      }
+
+      nextPanel() {
+        const newIndex = Math.min(this.panels.length - 1, this.currentIndex + 1);
+        this.jumpToPanel(newIndex, true);
+      }
+
+      jumpToPanel(index, showAllBubbles = false) {
+        let accumulatedTime = 0;
+        for (let i = 0; i < index; i++) {
+          accumulatedTime += parseInt(this.panels[i].dataset.duration || 30);
+        }
+        this.timeElapsed = accumulatedTime;
+        this.activatePanel(index);
+        this.updateDisplay();
+
+        if (showAllBubbles) {
+          this.showAllBubblesInPanel(this.panels[index]);
+        } else {
+          this.updateBubbles();
+        }
+      }
+
+      showAllBubblesInPanel(panel) {
+        const bubbles = panel.querySelectorAll('.comic-bubble[data-time]');
+        bubbles.forEach(bubble => {
+          const animation = bubble.dataset.animation || 'fadeIn';
+          if (!bubble.classList.contains('visible')) {
+            this.showBubble(bubble, animation);
+          }
+        });
+      }
+
+      jumpToTime(targetTime) {
+        this.timeElapsed = Math.floor(targetTime);
+        let accumulatedTime = 0;
+        for (let i = 0; i < this.panels.length; i++) {
+          const duration = parseInt(this.panels[i].dataset.duration || 30);
+          if (this.timeElapsed < accumulatedTime + duration) {
+            this.activatePanel(i);
+            break;
+          }
+          accumulatedTime += duration;
+        }
+        this.updateDisplay();
+        this.updateBubbles();
+      }
+
+      activatePanel(index) {
+        this.panels.forEach(p => {
+          p.classList.remove('active');
+          this.hideBubbles(p);
+        });
+        this.panels[index].classList.add('active');
+        this.currentIndex = index;
+      }
+
+      hideBubbles(panel) {
+        const bubbles = panel.querySelectorAll('.comic-bubble');
+        bubbles.forEach(bubble => {
+          bubble.classList.remove('visible');
+          bubble.className = bubble.className.replace(/animate__\w+/g, '');
+        });
+      }
+
+      showBubble(bubble, animation) {
+        bubble.classList.add('visible', 'animate__animated', `animate__${animation}`);
+      }
+
+      updateBubbles() {
+        const currentPanel = this.panels[this.currentIndex];
+        if (!currentPanel) return;
+
+        let accumulatedTime = 0;
+        for (let i = 0; i < this.currentIndex; i++) {
+          accumulatedTime += parseInt(this.panels[i].dataset.duration || 30);
+        }
+
+        const panelTimeElapsed = this.timeElapsed - accumulatedTime;
+        const bubbles = currentPanel.querySelectorAll('.comic-bubble[data-time]');
+
+        bubbles.forEach(bubble => {
+          const bubbleTime = parseInt(bubble.dataset.time || 0);
+          const animation = bubble.dataset.animation || 'fadeIn';
+
+          if (panelTimeElapsed >= bubbleTime && !bubble.classList.contains('visible')) {
+            this.showBubble(bubble, animation);
+          }
+        });
+      }
+
+      updateDisplay() {
+        const progress = (this.timeElapsed / this.totalDuration) * 100;
+        document.getElementById('timelineProgress').style.width = `${progress}%`;
+
+        document.getElementById('currentTime').textContent = this.formatTime(this.timeElapsed);
+        document.getElementById('totalTime').textContent = this.formatTime(this.totalDuration);
+      }
+
+      formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      new ComicTimeline();
+    });
+  </script>
+</body>
+</html>

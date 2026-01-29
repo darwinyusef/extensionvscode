@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ejemplo .lottie</title>
+
+  <!-- CDN del player oficial -->
+  <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f7f8fa;
+      font-family: Arial, sans-serif;
+    }
+    dotlottie-player {
+      width: 300px;
+      height: 300px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #0078ff;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #005fcc;
+    }
+  </style>
+</head>
+<body>
+
+  <dotlottie-player
+    id="animacion"
+    src="frame.lottie"
+    background="transparent"
+    speed="1"
+    loop
+    autoplay>
+  </dotlottie-player>
+
+  <div>
+    <button id="playBtn">▶️ Play</button>
+    <button id="pauseBtn">⏸️ Pause</button>
+  </div>
+
+  <script>
+    const player = document.getElementById('animacion');
+    document.getElementById('playBtn').addEventListener('click', () => player.play());
+    document.getElementById('pauseBtn').addEventListener('click', () => player.pause());
+  </script>
+
+</body>
+</html>

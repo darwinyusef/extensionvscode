@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comic Demo - Sin Assets</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="comic-container">
+    <h1 style="text-align: center; margin-bottom: 30px; color: #667eea;">Comic Interactivo - Demo</h1>
+
+    <div class="panels-grid format-a">
+      <div class="panel" data-panel="1" data-duration="30">
+        <div class="panel-layer background" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+        <div class="panel-content">
+          <div class="dialogue">Panel 1: Mi nombre es Yunara de la Orden Kinkou.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="2" data-duration="25">
+        <div class="panel-layer background" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+        <div class="panel-content">
+          <div class="dialogue">Panel 2: He recorrido el mundo para llegar a Demacia.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="3" data-duration="35">
+        <div class="panel-layer background" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+        <div class="panel-content">
+          <div class="dialogue">Panel 3: Para honrar a un héroe.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="4" data-duration="30">
+        <div class="panel-layer background" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+        <div class="panel-content">
+          <div class="dialogue">Panel 4: Al reino que tanto amó.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="5" data-duration="40">
+        <div class="panel-layer background" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
+        <div class="panel-content">
+          <div class="dialogue">Panel 5: He dejado atrás mi mundo de espías.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="6" data-duration="30">
+        <div class="panel-layer background" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);"></div>
+        <div class="panel-content">
+          <div class="dialogue">Panel 6: Para entrar al suyo.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <a href="../index.html" class="nav-btn">Ir a Versión Completa</a>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px; max-width: 800px; margin-left: auto; margin-right: auto;">
+      <h3 style="color: #667eea; margin-bottom: 15px;">Instrucciones de Prueba</h3>
+      <ul style="list-style: none; padding: 0; text-align: left;">
+        <li style="margin: 10px 0;">✅ Click en Play para iniciar el timeline automático</li>
+        <li style="margin: 10px 0;">✅ Click en cualquier panel para saltar directamente</li>
+        <li style="margin: 10px 0;">✅ Click en la barra de progreso para navegar</li>
+        <li style="margin: 10px 0;">✅ Click en el botón de audio 🎵 para ver controles</li>
+        <li style="margin: 10px 0;">✅ Hover sobre paneles para ver efecto parallax</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="timeline-container">
+    <div class="timeline-controls">
+      <button id="playPause" class="control-btn">▶</button>
+      <button id="prev" class="control-btn">◀</button>
+      <button id="next" class="control-btn">▶▶</button>
+    </div>
+    <div class="timeline-bar">
+      <div class="timeline-progress"></div>
+      <div class="timeline-markers"></div>
+    </div>
+    <div class="timeline-info">
+      <span id="currentTime">00:00</span> / <span id="totalTime">00:00</span>
+    </div>
+  </div>
+
+  <div class="audio-panel">
+    <button class="audio-toggle" id="audioToggle">🎵</button>
+    <div class="audio-controls" id="audioControls">
+      <div class="audio-control">
+        <label>Volumen maestro</label>
+        <input type="range" id="masterVolume" min="0" max="100" value="100">
+        <span class="volume-value">100</span>
+      </div>
+      <div class="audio-control">
+        <label>Banda sonora</label>
+        <input type="range" id="soundtrackVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+      <div class="audio-control">
+        <label>Ambiente</label>
+        <input type="range" id="ambientVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+      <div class="audio-control">
+        <label>Efectos</label>
+        <input type="range" id="effectsVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+      <div class="audio-control">
+        <label>Diálogos</label>
+        <input type="range" id="dialoguesVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="../config.js"></script>
+  <script src="../keyboard-controls.js"></script>
+  <script src="../comic.js"></script>
+</body>
+</html>

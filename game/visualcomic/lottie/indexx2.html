@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Lottie JSON - Simple</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="https://unpkg.com/lottie-web/build/player/lottie.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto;
+            background: #f6f7fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 6px 24px rgba(12, 20, 30, 0.08);
+            width: 320px;
+            text-align: center;
+        }
+
+        #stage {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 14px;
+        }
+
+        button {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+            margin: 0 6px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        small {
+            display: block;
+            margin-top: 8px;
+            color: #666
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div id="stage"></div>
+        <div>
+            <button id="playBtn" disabled>Play</button>
+            <button id="pauseBtn" disabled>Pause</button>
+        </div>
+        <small id="msg">Cargando animación...</small>
+    </div>
+
+    <script>
+        (async function () {
+            const ASSETS_BASE = './lottie_files/'; // <- cambia si tus imágenes están en otra carpeta (ej: './images/')
+            const JSON_PATH = 'animation.json';     // <- asegúrate que exista en la misma carpeta
+
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const msg = document.getElementById('msg');
+
+            // 1) Cargar el JSON manualmente para poder inspeccionar assets y ajustar rutas
+            let animJson;
+            try {
+                const res = await fetch(JSON_PATH);
+                if (!res.ok) throw new Error('JSON no encontrado: ' + res.status);
+                animJson = await res.json();
+            } catch (err) {
+                msg.textContent = 'Error cargando animation.json — revisá la consola';
+                console.error(err);
+                return;
+            }
+
+            // 2) Si existen assets con 'p' (filename) o 'u' vacío, forzamos assetsPath para que lottie los busque en ASSETS_BASE
+            //    Esto evita problemas cuando el JSON viene con rutas relativas internas.
+            //    También imprimimos lo que falta para debug.
+            const missing = [];
+            if (Array.isArray(animJson.assets)) {
+                animJson.assets.forEach(a => {
+                    if (a.p && !a.u) {
+                        // a.p = filename (ej: "img_0.png"); lottie-web busca assetsPath + p
+                        // nada por hacer, solo verificamos si archivo existe mediante HEAD fetch
+                        const url = ASSETS_BASE + a.p;
+                        // comprobación asíncrona no bloqueante (solo para debug)
+                        fetch(url, { method: 'HEAD' }).then(r => {
+                            if (!r.ok) {
+                                console.warn('Asset no encontrado:', url);
+                                missing.push(url);
+                            }
+                        }).catch(e => {
+                            console.warn('Error comprobando asset:', url, e);
+                            missing.push(url);
+                        });
+                    } else if (a.u && a.u.trim() !== '') {
+                        // Si 'u' ya tiene una url, lottie descargará desde ahí.
+                    }
+                });
+            }
+
+            // 3) Inicializamos lottie con animationData y assetsPath
+            const anim = lottie.loadAnimation({
+                container: document.getElementById('stage'),
+                renderer: 'svg',
+                loop: true,
+                autoplay: false,          // arranca en pausa
+                animationData: animJson,  // cargamos JSON ya parseado
+                assetsPath: ASSETS_BASE   // prefijo para assets (images) — importantísimo si usás imágenes
+            });
+
+            // 4) habilitar controles cuando la animación esté lista (enterFrame/DOM loaded)
+            anim.addEventListener('DOMLoaded', () => {
+                playBtn.disabled = false;
+                pauseBtn.disabled = false;
+                msg.textContent = missing.length ? 'Cargado (falta algún asset — ver consola)' : 'Listo';
+            });
+
+            anim.addEventListener('data_failed', (e) => {
+                console.error('lottie data_failed', e);
+                msg.textContent = 'Error interno lottie (ver consola)';
+            });
+
+            // Botones
+            playBtn.onclick = () => anim.play();
+            pauseBtn.onclick = () => anim.pause();
+
+            // Dev tip: log de assets y tamaño para debug
+            console.log('Anim JSON cargado. assets:', animJson.assets || []);
+        })();
+    </script>
+</body>
+
+</html>

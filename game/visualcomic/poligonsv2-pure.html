@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polígonos v2 - Solo HTML y CSS</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .comic-layout {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    .panel {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .panel-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.5s ease;
+    }
+
+    .panel:hover .panel-bg {
+      transform: scale(1.05);
+    }
+
+    .panel-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      transition: opacity 0.5s ease;
+      z-index: 1;
+    }
+
+    .panel:hover .panel-overlay {
+      opacity: 0;
+    }
+
+    /* Convertidos desde poligonsv2.svg */
+
+    /* Panel 1 - Superior completo */
+    .panel-1 {
+      clip-path: polygon(0% 0%, 76.09% 0%, 76.09% 42.44%, 0% 42.44%);
+    }
+
+    /* Panel 2 - Inferior izquierdo */
+    .panel-2 {
+      clip-path: polygon(0% 42.44%, 22% 42.44%, 22% 100%, 0% 100%);
+    }
+
+    /* Panel 3 - Inferior centro-izq */
+    .panel-3 {
+      clip-path: polygon(22% 42.44%, 42.33% 42.44%, 42.33% 100%, 22% 100%);
+    }
+
+    /* Panel 4 - Inferior centro-derecha */
+    .panel-4 {
+      clip-path: polygon(42.32% 42.44%, 76.09% 42.44%, 76.09% 100%, 42.32% 100%);
+    }
+
+    /* Panel 5 - Derecha diagonal */
+    .panel-5 {
+      clip-path: polygon(75.51% 0%, 100% 0%, 100% 100%, 68.54% 100%);
+    }
+
+    .gradient-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .gradient-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .gradient-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .gradient-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .gradient-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+  </style>
+</head>
+<body>
+  <div class="comic-layout">
+    <div class="panel panel-1">
+      <div class="panel-bg gradient-1"></div>
+      <div class="panel-overlay"></div>
+    </div>
+
+    <div class="panel panel-2">
+      <div class="panel-bg gradient-2"></div>
+      <div class="panel-overlay"></div>
+    </div>
+
+    <div class="panel panel-3">
+      <div class="panel-bg gradient-3"></div>
+      <div class="panel-overlay"></div>
+    </div>
+
+    <div class="panel panel-4">
+      <div class="panel-bg gradient-4"></div>
+      <div class="panel-overlay"></div>
+    </div>
+
+    <div class="panel panel-5">
+      <div class="panel-bg gradient-5"></div>
+      <div class="panel-overlay"></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comic Interactivo - Inicio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="comic-container">
+    <div class="panels-grid format-a">
+      <div class="panel" data-panel="1" data-duration="30">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg1.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char1.png')"></div>
+        <div class="panel-content">
+          <div class="dialogue">Mi nombre es Yunara de la Orden Kinkou.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="2" data-duration="25">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg2.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char2.png')"></div>
+        <div class="panel-content">
+          <div class="dialogue">He recorrido el mundo para llegar a Demacia.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="3" data-duration="35">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg3.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char3.png')"></div>
+        <div class="panel-content">
+          <div class="dialogue">Para honrar a un héroe.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="4" data-duration="30">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg4.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char4.png')"></div>
+        <div class="panel-content">
+          <div class="dialogue">Al reino que tanto amó.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="5" data-duration="40">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg5.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char5.png')"></div>
+        <div class="panel-content">
+          <div class="dialogue">He dejado atrás mi mundo de espías.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="6" data-duration="30">
+        <div class="panel-layer background" style="background-image: url('assets/panels/bg6.jpg')"></div>
+        <div class="panel-layer character" style="background-image: url('assets/panels/char6.png')"></div>
+        <div class="panel-content">
+          <div class="dialogue">Para entrar al suyo.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <a href="page2.html" class="nav-btn">Siguiente Capítulo →</a>
+    </div>
+  </div>
+
+  <div class="timeline-container">
+    <div class="timeline-controls">
+      <button id="playPause" class="control-btn">▶</button>
+      <button id="prev" class="control-btn">◀</button>
+      <button id="next" class="control-btn">▶▶</button>
+    </div>
+    <div class="timeline-bar">
+      <div class="timeline-progress"></div>
+      <div class="timeline-markers"></div>
+    </div>
+    <div class="timeline-info">
+      <span id="currentTime">00:00</span> / <span id="totalTime">00:00</span>
+    </div>
+  </div>
+
+  <div class="audio-panel">
+    <button class="audio-toggle" id="audioToggle">🎵</button>
+    <div class="audio-controls" id="audioControls">
+      <div class="audio-control">
+        <label>Volumen maestro</label>
+        <input type="range" id="masterVolume" min="0" max="100" value="100">
+        <span class="volume-value">100</span>
+      </div>
+      <div class="audio-control">
+        <label>Banda sonora</label>
+        <input type="range" id="soundtrackVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+      <div class="audio-control">
+        <label>Ambiente</label>
+        <input type="range" id="ambientVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+      <div class="audio-control">
+        <label>Efectos</label>
+        <input type="range" id="effectsVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+      <div class="audio-control">
+        <label>Diálogos</label>
+        <input type="range" id="dialoguesVolume" min="0" max="100" value="75">
+        <span class="volume-value">75</span>
+      </div>
+    </div>
+  </div>
+
+  <audio id="soundtrack" src="assets/audio/banda-sonora.mp3" loop></audio>
+  <audio id="ambient" src="assets/audio/ambiente.mp3" loop></audio>
+  <audio id="effects" src="assets/audio/efectos.mp3"></audio>
+  <audio id="dialogues" src="assets/audio/dialogos.mp3"></audio>
+
+  <script src="config.js"></script>
+  <script src="keyboard-controls.js"></script>
+  <script src="comic.js"></script>
+</body>
+</html>

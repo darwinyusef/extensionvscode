@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ejemplo .lottie</title>
+
+  <!-- CDN del player oficial -->
+  <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f7f8fa;
+      font-family: Arial, sans-serif;
+    }
+
+    dotlottie-player {
+      width: 300px;
+      height: 300px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #0078ff;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #005fcc;
+    }
+  </style>
+</head>
+
+<body>
+
+  <dotlottie-player id="animacion" src="frame.lottie" background="transparent" speed="1" loop autoplay>
+  </dotlottie-player>
+
+  <div>
+    <button id="playBtn">▶️ Play</button>
+    <button id="pauseBtn">⏸️ Pause</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.10.2/lottie.min.js"></script>
+
+  <div id="player" style="width:400px;height:400px"></div>
+  <button id="playEase">Play 0→20 con easeInOutQuad (2s)</button>
+  <button id="cancel">Cancelar</button>
+
+  <script>
+    const anim = lottie.loadAnimation({
+      container: document.getElementById('player'),
+      renderer: 'svg',
+      loop: false,
+      autoplay: false,
+      path: 'animacion.json'
+    });
+
+    // Funciones de easing (ejemplos)
+    function linear(t) { return t; }
+    function easeInOutQuad(t) {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+    function easeOutCubic(t) {
+      return (--t) * t * t + 1;
+    }
+
+    let rafId = null;
+    function playSegmentWithEasing(startFrame, endFrame, durationMs, easingFn, onComplete) {
+      const startTime = performance.now();
+      cancelAnimationFrame(rafId);
+      function tick(now) {
+        const elapsed = now - startTime;
+        let t = Math.min(1, elapsed / durationMs); // 0..1
+        const eased = easingFn(t);
+        const frame = startFrame + (endFrame - startFrame) * eased;
+        anim.goToAndStop(frame, true); // true -> isFrame
+        if (t < 1) {
+          rafId = requestAnimationFrame(tick);
+        } else {
+          if (onComplete) onComplete();
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    document.getElementById('playEase').onclick = () => {
+      // reproducir frames 0 a 20 en 2000ms usando easeInOutQuad
+      playSegmentWithEasing(0, 20, 2000, easeInOutQuad, () => console.log('terminó!'));
+    };
+
+    document.getElementById('cancel').onclick = () => {
+      cancelAnimationFrame(rafId);
+    };
+  </script>
+
+
+</body>
+
+</html>
